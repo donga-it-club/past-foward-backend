@@ -111,6 +111,8 @@ cmake-build-debug/
 /out/
 application.properties
 application.yml
+.gradle
+build
 
 # Mac
 *.DS_Store
