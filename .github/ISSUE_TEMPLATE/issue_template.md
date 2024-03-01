@@ -1,3 +1,11 @@
+---
+name: feature template
+about: 작업 내용 작성
+title: ""
+labels: ""
+assignees: ""
+---
+
 ### 만들고자 하는 기능이 무엇인가요?
 
 ex) Todo 생성 기능
