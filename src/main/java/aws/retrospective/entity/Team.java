@@ -34,13 +34,8 @@ public class Team extends BaseEntity {
     @OneToMany(mappedBy = "team")
     private List<UserTeam> users = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "retrospective_id")
-    private Retrospective retrospective;
-
     @Builder
-    public Team(String name, Retrospective retrospective) {
+    public Team(String name) {
         this.name = name;
-        this.retrospective = retrospective;
     }
 }
