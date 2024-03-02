@@ -30,7 +30,6 @@ public class Team extends BaseEntity {
     @Column(name = "team_name")
     private String name; // 팀 이름
 
-
     @OneToMany(mappedBy = "team")
     private List<UserTeam> users = new ArrayList<>();
 

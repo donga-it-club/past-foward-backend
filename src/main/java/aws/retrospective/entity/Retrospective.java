@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class Retrospective extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private String title; // 회고 제목
 
     @ManyToOne
@@ -35,6 +37,7 @@ public class Retrospective extends BaseEntity {
     private User user; // 회고를 작성한 사용자 정보
 
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "template_id")
     private RetrospectiveTemplate template; // 회고 템플릿 정보
 

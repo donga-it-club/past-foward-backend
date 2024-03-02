@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,6 +21,7 @@ public class RetrospectiveTemplate extends BaseEntity {
     private Long id;
 
     @Size(max = 10)
+    @NotNull
     private String name; // ex) KPT, KWAT
 
     @Builder
