@@ -35,38 +35,43 @@ public class RetrospectiveService {
         this.templateRepository = templateRepository;
     }
     public CreateRetrospectiveResponseDto createRetrospective(CreateRetrospectiveDto dto) {
-
-        User user = userRepository.findById(dto.getUserId())
-            .orElseThrow(() -> new EntityNotFoundException("Not found user: " + dto.getUserId()));
-        RetrospectiveTemplate template = templateRepository.findById(dto.getTemplateId())
-            .orElseThrow(() -> new EntityNotFoundException("Not found template: " + dto.getTemplateId()));
-
-        Team team = null;
-        if (dto.getTeamId() != null) {
-            team = teamRepository.findById(dto.getTeamId())
-                .orElseThrow(() -> new EntityNotFoundException("Team not found with id: " + dto.getTeamId()));
-        }
+        User user = findUserById(dto.getUserId());
+        RetrospectiveTemplate template = findTemplateById(dto.getTemplateId());
+        Optional<Team> team = findTeamByIdOptional(dto.getTeamId());
 
         Retrospective retrospective = Retrospective.builder()
             .title(dto.getTitle())
-            .team(team)
+            .team(team.orElse(null))
             .user(user)
             .template(template)
             .build();
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
-
-        CreateRetrospectiveResponseDto responseDto = new CreateRetrospectiveResponseDto();
-        responseDto.setId(savedRetrospective.getId());
-        responseDto.setTitle(savedRetrospective.getTitle());
-        if(savedRetrospective.getTeam() != null) {
-            responseDto.setTeamId(savedRetrospective.getTeam().getId());
-        }
-        responseDto.setUserId(savedRetrospective.getUser().getId());
-        responseDto.setTemplateId(savedRetrospective.getTemplate().getId());
-
-        return responseDto;
+        return toResponseDto(savedRetrospective);
     }
 
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("Not found user: " + userId));
+    }
+
+    private RetrospectiveTemplate findTemplateById(Long templateId) {
+        return templateRepository.findById(templateId)
+            .orElseThrow(() -> new EntityNotFoundException("Not found template: " + templateId));
+    }
+
+    private Optional<Team> findTeamByIdOptional(Long teamId) {
+        return (teamId != null) ? teamRepository.findById(teamId) : Optional.empty();
+    }
+
+    private CreateRetrospectiveResponseDto toResponseDto(Retrospective retrospective) {
+        CreateRetrospectiveResponseDto responseDto = new CreateRetrospectiveResponseDto();
+        responseDto.setId(retrospective.getId());
+        responseDto.setTitle(retrospective.getTitle());
+        responseDto.setTeamId(Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null));
+        responseDto.setUserId(retrospective.getUser().getId());
+        responseDto.setTemplateId(retrospective.getTemplate().getId());
+        return responseDto;
+    }
 
 }
