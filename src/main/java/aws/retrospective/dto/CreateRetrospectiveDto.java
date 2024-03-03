@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CreateRetrospectiveDto {
+
     @NotEmpty(message = "Retrospective title is required.")
     String title;
 

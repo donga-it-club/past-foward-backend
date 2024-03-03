@@ -26,25 +26,21 @@ public class RetrospectiveService {
 
     @Autowired
     public RetrospectiveService(RetrospectiveRepository retrospectiveRepository,
-        TeamRepository teamRepository,
-        UserRepository userRepository,
+        TeamRepository teamRepository, UserRepository userRepository,
         RetrospectiveTemplateRepository templateRepository) {
         this.retrospectiveRepository = retrospectiveRepository;
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.templateRepository = templateRepository;
     }
+
     public CreateRetrospectiveResponseDto createRetrospective(CreateRetrospectiveDto dto) {
         User user = findUserById(dto.getUserId());
         RetrospectiveTemplate template = findTemplateById(dto.getTemplateId());
         Optional<Team> team = findTeamByIdOptional(dto.getTeamId());
 
-        Retrospective retrospective = Retrospective.builder()
-            .title(dto.getTitle())
-            .team(team.orElse(null))
-            .user(user)
-            .template(template)
-            .build();
+        Retrospective retrospective = Retrospective.builder().title(dto.getTitle())
+            .team(team.orElse(null)).user(user).template(template).build();
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
         return toResponseDto(savedRetrospective);
@@ -68,7 +64,8 @@ public class RetrospectiveService {
         CreateRetrospectiveResponseDto responseDto = new CreateRetrospectiveResponseDto();
         responseDto.setId(retrospective.getId());
         responseDto.setTitle(retrospective.getTitle());
-        responseDto.setTeamId(Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null));
+        responseDto.setTeamId(
+            Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null));
         responseDto.setUserId(retrospective.getUser().getId());
         responseDto.setTemplateId(retrospective.getTemplate().getId());
         return responseDto;

@@ -1,6 +1,5 @@
 package aws.retrospective.dto;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CreateRetrospectiveResponseDto {
+
     private Long id;
     private String title;
     private Long teamId;

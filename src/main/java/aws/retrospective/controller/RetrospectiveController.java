@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/retrospectives")
 public class RetrospectiveController {
+
     private final RetrospectiveService retrospectiveService;
 
     @Autowired
@@ -21,7 +22,8 @@ public class RetrospectiveController {
     }
 
     @PostMapping()
-    public CreateRetrospectiveResponseDto createRetrospective(@RequestBody CreateRetrospectiveDto createRetrospectiveDto) {
+    public CreateRetrospectiveResponseDto createRetrospective(
+        @RequestBody CreateRetrospectiveDto createRetrospectiveDto) {
         return retrospectiveService.createRetrospective(createRetrospectiveDto);
     }
 }
