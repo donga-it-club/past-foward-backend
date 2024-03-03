@@ -1,5 +1,6 @@
 package aws.retrospective.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,11 +35,17 @@ public class Section extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user; // 작성자
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_section_id")
+    private TemplateSection templateSection; // 섹션 템플릿 정보
+
+
     @Builder
-    public Section(String content, long likeCnt, Retrospective retrospective, User user) {
+    public Section(String content, long likeCnt, Retrospective retrospective, User user, TemplateSection templateSection) {
         this.content = content;
         this.likeCnt = likeCnt;
         this.retrospective = retrospective;
         this.user = user;
+        this.templateSection = templateSection;
     }
 }
