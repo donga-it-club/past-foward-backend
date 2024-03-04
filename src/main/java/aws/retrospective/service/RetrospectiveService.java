@@ -13,10 +13,11 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class RetrospectiveService {
 
     private final RetrospectiveRepository retrospectiveRepository;
@@ -24,15 +25,6 @@ public class RetrospectiveService {
     private final UserRepository userRepository;
     private final RetrospectiveTemplateRepository templateRepository;
 
-    @Autowired
-    public RetrospectiveService(RetrospectiveRepository retrospectiveRepository,
-        TeamRepository teamRepository, UserRepository userRepository,
-        RetrospectiveTemplateRepository templateRepository) {
-        this.retrospectiveRepository = retrospectiveRepository;
-        this.teamRepository = teamRepository;
-        this.userRepository = userRepository;
-        this.templateRepository = templateRepository;
-    }
 
     public CreateRetrospectiveResponseDto createRetrospective(CreateRetrospectiveDto dto) {
         User user = findUserById(dto.getUserId());
