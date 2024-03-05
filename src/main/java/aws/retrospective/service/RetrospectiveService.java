@@ -32,9 +32,11 @@ public class RetrospectiveService {
         Optional<Team> team = findTeamByIdOptional(dto.getTeamId());
 
         Retrospective retrospective = Retrospective.builder().title(dto.getTitle())
-            .team(team.orElse(null)).user(user).template(template).build();
+            .status(dto.getStatus()).team(team.orElse(null)).user(user).template(template)
+            .build();
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
+
         return toResponseDto(savedRetrospective);
     }
 
@@ -53,14 +55,13 @@ public class RetrospectiveService {
     }
 
     private CreateRetrospectiveResponseDto toResponseDto(Retrospective retrospective) {
-        CreateRetrospectiveResponseDto responseDto = new CreateRetrospectiveResponseDto();
-        responseDto.setId(retrospective.getId());
-        responseDto.setTitle(retrospective.getTitle());
-        responseDto.setTeamId(
-            Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null));
-        responseDto.setUserId(retrospective.getUser().getId());
-        responseDto.setTemplateId(retrospective.getTemplate().getId());
-        return responseDto;
+        return CreateRetrospectiveResponseDto.builder()
+            .id(retrospective.getId())
+            .title(retrospective.getTitle())
+            .teamId(retrospective.getTeam().getId())
+            .userId(retrospective.getUser().getId())
+            .templateId(retrospective.getTemplate().getId())
+            .build();
     }
 
 }

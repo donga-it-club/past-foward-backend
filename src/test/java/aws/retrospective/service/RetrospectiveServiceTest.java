@@ -69,10 +69,10 @@ public class RetrospectiveServiceTest {
             .willReturn(retrospective);
 
         CreateRetrospectiveDto dto = new CreateRetrospectiveDto();
-        dto.setTitle("New Retro");
-        dto.setTeamId(team.getId());
-        dto.setUserId(user.getId());
-        dto.setTemplateId(template.getId());
+        ReflectionTestUtils.setField(dto, "title", "New Retro");
+        ReflectionTestUtils.setField(dto, "teamId", 1L);
+        ReflectionTestUtils.setField(dto, "userId", 1L);
+        ReflectionTestUtils.setField(dto, "templateId", 1L);
 
         // when
         CreateRetrospectiveResponseDto response = retrospectiveService.createRetrospective(dto);
