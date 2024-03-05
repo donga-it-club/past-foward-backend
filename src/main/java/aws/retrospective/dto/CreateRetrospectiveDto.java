@@ -1,14 +1,13 @@
 package aws.retrospective.dto;
 
 
+import aws.retrospective.entity.ProjectStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class CreateRetrospectiveDto {
 
@@ -22,4 +21,7 @@ public class CreateRetrospectiveDto {
 
     @NotNull(message = "Template id is required.")
     Long templateId;
+
+    ProjectStatus status = ProjectStatus.IN_PROGRESS;
+
 }
