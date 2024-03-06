@@ -34,6 +34,7 @@ public class Retrospective extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @NotNull
     private User user; // 회고를 작성한 사용자 정보
 
     @ManyToOne
