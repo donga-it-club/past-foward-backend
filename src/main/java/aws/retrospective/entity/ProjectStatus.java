@@ -1,6 +1,6 @@
 package aws.retrospective.entity;
 
-enum ProjectStatus {
+public enum ProjectStatus {
     IN_PROGRESS,
     COMPLETED
 }
