@@ -1,4 +1,4 @@
-package aws.retrospective.contoller;
+package aws.retrospective.controller;
 
 
 import aws.retrospective.dto.RetrospectiveTemplateResponseDto;
