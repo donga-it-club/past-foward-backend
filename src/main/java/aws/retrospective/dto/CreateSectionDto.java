@@ -1,9 +1,9 @@
 package aws.retrospective.dto;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class CreateSectionDto {
 
     private Long userId;

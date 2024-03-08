@@ -1,11 +1,9 @@
 package aws.retrospective.dto;
 
-import aws.retrospective.entity.Retrospective;
-import aws.retrospective.entity.User;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @AllArgsConstructor
 public class CreateSectionResponseDto {
 
