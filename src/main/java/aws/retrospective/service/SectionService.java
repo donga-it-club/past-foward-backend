@@ -2,6 +2,8 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.EditSectionRequestDto;
+import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.TemplateSection;
@@ -10,9 +12,9 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,26 @@ public class SectionService {
             createSection.getRetrospective().getId(),
             createSection.getTemplateSection().getSectionName(), createSection.getContent(), createTemplateSection.getSequence());
     }
+
+    // 섹션 수정
+    @Transactional
+    public EditSectionResponseDto updateSectionContent(Long sectionId, EditSectionRequestDto request) {
+        Section findSection = sectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("섹션이 조회되지 않습니다."));
+        User loginedUser = userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
+
+        // 섹션 수정은 해당 섹션 작성자만 가능하다.
+        if(!findSection.getUser().equals(loginedUser)) {
+            throw new IllegalStateException("섹션 수정은 해당 섹션 작성자만 가능합니다.");
+        }
+
+        // 섹션 수정
+        sectionRepository.updateSectionContent(request.getSectionContent(), loginedUser.getId());
+
+        return new EditSectionResponseDto(sectionId, request.getSectionContent());
+    }
+
 
     // 섹션 생성
     private static Section createSection(CreateSectionDto request, Retrospective findRetrospective,
