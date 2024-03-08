@@ -58,10 +58,10 @@ class SectionServiceTest {
             Optional.of(retrospective));
 
         CreateSectionDto request = new CreateSectionDto();
-        request.setSectionContent("test");
-        request.setSectionName("test");
-        request.setRetrospectiveId(retrospectiveId);
-        request.setUserId(userId);
+        ReflectionTestUtils.setField(request, "sectionName", "test");
+        ReflectionTestUtils.setField(request, "sectionContent", "test");
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "userId", userId);
 
         //when
         CreateSectionResponseDto response = sectionService.createSection(request);
