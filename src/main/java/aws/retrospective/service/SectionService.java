@@ -72,7 +72,7 @@ public class SectionService {
 
     // 섹션에 등록된 게시물 개수 반환
     private int findSectionSequence(String sectionName) {
-        return sectionRepository.findSectionSequence(sectionName);
+        return sectionRepository.countByTemplateSectionSectionName(sectionName).intValue();
     }
 
 }
