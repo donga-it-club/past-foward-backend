@@ -9,6 +9,7 @@ import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
+import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -24,78 +25,53 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-@ExtendWith(MockitoExtension.class)
-class SectionServiceTest {
-
-    @Mock
-    SectionRepository sectionRepository;
-    @Mock
-    UserRepository userRepository;
-    @Mock
-    RetrospectiveRepository retrospectiveRepository;
-    @Mock
-    TemplateSectionRepository templateSectionRepository;
-    @InjectMocks
-    SectionService sectionService;
-
-    @Test
-    @DisplayName("섹션 등록 API")
-    void createSectionTest() {
-        //given
-        Long userId = 1L;
-        User user = createUser();
-        ReflectionTestUtils.setField(user, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        Team team = createTeam();
-        RetrospectiveTemplate retrospectiveTemplate = createTemplate();
+@Transactionalgit ence(0)
+            .build();
+        when(templateSectionRepository.findById(templateSectionId)).thenReturn(
+            Optional.of(templateSection));
 
         Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(retrospectiveTemplate, user, team);
-        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
+        Retrospective retrospective = createRetrospective(createTeam(), user,
+            retrospectiveTemplate);
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
 
         CreateSectionDto request = new CreateSectionDto();
-        ReflectionTestUtils.setField(request, "sectionName", "test");
-        ReflectionTestUtils.setField(request, "sectionContent", "test");
-        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "userId", userId);
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "templateSectionId", templateSectionId);
+        ReflectionTestUtils.setField(request, "sectionContent", "section content");
 
         //when
         CreateSectionResponseDto response = sectionService.createSection(request);
 
         //then
-        assertThat(response.getSectionName()).isEqualTo(request.getSectionName());
         assertThat(response.getSectionContent()).isEqualTo(request.getSectionContent());
-        assertThat(response.getRetrospectiveId()).isEqualTo(request.getRetrospectiveId());
-        assertThat(response.getUserId()).isEqualTo(request.getUserId());
-
-
+        assertThat(response.getRetrospectiveId()).isEqualTo(retrospective.getId());
+        assertThat(response.getUserId()).isEqualTo(user.getId());
+        assertThat(response.getUserId()).isEqualTo(user.getId());
     }
 
-    private static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,
-        User user,
-        Team team) {
+    private static Retrospective createRetrospective(Team team, User user,
+        RetrospectiveTemplate retrospectiveTemplate) {
         return Retrospective.builder()
-            .title("test")
-            .template(retrospectiveTemplate)
-            .status(ProjectStatus.IN_PROGRESS)
-            .user(user)
             .team(team)
-            .build();
-    }
-
-    private static RetrospectiveTemplate createTemplate() {
-        return RetrospectiveTemplate.builder()
-            .name("test")
+            .user(user)
+            .title("회고 제목")
+            .status(ProjectStatus.IN_PROGRESS)
+            .template(retrospectiveTemplate)
             .build();
     }
 
     private static Team createTeam() {
         return Team.builder()
-            .name("test")
+            .name("팀A")
+            .build();
+    }
+
+    private static RetrospectiveTemplate createRetrospectiveTemplate() {
+        return RetrospectiveTemplate.builder()
+            .name("KPT")
             .build();
     }
 
