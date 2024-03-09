@@ -23,5 +23,7 @@ public class GetRetrospectivesDto {
 
     String keyword;
 
+    Boolean isBookmarked;
+
 
 }
