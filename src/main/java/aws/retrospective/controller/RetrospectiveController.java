@@ -3,6 +3,7 @@ package aws.retrospective.controller;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
+import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.service.RetrospectiveService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,8 +27,9 @@ public class RetrospectiveController {
 
     @Operation(summary = "회고 조회")
     @GetMapping()
-    public List<Retrospective> getRetrospectives() {
-        return retrospectiveService.getRetrospectives();
+    public List<Retrospective> getRetrospectives(
+        GetRetrospectivesDto dto) {
+        return retrospectiveService.getRetrospectives(dto);
     }
 
     @Operation(summary = "회고 생성")
