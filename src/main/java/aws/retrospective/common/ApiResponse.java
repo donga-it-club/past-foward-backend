@@ -2,9 +2,10 @@ package aws.retrospective.common;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-@Data
+@Getter
 public class ApiResponse<T> {
 
     private int code; // 처리 코드
