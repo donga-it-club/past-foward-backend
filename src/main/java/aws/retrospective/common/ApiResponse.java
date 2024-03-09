@@ -1,7 +1,6 @@
 package aws.retrospective.common;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -19,7 +18,7 @@ public class ApiResponse<T> {
         this.data = data;
     }
 
-    public static<T> ApiResponse<T> successResponse(HttpStatus status, T data) {
+    public static <T> ApiResponse<T> successResponse(HttpStatus status, T data) {
         return ApiResponse.<T>builder()
             .code(status.value())
             .message(null)
@@ -27,7 +26,7 @@ public class ApiResponse<T> {
             .build();
     }
 
-    public static<T>ApiResponse<T> errorResponse(HttpStatus status, String message) {
+    public static <T> ApiResponse<T> errorResponse(HttpStatus status, String message) {
         return ApiResponse.<T>builder()
             .code(status.value())
             .message(message)
