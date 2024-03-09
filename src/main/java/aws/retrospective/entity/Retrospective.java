@@ -9,7 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,8 +48,12 @@ public class Retrospective extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private ProjectStatus status; // 회고 진행 상태(시작 전, 진행 중, 완료)
 
+    @OneToMany(mappedBy = "retrospective")
+    private List<Bookmark> bookmarks = new ArrayList<>();
+
     @Builder
-    public Retrospective(String title, ProjectStatus status, Team team, User user, RetrospectiveTemplate template) {
+    public Retrospective(String title, ProjectStatus status, Team team, User user,
+        RetrospectiveTemplate template) {
         this.title = title;
         this.status = status;
         this.team = team;
