@@ -3,6 +3,7 @@ package aws.retrospective.controller;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.service.SectionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,7 @@ public class SectionController {
 
     // 특정 섹션 추가
     @PostMapping
-    public CreateSectionResponseDto createSection(@RequestBody CreateSectionDto request) {
+    public CreateSectionResponseDto createSection(@Valid @RequestBody CreateSectionDto request) {
         return sectionService.createSection(request);
     }
 }
