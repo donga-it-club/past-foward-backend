@@ -3,6 +3,8 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
+import aws.retrospective.dto.GetRetrospectivesDto;
+import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
@@ -11,10 +13,14 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
+import aws.retrospective.specification.RetrospectiveSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,11 +32,23 @@ public class RetrospectiveService {
     private final UserRepository userRepository;
     private final RetrospectiveTemplateRepository templateRepository;
 
-    //    TODO: response dto
-    public List<Retrospective> getRetrospectives() {
-        return retrospectiveRepository.findAll();
+    public List<Retrospective> getRetrospectives(GetRetrospectivesDto dto) {
+        Sort sort = getSort(dto.getOrder());
+        PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), sort);
+
+        Specification<Retrospective> spec = Specification.where(
+            RetrospectiveSpecification.withKeyword(dto.getKeyword()));
+
+        return retrospectiveRepository.findAll(spec, pageRequest).getContent();
     }
 
+    private Sort getSort(RetrospectivesOrderType orderType) {
+        if (orderType == RetrospectivesOrderType.LATELY) {
+            return Sort.by(Sort.Direction.ASC, "createdDate");
+        }
+
+        return Sort.by(Sort.Direction.DESC, "createdDate");
+    }
 
     public CreateRetrospectiveResponseDto createRetrospective(CreateRetrospectiveDto dto) {
         User user = findUserById(dto.getUserId());
