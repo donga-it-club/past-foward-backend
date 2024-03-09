@@ -8,8 +8,8 @@ public class CreateSectionDto {
 
     private Long userId;
     private Long retrospectiveId;
-    @NotEmpty(message = "Section location is required")
-    private String sectionName;
+    private Long templateSectionId;
+
     @NotEmpty(message = "Section content is required")
     private String sectionContent;
 }
