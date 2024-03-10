@@ -8,6 +8,7 @@ import aws.retrospective.entity.Retrospective;
 import aws.retrospective.service.RetrospectiveService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,14 +29,14 @@ public class RetrospectiveController {
     @Operation(summary = "회고 조회")
     @GetMapping()
     public List<Retrospective> getRetrospectives(
-        GetRetrospectivesDto dto) {
+        @Valid GetRetrospectivesDto dto) {
         return retrospectiveService.getRetrospectives(dto);
     }
 
     @Operation(summary = "회고 생성")
     @PostMapping()
     public CreateRetrospectiveResponseDto createRetrospective(
-        @RequestBody CreateRetrospectiveDto createRetrospectiveDto) {
+        @RequestBody @Valid CreateRetrospectiveDto createRetrospectiveDto) {
         return retrospectiveService.createRetrospective(createRetrospectiveDto);
     }
 }
