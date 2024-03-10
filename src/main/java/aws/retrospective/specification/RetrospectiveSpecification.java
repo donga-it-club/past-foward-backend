@@ -7,8 +7,12 @@ public class RetrospectiveSpecification {
 
 
     public static Specification<Retrospective> withKeyword(String keyword) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"),
-            "%" + keyword + "%");
+        if (keyword == null || keyword.isEmpty()) {
+            return null;
+        }
+
+        return (root, query, cb) -> cb.like(root.get("title"), "%" + keyword + "%");
+
     }
 
     public static Specification<Retrospective> withBookmark(Boolean isBookmarked, Long userId) {
