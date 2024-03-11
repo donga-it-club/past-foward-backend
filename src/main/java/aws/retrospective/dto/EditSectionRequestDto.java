@@ -1,8 +1,8 @@
 package aws.retrospective.dto;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class EditSectionRequestDto {
 
     private Long userId; // 사용자
