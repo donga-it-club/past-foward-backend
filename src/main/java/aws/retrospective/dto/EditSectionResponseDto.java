@@ -7,6 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class EditSectionResponseDto {
 
-    Long sectionId; // 섹션 id
-    String content; // 수정된 섹션 내용
+    private Long sectionId; // 섹션 id
+    private String content; // 수정된 섹션 내용
 }
