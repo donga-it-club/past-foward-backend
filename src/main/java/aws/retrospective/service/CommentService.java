@@ -28,7 +28,24 @@ public class CommentService {
     public Comment createComment(Comment comment) {
         return commentRepository.save(comment);
     }
+    public Comment updateComment(Long id, Comment updatedComment) {
+        Optional<Comment> existingComment = commentRepository.findById(id);
 
+        if (existingComment.isPresent()) {
+            Comment commentToUpdate = existingComment.get();
+            // Update relevant fields of the existing comment with new values from updatedComment
+            // e.g., commentToUpdate.setText(updatedComment.getText());
+            return commentRepository.save(commentToUpdate);
+        } else {
+            // Handle the case where the comment with the given ID is not found
+            // You may throw an exception or handle it according to your application's requirements
+            return null;
+        }
+    }
+
+    public void deleteComment(Long id) {
+        commentRepository.deleteById(id);
+    }
 
 
 
