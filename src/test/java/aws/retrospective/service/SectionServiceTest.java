@@ -94,8 +94,8 @@ class SectionServiceTest {
 
         //when
         EditSectionRequestDto request = new EditSectionRequestDto();
-        request.setUserId(1L);
-        request.setSectionContent("updateContent");
+        ReflectionTestUtils.setField(request, "userId", userId);
+        ReflectionTestUtils.setField(request, "sectionContent", request.getSectionContent());
         EditSectionResponseDto response = sectionService.updateSectionContent(
             sectionId, request);
 
