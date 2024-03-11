@@ -6,6 +6,7 @@ import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.service.SectionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,7 +28,7 @@ public class SectionController {
     }
 
     // 특정 섹션 수정
-    @PutMapping("/{sectionId}")
+    @PatchMapping("/{sectionId}")
     public EditSectionResponseDto editSectionContent(@PathVariable Long sectionId, @RequestBody EditSectionRequestDto request) {
         return sectionService.updateSectionContent(sectionId, request);
     }
