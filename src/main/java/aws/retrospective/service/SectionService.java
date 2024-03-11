@@ -12,15 +12,16 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class SectionService {
 
     private final SectionRepository sectionRepository;
@@ -47,7 +48,8 @@ public class SectionService {
 
         return new CreateSectionResponseDto(createSection.getUser().getId(),
             createSection.getRetrospective().getId(),
-            createSection.getTemplateSection().getSectionName(), createSection.getContent(), createTemplateSection.getSequence());
+            createSection.getTemplateSection().getSectionName(), createSection.getContent(),
+            createTemplateSection.getSequence());
     }
 
     // 섹션 수정
@@ -59,12 +61,12 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
 
         // 섹션 수정은 해당 섹션 작성자만 가능하다.
-        if(!findSection.getUser().equals(loginedUser)) {
+        if (!findSection.getUser().equals(loginedUser)) {
             throw new IllegalStateException("섹션 수정은 해당 섹션 작성자만 가능합니다.");
         }
 
         // 섹션 수정
-        sectionRepository.updateSectionContent(request.getSectionContent(), loginedUser.getId());
+        findSection.updateSection(request.getSectionContent());
 
         return new EditSectionResponseDto(sectionId, request.getSectionContent());
     }
