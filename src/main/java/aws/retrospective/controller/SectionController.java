@@ -23,7 +23,7 @@ public class SectionController {
 
     // 특정 섹션 추가
     @PostMapping
-    public CreateSectionResponseDto createSection(@RequestBody CreateSectionDto request) {
+    public CreateSectionResponseDto createSection(@Valid @RequestBody CreateSectionDto request) {
         return sectionService.createSection(request);
     }
 

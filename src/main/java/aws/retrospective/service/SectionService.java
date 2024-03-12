@@ -14,12 +14,10 @@ import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class SectionService {
@@ -38,12 +36,19 @@ public class SectionService {
         Retrospective findRetrospective = retrospectiveRepository.findById(
                 request.getRetrospectiveId())
             .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다"));
+        TemplateSection findTemplateSection = templateSectionRepository.findById(
+                request.getTemplateSectionId())
+            .orElseThrow(() -> new NoSuchElementException("템플릿 섹션이 조회되지 않습니다."));
 
-        TemplateSection createTemplateSection = createTemplateSection(request, findRetrospective);
-        templateSectionRepository.save(createTemplateSection);
+        // 회고보드와 템플릿 섹션에 등록된 회고보드 유형 이름이 다르면 예외를 발생한다.
+        if (!findRetrospective.getTemplate().getName()
+            .equals(findTemplateSection.getTemplate().getName())) {
+            throw new IllegalArgumentException("템플릿 정보가 일치하지 않습니다.");
+        }
 
-        Section createSection = createSection(request, findRetrospective, findUser,
-            createTemplateSection);
+        // 섹션 등록
+        Section createSection = createSection(request.getSectionContent(), findTemplateSection,
+            findRetrospective, findUser);
         sectionRepository.save(createSection);
 
         return new CreateSectionResponseDto(createSection.getUser().getId(),
@@ -71,31 +76,15 @@ public class SectionService {
         return new EditSectionResponseDto(sectionId, request.getSectionContent());
     }
 
-    // 섹션 생성
-    private static Section createSection(CreateSectionDto request, Retrospective findRetrospective,
-        User findUser, TemplateSection createTemplateSection) {
+    // 섹션 등록
+    private Section createSection(String sectionContent, TemplateSection findTemplateSection,
+        Retrospective findRetrospective, User findUser) {
         return Section.builder()
-            .content(request.getSectionContent())
-            .likeCnt(0)
+            .templateSection(findTemplateSection)
             .retrospective(findRetrospective)
             .user(findUser)
-            .templateSection(createTemplateSection)
+            .likeCnt(0)
+            .content(sectionContent)
             .build();
     }
-
-    // 섹션 템플릿 생성
-    private TemplateSection createTemplateSection(CreateSectionDto request,
-        Retrospective findRetrospective) {
-        return TemplateSection.builder()
-            .sectionName(request.getSectionName())
-            .template(findRetrospective.getTemplate())
-            .sequence(findSectionSequence(request.getSectionName()) + 1) // 현재 섹션에 등록된 개수 + 1
-            .build();
-    }
-
-    // 섹션에 등록된 게시물 개수 반환
-    private int findSectionSequence(String sectionName) {
-        return sectionRepository.findSectionSequence(sectionName);
-    }
-
 }
