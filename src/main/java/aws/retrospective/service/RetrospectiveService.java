@@ -15,6 +15,7 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.specification.RetrospectiveSpecification;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -42,14 +43,16 @@ public class RetrospectiveService {
         return retrospectiveRepository.findAll(spec, pageRequest).getContent();
     }
 
+
     private Sort getSort(RetrospectivesOrderType orderType) {
-        if (orderType == RetrospectivesOrderType.LATELY) {
+        if (orderType == RetrospectivesOrderType.PREVIOUSLY) {
             return Sort.by(Sort.Direction.ASC, "createdDate");
         }
 
         return Sort.by(Sort.Direction.DESC, "createdDate");
     }
 
+    @Transactional
     public CreateRetrospectiveResponseDto createRetrospective(CreateRetrospectiveDto dto) {
         User user = findUserById(dto.getUserId());
         RetrospectiveTemplate template = findTemplateById(dto.getTemplateId());
