@@ -11,7 +11,7 @@ public class RetrospectiveSpecification {
             return null;
         }
 
-        return (root, query, cb) -> cb.like(root.get("title"), "%" + keyword + "%");
+        return (root, query, cb) -> cb.like(root.get("title"), keyword + "%");
 
     }
 
