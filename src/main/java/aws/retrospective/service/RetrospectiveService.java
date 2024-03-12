@@ -58,7 +58,7 @@ public class RetrospectiveService {
         return CreateRetrospectiveResponseDto.builder()
             .id(retrospective.getId())
             .title(retrospective.getTitle())
-            .teamId(retrospective.getTeam().getId())
+            .teamId(Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null))
             .userId(retrospective.getUser().getId())
             .templateId(retrospective.getTemplate().getId())
             .build();

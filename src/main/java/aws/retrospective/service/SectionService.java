@@ -71,7 +71,6 @@ public class SectionService {
         return new EditSectionResponseDto(sectionId, request.getSectionContent());
     }
 
-
     // 섹션 생성
     private static Section createSection(CreateSectionDto request, Retrospective findRetrospective,
         User findUser, TemplateSection createTemplateSection) {
