@@ -9,6 +9,7 @@ import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
+import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -49,63 +50,72 @@ class SectionServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Team team = createTeam();
-        RetrospectiveTemplate retrospectiveTemplate = createTemplate();
+        RetrospectiveTemplate kptTemplate = createTemplate();
 
         Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(retrospectiveTemplate, user, team);
+        Retrospective retrospective = createRetrospective(kptTemplate, team, user);
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
 
+        Long templateSectionId = 1L;
+        TemplateSection templateSection = createTemplateSection(kptTemplate);
+        ReflectionTestUtils.setField(templateSection, "id", templateSectionId);
+        when(templateSectionRepository.findById(templateSectionId)).thenReturn(
+            Optional.of(templateSection));
+
         CreateSectionDto request = new CreateSectionDto();
-        request.setSectionContent("test");
-        request.setSectionName("test");
-        request.setRetrospectiveId(retrospectiveId);
-        request.setUserId(userId);
+        ReflectionTestUtils.setField(request, "userId", userId);
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "templateSectionId", templateSectionId);
+        ReflectionTestUtils.setField(request, "sectionContent", "test");
 
         //when
         CreateSectionResponseDto response = sectionService.createSection(request);
 
         //then
-        assertThat(response.getSectionName()).isEqualTo(request.getSectionName());
-        assertThat(response.getSectionContent()).isEqualTo(request.getSectionContent());
-        assertThat(response.getRetrospectiveId()).isEqualTo(request.getRetrospectiveId());
-        assertThat(response.getUserId()).isEqualTo(request.getUserId());
-
-
+        assertThat(response.getSectionContent()).isEqualTo("test");
+        assertThat(response.getUserId()).isEqualTo(userId);
+        assertThat(response.getRetrospectiveId()).isEqualTo(retrospectiveId);
     }
 
-    private static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,
-        User user,
-        Team team) {
+    private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
+        return TemplateSection.builder()
+            .sectionName("Keep")
+            .sequence(0)
+            .template(kptTemplate)
+            .build();
+    }
+
+    private static Retrospective createRetrospective(RetrospectiveTemplate kptTemplate, Team team,
+        User user) {
         return Retrospective.builder()
-            .title("test")
-            .template(retrospectiveTemplate)
+            .template(kptTemplate)
             .status(ProjectStatus.IN_PROGRESS)
-            .user(user)
+            .title("test")
             .team(team)
+            .user(user)
             .build();
     }
 
     private static RetrospectiveTemplate createTemplate() {
         return RetrospectiveTemplate.builder()
-            .name("test")
+            .name("KPT")
             .build();
     }
 
     private static Team createTeam() {
         return Team.builder()
-            .name("test")
+            .name("name")
             .build();
     }
 
     private static User createUser() {
         return User.builder()
-            .email("test")
-            .phone("test")
-            .password("test")
             .username("test")
+            .password("test")
+            .phone("010-1234-1234")
+            .email("test@naver.com")
             .build();
     }
-
 }
