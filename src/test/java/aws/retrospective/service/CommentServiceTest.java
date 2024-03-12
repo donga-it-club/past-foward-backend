@@ -26,7 +26,7 @@ public class CommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -43,7 +43,11 @@ public class CommentServiceTest {
     @Test
     void getCommentById() {
         Long commentId = 1L;
-        Comment comment = new Comment("Sample content", new User(), new Section());
+        Comment comment = Comment.builder()
+            .content("Sample content")
+            .user(User.builder().build())
+            .section(Section.builder().build())
+            .build();
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         Optional<Comment> result = commentService.getCommentId(commentId);
@@ -66,7 +70,11 @@ public class CommentServiceTest {
 
     @Test
     void createComment() {
-        Comment comment = new Comment("Sample content", new User(), new Section());
+        Comment comment = Comment.builder()
+            .content("Sample content")
+            .user(User.builder().build())
+            .section(Section.builder().build())
+            .build();
         when(commentRepository.save(comment)).thenReturn(comment);
 
         Comment result = commentService.createComment(comment);
@@ -78,8 +86,16 @@ public class CommentServiceTest {
     @Test
     void updateComment() {
         Long commentId = 1L;
-        Comment existingComment = new Comment("Sample content", new User(), new Section());
-        Comment updatedComment = new Comment("Updated content", new User(), new Section());
+        Comment existingComment = Comment.builder()
+            .content("Sample content")
+            .user(User.builder().build())
+            .section(Section.builder().build())
+            .build();
+        Comment updatedComment = Comment.builder()
+            .content("Updated content")
+            .user(User.builder().build())
+            .section(Section.builder().build())
+            .build();
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(existingComment));
         when(commentRepository.save(existingComment)).thenReturn(updatedComment);
 
@@ -93,7 +109,11 @@ public class CommentServiceTest {
     @Test
     void updateComment_NotFound() {
         Long commentId = 1L;
-        Comment updatedComment = new Comment("Updated content", new User(), new Section());
+        Comment updatedComment = Comment.builder()
+            .content("Updated content")
+            .user(User.builder().build())
+            .section(Section.builder().build())
+            .build();
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         Comment result = commentService.updateComment(commentId, updatedComment);
