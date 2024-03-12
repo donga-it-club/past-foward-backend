@@ -1,30 +1,33 @@
 import aws.retrospective.entity.Comment;
+import aws.retrospective.entity.User;
+import aws.retrospective.entity.Section;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.service.CommentService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class CommentServiceTest {
+public class CommentServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
 
     @InjectMocks
     private CommentService commentService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     void getAllComments() {
@@ -40,7 +43,7 @@ class CommentServiceTest {
     @Test
     void getCommentById() {
         Long commentId = 1L;
-        Comment comment = new Comment();
+        Comment comment = new Comment("Sample content", new User(), new Section());
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         Optional<Comment> result = commentService.getCommentId(commentId);
@@ -63,7 +66,7 @@ class CommentServiceTest {
 
     @Test
     void createComment() {
-        Comment comment = new Comment();
+        Comment comment = new Comment("Sample content", new User(), new Section());
         when(commentRepository.save(comment)).thenReturn(comment);
 
         Comment result = commentService.createComment(comment);
@@ -75,8 +78,8 @@ class CommentServiceTest {
     @Test
     void updateComment() {
         Long commentId = 1L;
-        Comment existingComment = new Comment();
-        Comment updatedComment = new Comment();
+        Comment existingComment = new Comment("Sample content", new User(), new Section());
+        Comment updatedComment = new Comment("Updated content", new User(), new Section());
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(existingComment));
         when(commentRepository.save(existingComment)).thenReturn(updatedComment);
 
@@ -90,7 +93,7 @@ class CommentServiceTest {
     @Test
     void updateComment_NotFound() {
         Long commentId = 1L;
-        Comment updatedComment = new Comment();
+        Comment updatedComment = new Comment("Updated content", new User(), new Section());
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         Comment result = commentService.updateComment(commentId, updatedComment);
