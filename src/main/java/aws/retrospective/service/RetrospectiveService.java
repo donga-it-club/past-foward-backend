@@ -4,6 +4,8 @@ package aws.retrospective.service;
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
 import aws.retrospective.dto.GetRetrospectivesDto;
+import aws.retrospective.dto.PaginationResponseDto;
+import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
@@ -15,9 +17,9 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.specification.RetrospectiveSpecification;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,14 +36,17 @@ public class RetrospectiveService {
     private final RetrospectiveTemplateRepository templateRepository;
 
     @Transactional(readOnly = true)
-    public List<Retrospective> getRetrospectives(GetRetrospectivesDto dto) {
+    public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(
+        GetRetrospectivesDto dto) {
         Sort sort = getSort(dto.getOrder());
         PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), sort);
 
         Specification<Retrospective> spec = Specification.where(
             RetrospectiveSpecification.withKeyword(dto.getKeyword()));
 
-        return retrospectiveRepository.findAll(spec, pageRequest).getContent();
+        Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
+
+        return PaginationResponseDto.fromPage(page, RetrospectiveResponseDto::of);
     }
 
 
