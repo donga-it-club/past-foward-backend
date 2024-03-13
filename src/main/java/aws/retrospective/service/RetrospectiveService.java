@@ -41,8 +41,10 @@ public class RetrospectiveService {
         Sort sort = getSort(dto.getOrder());
         PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), sort);
 
-        Specification<Retrospective> spec = Specification.where(
-            RetrospectiveSpecification.withKeyword(dto.getKeyword()));
+        Specification<Retrospective> spec = Specification
+            .where(RetrospectiveSpecification.withKeyword(dto.getKeyword()))
+            .and(RetrospectiveSpecification.withUserId(dto.getUserId()))
+            .and(RetrospectiveSpecification.withBookmark(dto.getIsBookmarked(), dto.getUserId()));
 
         Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
 

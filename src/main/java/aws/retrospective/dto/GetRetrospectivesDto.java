@@ -27,5 +27,8 @@ public class GetRetrospectivesDto {
 
     Boolean isBookmarked;
 
+    //TODO: dto에서 받지 않도록 수정
+    Long userId;
+
 
 }
