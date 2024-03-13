@@ -15,7 +15,6 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.specification.RetrospectiveSpecification;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +33,7 @@ public class RetrospectiveService {
     private final UserRepository userRepository;
     private final RetrospectiveTemplateRepository templateRepository;
 
+    @Transactional(readOnly = true)
     public List<Retrospective> getRetrospectives(GetRetrospectivesDto dto) {
         Sort sort = getSort(dto.getOrder());
         PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), sort);
