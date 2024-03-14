@@ -2,7 +2,6 @@ package aws.retrospective.dto;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 
 public record PaginationResponseDto<T>(long totalCount, List<T> nodes) {
@@ -11,7 +10,7 @@ public record PaginationResponseDto<T>(long totalCount, List<T> nodes) {
         Function<T, U> converter) {
         List<U> dtoList = page.getContent().stream()
             .map(converter)
-            .collect(Collectors.toList());
+            .toList();
         return new PaginationResponseDto<>(page.getTotalElements(), dtoList);
     }
 }
