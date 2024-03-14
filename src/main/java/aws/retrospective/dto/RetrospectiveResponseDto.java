@@ -1,8 +1,6 @@
 package aws.retrospective.dto;
 
 import aws.retrospective.entity.Retrospective;
-import aws.retrospective.entity.Team;
-import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -38,7 +36,7 @@ public class RetrospectiveResponseDto {
             retrospective.getId(),
             retrospective.getTitle(),
             retrospective.getUser().getId(),
-            Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null),
+            retrospective.getTeam() != null ? retrospective.getTeam().getId() : null,
             retrospective.getTemplate().getId(),
             retrospective.getStatus().name(),
             retrospective.getBookmarks().stream().anyMatch(
