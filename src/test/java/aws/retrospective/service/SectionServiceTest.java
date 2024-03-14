@@ -1,13 +1,18 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.DeleteSectionResponseDto;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
+import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
@@ -15,13 +20,16 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,6 +85,61 @@ class SectionServiceTest {
         assertThat(response.getSectionContent()).isEqualTo("test");
         assertThat(response.getUserId()).isEqualTo(userId);
         assertThat(response.getRetrospectiveId()).isEqualTo(retrospectiveId);
+    }
+
+    @Test
+    @DisplayName("섹션 삭제 성공 API")
+    void deleteSectionSuccessTest() {
+        //given
+        User user = createUser();
+        Team team = createTeam();
+        RetrospectiveTemplate kptTemplate = createTemplate();
+        TemplateSection templateSection = createTemplateSection(kptTemplate);
+        Retrospective retrospective = createRetrospective(kptTemplate, team, user);
+
+        Long sectionId = 1L;
+        Section section = createSection(user, templateSection, retrospective);
+        ReflectionTestUtils.setField(section, "id", sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+
+        //when
+        DeleteSectionResponseDto response = sectionService.deleteSection(sectionId);
+
+        //then
+        assertThat(response.getId()).isEqualTo(sectionId);
+    }
+
+    @Test
+    @DisplayName("섹션 삭제 실패 API")
+    void deleteSectionFailTest() {
+
+        //given
+        User user = createUser();
+        Team team = createTeam();
+        RetrospectiveTemplate kptTemplate = createTemplate();
+        TemplateSection templateSection = createTemplateSection(kptTemplate);
+        Retrospective retrospective = createRetrospective(kptTemplate, team, user);
+
+        Long sectionId = 1L;
+        Section section = createSection(user, templateSection, retrospective);
+        ReflectionTestUtils.setField(section, "id", sectionId);
+
+        doThrow(NoSuchElementException.class).when(sectionRepository).findById(2L);
+
+        //when
+        assertThatThrownBy(() -> sectionService.deleteSection(2L))
+            .isInstanceOf(NoSuchElementException.class);
+    }
+
+    private static Section createSection(User user, TemplateSection templateSection,
+        Retrospective retrospective) {
+        return Section.builder()
+            .user(user)
+            .content("test")
+            .templateSection(templateSection)
+            .likeCnt(0)
+            .retrospective(retrospective)
+            .build();
     }
 
     private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
