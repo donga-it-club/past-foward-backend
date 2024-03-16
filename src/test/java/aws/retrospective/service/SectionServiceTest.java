@@ -1,14 +1,12 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
-import aws.retrospective.dto.DeleteSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.entity.ProjectStatus;
@@ -95,7 +93,7 @@ class SectionServiceTest {
         Team team = createTeam();
         RetrospectiveTemplate kptTemplate = createTemplate();
         TemplateSection templateSection = createTemplateSection(kptTemplate);
-        Retrospective retrospective = createRetrospective(kptTemplate, team, user);
+        Retrospective retrospective = createRetrospective(kptTemplate, user, team);
 
         Long sectionId = 1L;
         Section section = createSection(user, templateSection, retrospective);
@@ -103,10 +101,10 @@ class SectionServiceTest {
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
         //when
-        DeleteSectionResponseDto response = sectionService.deleteSection(sectionId);
+        sectionService.deleteSection(sectionId);
 
         //then
-        assertThat(response.getId()).isEqualTo(sectionId);
+        verify(sectionRepository).delete(section);
     }
 
     @Test
@@ -118,7 +116,8 @@ class SectionServiceTest {
         //when
         when(sectionRepository.findById(notExistSectionId)).thenThrow(NoSuchElementException.class);
         //then
-        assertThrows(NoSuchElementException.class, () -> sectionService.deleteSection(notExistSectionId));
+        assertThrows(NoSuchElementException.class,
+            () -> sectionService.deleteSection(notExistSectionId));
     }
 
     private static Section createSection(User user, TemplateSection templateSection,
