@@ -1,12 +1,14 @@
 package aws.retrospective.controller;
 
 
+import aws.retrospective.common.ApiResponse;
 import aws.retrospective.dto.RetrospectiveTemplateResponseDto;
 import aws.retrospective.service.RetrospectiveTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +23,10 @@ public class RetrospectiveTemplateController {
 
     @Operation(summary = "회고 템플릿 리스트 조회")
     @GetMapping()
-    public List<RetrospectiveTemplateResponseDto> getRetrospectiveTemplates() {
-        return retrospectiveTemplateService.getRetrospectiveTemplates();
+    public ApiResponse<List<RetrospectiveTemplateResponseDto>> getRetrospectiveTemplates() {
+        List<RetrospectiveTemplateResponseDto> response = retrospectiveTemplateService.getRetrospectiveTemplates();
+
+        return ApiResponse.successResponse(HttpStatus.OK, response);
     }
 
 }
