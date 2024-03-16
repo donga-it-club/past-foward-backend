@@ -2,7 +2,6 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
-import aws.retrospective.dto.DeleteSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.entity.Retrospective;
@@ -75,11 +74,10 @@ public class SectionService {
     }
 
     @Transactional
-    public DeleteSectionResponseDto deleteSection(Long sectionId) {
+    public void deleteSection(Long sectionId) {
         Section findSection = sectionRepository.findById(sectionId)
             .orElseThrow(() -> new NoSuchElementException("section이 조회되지 않습니다."));
         sectionRepository.delete(findSection);
-        return new DeleteSectionResponseDto(sectionId);
     }
 
     // 섹션 등록
