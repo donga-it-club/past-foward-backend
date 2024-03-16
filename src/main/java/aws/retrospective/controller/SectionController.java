@@ -3,7 +3,6 @@ package aws.retrospective.controller;
 import aws.retrospective.common.ApiResponse;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
-import aws.retrospective.dto.DeleteSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.service.SectionService;
@@ -43,8 +42,8 @@ public class SectionController {
 
     // 특정 섹션 삭제
     @DeleteMapping("/{id}")
-    public ApiResponse<DeleteSectionResponseDto> deleteSection(@PathVariable("id") Long sectionId) {
-        DeleteSectionResponseDto response = sectionService.deleteSection(sectionId);
-        return ApiResponse.successResponse(HttpStatus.OK, response);
+    public ApiResponse<?> deleteSection(@PathVariable("id") Long sectionId) {
+        sectionService.deleteSection(sectionId);
+        return ApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 }
