@@ -25,8 +25,10 @@ public class SectionController {
 
     // 특정 섹션 추가
     @PostMapping
-    public CreateSectionResponseDto createSection(@Valid @RequestBody CreateSectionDto request) {
-        return sectionService.createSection(request);
+    public ApiResponse<CreateSectionResponseDto> createSection(
+        @Valid @RequestBody CreateSectionDto request) {
+        CreateSectionResponseDto response = sectionService.createSection(request);
+        return ApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
     // 특정 섹션 수정

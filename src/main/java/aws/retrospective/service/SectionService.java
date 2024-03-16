@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SectionService {
 
     private final SectionRepository sectionRepository;
@@ -51,10 +50,8 @@ public class SectionService {
             findRetrospective, findUser);
         sectionRepository.save(createSection);
 
-        return new CreateSectionResponseDto(createSection.getUser().getId(),
-            createSection.getRetrospective().getId(),
-            createSection.getTemplateSection().getSectionName(), createSection.getContent(),
-            createTemplateSection.getSequence());
+        return new CreateSectionResponseDto(createSection.getId(),
+            createSection.getUser().getId(), request.getRetrospectiveId(), request.getSectionContent());
     }
 
     // 섹션 수정

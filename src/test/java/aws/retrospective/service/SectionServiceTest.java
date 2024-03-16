@@ -56,7 +56,7 @@ class SectionServiceTest {
         RetrospectiveTemplate kptTemplate = createTemplate();
 
         Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(kptTemplate, team, user);
+        Retrospective retrospective = createRetrospective(kptTemplate, user, team);
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
@@ -128,7 +128,7 @@ class SectionServiceTest {
         User user,
         Team team) {
         return Retrospective.builder()
-            .template(kptTemplate)
+            .template(retrospectiveTemplate)
             .status(ProjectStatus.IN_PROGRESS)
             .title("test")
             .team(team)
