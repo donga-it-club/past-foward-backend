@@ -2,6 +2,8 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.EditSectionRequestDto;
+import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.TemplateSection;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SectionService {
 
     private final SectionRepository sectionRepository;
@@ -48,10 +51,29 @@ public class SectionService {
             findRetrospective, findUser);
         sectionRepository.save(createSection);
 
-        return new CreateSectionResponseDto(
-            createSection.getId(), createSection.getUser().getId(),
-            createSection.getRetrospective().getId(), createSection.getContent()
-        );
+        return new CreateSectionResponseDto(createSection.getUser().getId(),
+            createSection.getRetrospective().getId(),
+            createSection.getTemplateSection().getSectionName(), createSection.getContent(),
+            createTemplateSection.getSequence());
+    }
+
+    // 섹션 수정
+    @Transactional
+    public EditSectionResponseDto updateSectionContent(Long sectionId, EditSectionRequestDto request) {
+        Section findSection = sectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("섹션이 조회되지 않습니다."));
+        User loginedUser = userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
+
+        // 섹션 수정은 해당 섹션 작성자만 가능하다.
+        if (!findSection.getUser().equals(loginedUser)) {
+            throw new IllegalStateException("섹션 수정은 해당 섹션 작성자만 가능합니다.");
+        }
+
+        // 섹션 수정
+        findSection.updateSection(request.getSectionContent());
+
+        return new EditSectionResponseDto(sectionId, request.getSectionContent());
     }
 
     // 섹션 등록

@@ -5,9 +5,12 @@ import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.EditSectionRequestDto;
+import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
+import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
@@ -87,8 +90,43 @@ class SectionServiceTest {
             .build();
     }
 
-    private static Retrospective createRetrospective(RetrospectiveTemplate kptTemplate, Team team,
-        User user) {
+    @Test
+    @DisplayName("특정 섹션 내용 수정")
+    void updateSectionContentTest() {
+        //given
+        Long userId = 1L;
+        User loginedUser = createUser();
+        ReflectionTestUtils.setField(loginedUser, "id", userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(loginedUser));
+
+        Long sectionId = 1L;
+        Section section = createSection(loginedUser);
+        ReflectionTestUtils.setField(section, "id", sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+
+        //when
+        EditSectionRequestDto request = new EditSectionRequestDto();
+        ReflectionTestUtils.setField(request, "userId", userId);
+        ReflectionTestUtils.setField(request, "sectionContent", request.getSectionContent());
+        EditSectionResponseDto response = sectionService.updateSectionContent(
+            sectionId, request);
+
+        //then
+        assertThat(response.getSectionId()).isEqualTo(sectionId);
+        assertThat(response.getContent()).isEqualTo(request.getSectionContent());
+    }
+
+    private static Section createSection(User loginedUser) {
+        return Section.builder()
+            .user(loginedUser)
+            .content("test")
+            .likeCnt(0)
+            .build();
+    }
+
+    private static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,
+        User user,
+        Team team) {
         return Retrospective.builder()
             .template(kptTemplate)
             .status(ProjectStatus.IN_PROGRESS)
