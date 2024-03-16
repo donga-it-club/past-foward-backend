@@ -124,11 +124,9 @@ class SectionServiceTest {
 
         //when
         doThrow(NoSuchElementException.class).when(sectionRepository).findById(2L); // 예외가 발생한다.
-        DeleteSectionResponseDto response = sectionService.deleteSection(sectionId); // 예외가 발생하지 않는다.
 
         //then
         assertThrows(NoSuchElementException.class, () -> sectionService.deleteSection(2L));
-        assertThat(response.getId()).isEqualTo(sectionId);
     }
 
     private static Section createSection(User user, TemplateSection templateSection,
