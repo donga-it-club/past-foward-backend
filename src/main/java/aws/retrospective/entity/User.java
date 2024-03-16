@@ -32,6 +32,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private List<UserTeam> teams = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    private List<Bookmark> bookmarks = new ArrayList<>();
+
     @Builder
     public User(String email, String password, String username, String phone) {
         this.email = email;
