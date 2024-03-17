@@ -11,8 +11,6 @@ import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
-import aws.retrospective.exception.ErrorCode;
-import aws.retrospective.exception.custom.MismatchedDataException;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -89,11 +87,6 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
         User findUser = userRepository.findById(request.getUserId())
             .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
-
-        // 해당 Section을 사용자가 작성한 것이 아니라면 예외가 발생한다.
-        if(!findSection.getUser().equals(findUser)) {
-            throw new MismatchedDataException(ErrorCode.MISMATCHED_DATA_EXCEPTION);
-        }
 
         // 사용자가 해당 Section에 좋아요를 눌렀는지 확인한다.
         Optional<Likes> findLikes = likesRepository.findByUserAndSection(findUser,
