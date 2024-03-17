@@ -1,5 +1,6 @@
 package aws.retrospective.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,6 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +41,9 @@ public class Section extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_section_id")
     private TemplateSection templateSection; // 섹션 템플릿 정보
+
+    @OneToMany(mappedBy = "section", cascade = CascadeType.REMOVE)
+    private List<Likes> likes = new ArrayList<>();
 
 
     @Builder
