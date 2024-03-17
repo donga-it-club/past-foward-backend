@@ -53,4 +53,13 @@ public class Section extends BaseEntity {
     public void updateSection(String updateContent) {
         this.content = updateContent;
     }
+
+    // 좋아요 등록
+    public void increaseSectionLikes() {
+        this.likeCnt += 1;
+    }
+    // 좋아요 취소
+    public void cancelSectionLikes() {
+        this.likeCnt -= 1;
+    }
 }
