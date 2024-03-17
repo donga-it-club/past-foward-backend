@@ -42,7 +42,7 @@ public class SectionController {
 
     // 특정 섹션 삭제
     @DeleteMapping("/{id}")
-    public ApiResponse<?> deleteSection(@PathVariable("id") Long sectionId) {
+    public ApiResponse<Void> deleteSection(@PathVariable("id") Long sectionId) {
         sectionService.deleteSection(sectionId);
         return ApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
