@@ -36,8 +36,7 @@ public class SectionService {
     @Transactional
     public CreateSectionResponseDto createSection(CreateSectionDto request) {
 
-        User findUser = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
+        User findUser = getUser(request.getRetrospectiveId());
         Retrospective findRetrospective = retrospectiveRepository.findById(
                 request.getRetrospectiveId())
             .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다"));
@@ -63,10 +62,8 @@ public class SectionService {
     // 섹션 수정
     @Transactional
     public EditSectionResponseDto updateSectionContent(Long sectionId, EditSectionRequestDto request) {
-        Section findSection = sectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("섹션이 조회되지 않습니다."));
-        User loginedUser = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
+        Section findSection = getSection(sectionId);
+        User loginedUser = getUser(request.getUserId());
 
         // 섹션 수정은 해당 섹션 작성자만 가능하다.
         if (!findSection.getUser().equals(loginedUser)) {
@@ -83,10 +80,8 @@ public class SectionService {
     @Transactional
     public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId, IncreaseSectionLikesRequestDto request) {
         // 섹션 조회
-        Section findSection = sectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
-        User findUser = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
+        Section findSection = getSection(sectionId);
+        User findUser = getUser(request.getUserId());
 
         // 사용자가 해당 Section에 좋아요를 눌렀는지 확인한다.
         Optional<Likes> findLikes = likesRepository.findByUserAndSection(findUser,
@@ -106,6 +101,16 @@ public class SectionService {
         }
 
         return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+    }
+
+    private Section getSection(Long sectionId) {
+        return sectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
+    }
+
+    private User getUser(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
     }
 
     // 섹션 등록
