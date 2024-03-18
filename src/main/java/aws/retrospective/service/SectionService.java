@@ -4,15 +4,20 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
+import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
+import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +30,13 @@ public class SectionService {
     private final UserRepository userRepository;
     private final RetrospectiveRepository retrospectiveRepository;
     private final TemplateSectionRepository templateSectionRepository;
+    private final LikesRepository likesRepository;
 
     // Section 등록
     @Transactional
     public CreateSectionResponseDto createSection(CreateSectionDto request) {
 
-        User findUser = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
+        User findUser = getUser(request.getRetrospectiveId());
         Retrospective findRetrospective = retrospectiveRepository.findById(
                 request.getRetrospectiveId())
             .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다"));
@@ -57,10 +62,8 @@ public class SectionService {
     // 섹션 수정
     @Transactional
     public EditSectionResponseDto updateSectionContent(Long sectionId, EditSectionRequestDto request) {
-        Section findSection = sectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("섹션이 조회되지 않습니다."));
-        User loginedUser = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
+        Section findSection = getSection(sectionId);
+        User loginedUser = getUser(request.getUserId());
 
         // 섹션 수정은 해당 섹션 작성자만 가능하다.
         if (!findSection.getUser().equals(loginedUser)) {
@@ -71,6 +74,43 @@ public class SectionService {
         findSection.updateSection(request.getSectionContent());
 
         return new EditSectionResponseDto(sectionId, request.getSectionContent());
+    }
+
+    // 섹션 좋아요 API
+    @Transactional
+    public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId, IncreaseSectionLikesRequestDto request) {
+        // 섹션 조회
+        Section findSection = getSection(sectionId);
+        User findUser = getUser(request.getUserId());
+
+        // 사용자가 해당 Section에 좋아요를 눌렀는지 확인한다.
+        Optional<Likes> findLikes = likesRepository.findByUserAndSection(findUser,
+            findSection);
+        // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
+        if(findLikes.isEmpty()) {
+            Likes createLikes = Likes.builder()
+                .section(findSection)
+                .user(findUser)
+                .build();
+            likesRepository.save(createLikes);
+            findSection.increaseSectionLikes();
+        } else {
+            Likes likes = findLikes.get();
+            likesRepository.delete(likes);
+            findSection.cancelSectionLikes();
+        }
+
+        return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+    }
+
+    private Section getSection(Long sectionId) {
+        return sectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
+    }
+
+    private User getUser(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
     }
 
     @Transactional

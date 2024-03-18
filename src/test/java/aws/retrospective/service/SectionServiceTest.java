@@ -9,6 +9,9 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
+import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
@@ -16,6 +19,7 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
+import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
@@ -43,6 +47,8 @@ class SectionServiceTest {
     RetrospectiveRepository retrospectiveRepository;
     @Mock
     TemplateSectionRepository templateSectionRepository;
+    @Mock
+    LikesRepository likesRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -118,6 +124,71 @@ class SectionServiceTest {
         //then
         assertThrows(NoSuchElementException.class,
             () -> sectionService.deleteSection(notExistSectionId));
+    }
+
+    @Test
+    @DisplayName("사용자가 좋아요를 누른 적이 없다면 좋아요 횟수 1이 증가한다")
+    void increaseLikesCnt() {
+        //given
+        Long userId = 1L;
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Long sectionId = 1L;
+        Section section = createSection(user);
+        ReflectionTestUtils.setField(section, "id", sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+
+        when(likesRepository.findByUserAndSection(user, section)).thenReturn(Optional.empty());
+
+        IncreaseSectionLikesRequestDto request = new IncreaseSectionLikesRequestDto();
+        ReflectionTestUtils.setField(request, "userId", userId);
+
+        //when
+        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
+            sectionId, request);
+
+        //then
+        assertThat(response.getSectionId()).isEqualTo(sectionId);
+        assertThat(response.getLikeCnt()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("사용자는 좋아요를 취소할 수 있다.")
+    void decreaseLikesCnt() {
+        //given
+        Long userId = 1L;
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Long sectionId = 1L;
+        Section section = createSection(user);
+        ReflectionTestUtils.setField(section, "id", sectionId);
+        ReflectionTestUtils.setField(section, "likeCnt", 2);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+
+        Likes likes = createLikes(section, user);
+        when(likesRepository.findByUserAndSection(user, section)).thenReturn(Optional.of(likes));
+
+        IncreaseSectionLikesRequestDto request = new IncreaseSectionLikesRequestDto();
+        ReflectionTestUtils.setField(request, "userId", userId);
+
+        //when
+        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
+            sectionId, request);
+
+        //then
+        assertThat(response.getSectionId()).isEqualTo(sectionId);
+        assertThat(response.getLikeCnt()).isEqualTo(1);
+    }
+
+    private static Likes createLikes(Section section, User user) {
+        return Likes.builder()
+            .section(section)
+            .user(user)
+            .build();
     }
 
     private static Section createSection(User user, TemplateSection templateSection,

@@ -1,5 +1,6 @@
 package aws.retrospective.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,11 +30,14 @@ public class User extends BaseEntity {
     private String username; // 사용자 이름
     private String phone; // 전화번호
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<UserTeam> teams = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Bookmark> bookmarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<Likes> likes = new ArrayList<>();
 
     @Builder
     public User(String email, String password, String username, String phone) {
