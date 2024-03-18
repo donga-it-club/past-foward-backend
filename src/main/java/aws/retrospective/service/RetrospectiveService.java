@@ -53,7 +53,7 @@ public class RetrospectiveService {
 
 
     private Sort getSort(RetrospectivesOrderType orderType) {
-        if (orderType == RetrospectivesOrderType.PREVIOUSLY) {
+        if (orderType == RetrospectivesOrderType.OLDEST) {
             return Sort.by(Sort.Direction.ASC, "createdDate");
         }
 
