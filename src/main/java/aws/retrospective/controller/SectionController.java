@@ -9,6 +9,7 @@ import aws.retrospective.service.SectionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,5 +38,12 @@ public class SectionController {
         EditSectionResponseDto response = sectionService.updateSectionContent(
             sectionId, request);
         return ApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    // 특정 섹션 삭제
+    @DeleteMapping("/{sectionId}")
+    public ApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
+        sectionService.deleteSection(sectionId);
+        return ApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 }

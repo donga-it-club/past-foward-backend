@@ -1,5 +1,6 @@
 package aws.retrospective.exception;
 
+import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> validMissingParameterException(MethodArgumentNotValidException ex) {
         log.error("유효성 검사 실패", ex);
         ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
+        log.error("엔티티 조회 실패", ex);
+        ErrorResponse response = new ErrorResponse(ErrorCode.EMPTY_DATA_ACCESS);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
