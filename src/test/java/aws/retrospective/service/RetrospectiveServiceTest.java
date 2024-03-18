@@ -148,7 +148,7 @@ public class RetrospectiveServiceTest {
     }
 
     @Test
-    void deleteRetrospective_Success_WithReflection() {
+    void deleteRetrospective_Success() {
         // Arrange
         User user = TestUtil.createUser();
         Team team = TestUtil.createTeam();
@@ -171,7 +171,7 @@ public class RetrospectiveServiceTest {
     }
 
     @Test
-    void deleteRetrospective_Failure_UserNotAuthorized_WithReflection() {
+    void deleteRetrospective_Failure_UserNotAuthorized() {
         // Arrange
         User unauthorizedUser = TestUtil.createUser();
         Team team = TestUtil.createTeam();
@@ -196,7 +196,7 @@ public class RetrospectiveServiceTest {
     }
 
     @Test
-    void deleteRetrospective_Failure_RetrospectiveNotFound_WithReflection() {
+    void deleteRetrospective_Failure_RetrospectiveNotFound() {
         // Arrange
         when(retrospectiveRepository.findById(anyLong())).thenReturn(Optional.empty());
 
