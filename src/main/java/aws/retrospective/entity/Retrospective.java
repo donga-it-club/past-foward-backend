@@ -12,16 +12,21 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE retrospective SET deleted_date = CURRENT_TIMESTAMP WHERE retrospective_id = ?")
+@SQLRestriction("deleted_date IS NULL")
 public class Retrospective extends BaseEntity {
 
     @Id
@@ -31,6 +36,8 @@ public class Retrospective extends BaseEntity {
 
     @NotNull
     private String title; // 회고 제목
+
+    private LocalDateTime deletedDate; // 삭제 일자
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
@@ -53,9 +60,11 @@ public class Retrospective extends BaseEntity {
     private List<Bookmark> bookmarks = new ArrayList<>();
 
     @Builder
-    public Retrospective(String title, ProjectStatus status, Team team, User user,
+    public Retrospective(String title, LocalDateTime deletedDate, ProjectStatus status, Team team,
+        User user,
         RetrospectiveTemplate template) {
         this.title = title;
+        this.deletedDate = deletedDate;
         this.status = status;
         this.team = team;
         this.user = user;
