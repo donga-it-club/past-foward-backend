@@ -113,6 +113,13 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
     }
 
+    @Transactional
+    public void deleteSection(Long sectionId) {
+        Section findSection = sectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("section이 조회되지 않습니다."));
+        sectionRepository.delete(findSection);
+    }
+
     // 섹션 등록
     private Section createSection(String sectionContent, TemplateSection findTemplateSection,
         Retrospective findRetrospective, User findUser) {

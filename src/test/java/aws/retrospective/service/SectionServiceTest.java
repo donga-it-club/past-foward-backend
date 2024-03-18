@@ -1,6 +1,8 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateSectionDto;
@@ -18,6 +20,7 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,6 +83,52 @@ class SectionServiceTest {
         assertThat(response.getSectionContent()).isEqualTo("test");
         assertThat(response.getUserId()).isEqualTo(userId);
         assertThat(response.getRetrospectiveId()).isEqualTo(retrospectiveId);
+    }
+
+    @Test
+    @DisplayName("섹션 삭제 성공 API")
+    void deleteSectionSuccessTest() {
+        //given
+        User user = createUser();
+        Team team = createTeam();
+        RetrospectiveTemplate kptTemplate = createTemplate();
+        TemplateSection templateSection = createTemplateSection(kptTemplate);
+        Retrospective retrospective = createRetrospective(kptTemplate, user, team);
+
+        Long sectionId = 1L;
+        Section section = createSection(user, templateSection, retrospective);
+        ReflectionTestUtils.setField(section, "id", sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+
+        //when
+        sectionService.deleteSection(sectionId);
+
+        //then
+        verify(sectionRepository).delete(section);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 섹션을 삭제 시 예외가 발생한다.")
+    void deleteSectionFailTest() {
+
+        //given
+        Long notExistSectionId = 1L;
+        //when
+        when(sectionRepository.findById(notExistSectionId)).thenThrow(NoSuchElementException.class);
+        //then
+        assertThrows(NoSuchElementException.class,
+            () -> sectionService.deleteSection(notExistSectionId));
+    }
+
+    private static Section createSection(User user, TemplateSection templateSection,
+        Retrospective retrospective) {
+        return Section.builder()
+            .user(user)
+            .content("test")
+            .templateSection(templateSection)
+            .likeCnt(0)
+            .retrospective(retrospective)
+            .build();
     }
 
     private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
