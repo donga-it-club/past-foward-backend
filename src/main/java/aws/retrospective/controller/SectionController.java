@@ -37,7 +37,8 @@ public class SectionController {
     @Operation(summary = "Section 추가", description = "회고보드 내의 section을 등록하는 API")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "successful operation"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "bad request operation")})
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "bad request operation",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @PostMapping
     public ApiResponse<CreateSectionResponseDto> createSection(
         @Valid @RequestBody CreateSectionDto request) {
@@ -72,7 +73,8 @@ public class SectionController {
     @Operation(summary = "Section 삭제", description = "등록된 section을 삭제하는 API")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "successful operation"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "bad request operation")})
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "bad request operation",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
     @DeleteMapping("/{sectionId}")
     public ApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
         sectionService.deleteSection(sectionId);
