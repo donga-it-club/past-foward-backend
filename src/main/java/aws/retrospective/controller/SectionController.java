@@ -28,17 +28,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/sections")
 @RequiredArgsConstructor
-@Tag(name = "Section", description = "Section API")
+@Tag(name = "Section", description = "Section API<br>"
+    + "200 OK : 요청을 정상적으로 처리<br>"
+    + "201 Created : 요청을 정상적으로 처리하여 새로운 엔티티를 생성<br>"
+    + "204 NoCont : 요청을 정상적으로 처리하였으나, 반환 할 데이터가 없음<br>"
+    + "400 Error : Id로 엔티티를 조회 할 수 없을 때 발생하는 에러<br>")
 public class SectionController {
 
     private final SectionService sectionService;
 
     // 특정 섹션 추가
-    @Operation(summary = "Section 추가", description = "회고보드 내의 section을 등록하는 API")
+    @Operation(summary = "Section 등록", description = "회고보드 내의 section을 등록하는 API")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "successful operation"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "bad request operation",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201")})
     @PostMapping
     public ApiResponse<CreateSectionResponseDto> createSection(
         @Valid @RequestBody CreateSectionDto request) {
@@ -49,8 +51,7 @@ public class SectionController {
     // 특정 섹션 수정
     @Operation(summary = "Section 수정", description = "등록 된 section의 내용을 수정하는 API")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "successful operation"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200")})
     @PatchMapping("/{sectionId}")
     public ApiResponse<EditSectionResponseDto> editSectionContent(@PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
         EditSectionResponseDto response = sectionService.updateSectionContent(
@@ -61,7 +62,7 @@ public class SectionController {
     // 섹션 좋아요
     @Operation(summary = "Section 좋아요", description = "등록된 section의 좋아요 또는 취소 API")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "successful operation")})
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200")})
     @PostMapping("/{sectionId}/likes")
     public ApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(@PathVariable Long sectionId, @Valid @RequestBody IncreaseSectionLikesRequestDto request) {
         IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
@@ -72,9 +73,7 @@ public class SectionController {
     // 특정 섹션 삭제
     @Operation(summary = "Section 삭제", description = "등록된 section을 삭제하는 API")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "successful operation"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "bad request operation",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204")})
     @DeleteMapping("/{sectionId}")
     public ApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
         sectionService.deleteSection(sectionId);
