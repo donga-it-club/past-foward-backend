@@ -70,4 +70,8 @@ public class Retrospective extends BaseEntity {
         this.user = user;
         this.template = template;
     }
+
+    public boolean isOwnedByUser(Long userId) {
+        return this.user.getId().equals(userId);
+    }
 }

@@ -80,13 +80,14 @@ public class RetrospectiveService {
             .orElseThrow(
                 () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
 
-        if (!retrospective.getUser().getId().equals(userId)) {
+        if (!retrospective.isOwnedByUser(userId)) {
             throw new IllegalArgumentException(
                 "Not allowed to delete retrospective: " + retrospectiveId);
         }
 
         retrospectiveRepository.deleteById(retrospectiveId);
     }
+
 
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
