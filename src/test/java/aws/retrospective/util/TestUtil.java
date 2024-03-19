@@ -9,6 +9,9 @@ import aws.retrospective.entity.User;
 
 public class TestUtil {
 
+    private TestUtil() {
+    }
+
     public static Section createSection(User loginedUser) {
         return Section.builder()
             .user(loginedUser)
