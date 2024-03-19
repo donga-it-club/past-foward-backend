@@ -61,7 +61,7 @@ public class RetrospectiveServiceTest {
         GetRetrospectivesDto dto = new GetRetrospectivesDto();
         dto.setPage(0);
         dto.setSize(10);
-        dto.setOrder(RetrospectivesOrderType.PREVIOUSLY);
+        dto.setOrder(RetrospectivesOrderType.OLDEST);
         dto.setKeyword("keyword");
 
         Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize(),

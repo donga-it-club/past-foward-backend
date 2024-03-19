@@ -19,7 +19,7 @@ public class GetRetrospectivesDto {
     @Min(1)
     int size = 10;
 
-    RetrospectivesOrderType order = RetrospectivesOrderType.RECENTLY;
+    RetrospectivesOrderType order = RetrospectivesOrderType.NEWEST;
 
     ProjectStatus status;
 
