@@ -74,6 +74,21 @@ public class RetrospectiveService {
         return toResponseDto(savedRetrospective);
     }
 
+    @Transactional
+    public void deleteRetrospective(Long retrospectiveId, Long userId) {
+        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
+            .orElseThrow(
+                () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+
+        if (!retrospective.isOwnedByUser(userId)) {
+            throw new IllegalArgumentException(
+                "Not allowed to delete retrospective: " + retrospectiveId);
+        }
+
+        retrospectiveRepository.deleteById(retrospectiveId);
+    }
+
+
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("Not found user: " + userId));
