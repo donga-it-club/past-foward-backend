@@ -1,13 +1,15 @@
 package aws.retrospective.service;
 
+import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.repository.CommentRepository;
-import java.util.List;
-import java.util.Optional;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class CommentService {
 
     private final CommentRepository commentRepository;
@@ -17,36 +19,19 @@ public class CommentService {
         this.commentRepository = commentRepository;
     }
 
-    public List<Comment> getAllComments() {
-        return commentRepository.findAll();
+    public CommentDto getCommentDTOById(Long id) {
+        Comment comment = commentRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+
+        return convertToDTO(comment);
     }
 
-    public Optional<Comment> getCommentId(Long id) {
-        return commentRepository.findById(id);
+    private CommentDto convertToDTO(Comment comment) {
+        CommentDto commentDto = new CommentDto();
+        commentDto.setId(comment.getId());
+        commentDto.setComment(comment.getContent());
+        // 필요한 다른 필드들도 엔티티에서 DTO로 복사합니다.
+
+        return commentDto;
     }
-
-    public Comment createComment(Comment comment) {
-        return commentRepository.save(comment);
-    }
-    public Comment updateComment(Long id, Comment updatedComment) {
-        Optional<Comment> existingComment = commentRepository.findById(id);
-
-        if (existingComment.isPresent()) {
-            Comment commentToUpdate = existingComment.get();
-            // Update relevant fields of the existing comment with new values from updatedComment
-            // e.g., commentToUpdate.setText(updatedComment.getText());
-            return commentRepository.save(commentToUpdate);
-        } else {
-            // Handle the case where the comment with the given ID is not found
-            // You may throw an exception or handle it according to your application's requirements
-            return null;
-        }
-    }
-
-    public void deleteComment(Long id) {
-        commentRepository.deleteById(id);
-    }
-
-
-
 }
