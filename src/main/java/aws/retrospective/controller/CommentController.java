@@ -28,10 +28,9 @@ public class CommentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
-        Optional<Comment> comment = commentService.getCommentId(id);
-        return comment.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Optional<Comment>> getCommentById(@PathVariable Long id) {
+        Optional<Comment> commentDto = commentService.getCommentId(id);
+        return ResponseEntity.ok(commentDto);
     }
 
     @PostMapping
