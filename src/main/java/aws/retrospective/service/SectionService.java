@@ -36,7 +36,7 @@ public class SectionService {
     @Transactional
     public CreateSectionResponseDto createSection(CreateSectionDto request) {
 
-        User findUser = getUser(request.getRetrospectiveId());
+        User findUser = getUser(request.getUserId());
         Retrospective findRetrospective = retrospectiveRepository.findById(
                 request.getRetrospectiveId())
             .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다"));
@@ -108,8 +108,8 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
     }
 
-    private User getUser(Long id) {
-        return userRepository.findById(id)
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
     }
 
