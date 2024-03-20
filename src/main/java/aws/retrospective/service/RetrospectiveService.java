@@ -7,6 +7,7 @@ import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectivesOrderType;
+import aws.retrospective.dto.UpdateRetrospectiveDto;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
@@ -49,6 +50,18 @@ public class RetrospectiveService {
         Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
 
         return PaginationResponseDto.fromPage(page, RetrospectiveResponseDto::of);
+    }
+
+    @Transactional
+    public RetrospectiveResponseDto updateRetrospective(Long retrospectiveId,
+        UpdateRetrospectiveDto dto) {
+        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
+            .orElseThrow(
+                () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+
+        retrospective.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail());
+
+        return RetrospectiveResponseDto.of(retrospective);
     }
 
 
@@ -108,6 +121,8 @@ public class RetrospectiveService {
             .title(retrospective.getTitle())
             .teamId(Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null))
             .userId(retrospective.getUser().getId()).templateId(retrospective.getTemplate().getId())
+            .status(retrospective.getStatus())
+            .thumbnail(retrospective.getThumbnail())
             .build();
     }
 
