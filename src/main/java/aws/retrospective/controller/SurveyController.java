@@ -1,21 +1,22 @@
 package aws.retrospective.controller;
 
-import aws.retrospective.entity.Survey;
-import aws.retrospective.repository.SurveyRepository;
-import java.util.List;
+import aws.retrospective.dto.SurveyDto;
+import aws.retrospective.service.SurveyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/surveys")
 @RequiredArgsConstructor
 public class SurveyController {
 
-    private final SurveyRepository surveyRepository;
+    private final SurveyService surveyService;
 
     @GetMapping
     public String showSurveyForm() {
@@ -23,23 +24,9 @@ public class SurveyController {
         return null; // 설문지 폼 루트 반환
     }
 
-    // 설문지 결과 등록
-    @PostMapping("surveys/{surveysId}")
-    public String addSurvey(@RequestParam Integer age, @RequestParam String gender,
-        @RequestParam String job, @RequestParam String residence,
-        @RequestParam String discoverySource, @RequestParam List<String> purpose) {
-
-        Survey survey = Survey.builder()
-            .age(age)
-            .gender(gender)
-            .job(job)
-            .residence(residence)
-            .discoverySource(discoverySource)
-            .purpose(purpose)
-            .build();
-
-        surveyRepository.save(survey);
-
-        return null; // 뷰 반환
+    @PostMapping("/surveys/{surveyId}/responses")
+    public ResponseEntity<String> addSurvey(@RequestBody SurveyDto surveyDto) {
+        surveyService.addSurvey(surveyDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Survey added successfully");
     }
 }
