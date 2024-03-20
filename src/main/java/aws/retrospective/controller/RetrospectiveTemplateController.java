@@ -1,7 +1,7 @@
 package aws.retrospective.controller;
 
 
-import aws.retrospective.common.ApiResponse;
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.RetrospectiveTemplateResponseDto;
 import aws.retrospective.service.RetrospectiveTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,10 +23,10 @@ public class RetrospectiveTemplateController {
 
     @Operation(summary = "회고 템플릿 리스트 조회")
     @GetMapping()
-    public ApiResponse<List<RetrospectiveTemplateResponseDto>> getRetrospectiveTemplates() {
+    public CommonApiResponse<List<RetrospectiveTemplateResponseDto>> getRetrospectiveTemplates() {
         List<RetrospectiveTemplateResponseDto> response = retrospectiveTemplateService.getRetrospectiveTemplates();
 
-        return ApiResponse.successResponse(HttpStatus.OK, response);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
 }
