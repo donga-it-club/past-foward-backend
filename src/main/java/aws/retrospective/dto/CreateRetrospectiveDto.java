@@ -4,6 +4,7 @@ package aws.retrospective.dto;
 import aws.retrospective.entity.ProjectStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,5 +24,7 @@ public class CreateRetrospectiveDto {
     Long templateId;
 
     ProjectStatus status = ProjectStatus.IN_PROGRESS;
+
+    UUID thumbnail;
 
 }

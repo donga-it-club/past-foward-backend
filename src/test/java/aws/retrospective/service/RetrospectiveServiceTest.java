@@ -78,6 +78,7 @@ public class RetrospectiveServiceTest {
 
         Retrospective retrospective = new Retrospective("New Retro",
             null,
+            null,
             ProjectStatus.IN_PROGRESS,
             new Team("Team Name"), new User("user1", "test", "test", "test"),
             new RetrospectiveTemplate("Template Name"));
@@ -122,6 +123,7 @@ public class RetrospectiveServiceTest {
         BDDMockito.given(templateRepository.findById(1L)).willReturn(Optional.of(template));
 
         Retrospective retrospective = new Retrospective("New Retro",
+            null,
             null,
             ProjectStatus.IN_PROGRESS,
             team, user, template);
