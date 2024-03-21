@@ -13,18 +13,18 @@ import lombok.NoArgsConstructor;
 public class CreateRetrospectiveDto {
 
     @NotEmpty(message = "Retrospective title is required.")
-    String title;
+    private String title;
 
-    Long teamId;
+    private Long teamId;
 
     //TODO: 추후 Cognito 이용해서 request body에서 받지 않고 perssitence layer에서 받아오도록 수정
-    Long userId;
+    private Long userId;
 
     @NotNull(message = "Template id is required.")
-    Long templateId;
+    private Long templateId;
 
-    ProjectStatus status = ProjectStatus.IN_PROGRESS;
+    private ProjectStatus status = ProjectStatus.IN_PROGRESS;
 
-    UUID thumbnail;
+    private UUID thumbnail;
 
 }
