@@ -52,10 +52,10 @@ public class SurveyServiceTest {
             surveyDto.getPurpose()));
 
         // Additional assertions
-        assertThat(surveyDto.getAge()).isEqualTo(30);
-        assertThat(surveyDto.getGender()).isEqualTo("male");
-        assertThat(surveyDto.getJob()).isEqualTo("engineer");
-        assertThat(surveyDto.getResidence()).isEqualTo("New York");
+        assertThat(surveyDto.getAge()).isEqualTo(22);
+        assertThat(surveyDto.getGender()).isEqualTo("female");
+        assertThat(surveyDto.getJob()).isEqualTo("student");
+        assertThat(surveyDto.getResidence()).isEqualTo("Korea");
         assertThat(surveyDto.getDiscoverySource()).isEqualTo("internet");
         assertThat(surveyDto.getPurpose()).containsExactly("research", "analysis");
     }
