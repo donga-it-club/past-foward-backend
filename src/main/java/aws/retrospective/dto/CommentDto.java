@@ -3,6 +3,7 @@ package aws.retrospective.dto;
 public class CommentDto {
 
     private Long id;
+
     private String comment;
 
     public CommentDto() {
