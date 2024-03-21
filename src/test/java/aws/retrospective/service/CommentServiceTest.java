@@ -1,8 +1,11 @@
+package aws.retrospective.service;
+
+import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
-import aws.retrospective.entity.User;
 import aws.retrospective.entity.Section;
+import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
-import aws.retrospective.service.CommentService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -34,9 +37,9 @@ public class CommentServiceTest {
         List<Comment> comments = new ArrayList<>();
         when(commentRepository.findAll()).thenReturn(comments);
 
-        List<Comment> result = commentService.getAllComments();
+        List<CommentDto> result = commentService.getAllComments();
 
-        assertEquals(comments, result);
+        assertEquals(comments.size(), result.size());
         verify(commentRepository, times(1)).findAll();
     }
 
@@ -50,7 +53,7 @@ public class CommentServiceTest {
             .build();
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-        Optional<Comment> result = commentService.getCommentId(commentId);
+        Optional<Comment> result = commentService.getCommentById(commentId);
 
         assertTrue(result.isPresent());
         assertEquals(comment, result.get());
@@ -62,7 +65,7 @@ public class CommentServiceTest {
         Long commentId = 1L;
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-        Optional<Comment> result = commentService.getCommentId(commentId);
+        Optional<Comment> result = commentService.getCommentById(commentId);
 
         assertFalse(result.isPresent());
         verify(commentRepository, times(1)).findById(commentId);
@@ -87,6 +90,7 @@ public class CommentServiceTest {
     void updateComment() {
         Long commentId = 1L;
         Comment existingComment = Comment.builder()
+            .id(commentId) // Set ID to existing comment
             .content("Sample content")
             .user(User.builder().build())
             .section(Section.builder().build())
@@ -116,9 +120,9 @@ public class CommentServiceTest {
             .build();
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-        Comment result = commentService.updateComment(commentId, updatedComment);
+        // Check if EntityNotFoundException is thrown when updating a non-existent comment
+        assertThrows(EntityNotFoundException.class, () -> commentService.updateComment(commentId, updatedComment));
 
-        assertNull(result);
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, never()).save(any());
     }
@@ -127,8 +131,24 @@ public class CommentServiceTest {
     void deleteComment() {
         Long commentId = 1L;
 
+        when(commentRepository.existsById(commentId)).thenReturn(true);
+
         commentService.deleteComment(commentId);
 
+        verify(commentRepository, times(1)).existsById(commentId);
         verify(commentRepository, times(1)).deleteById(commentId);
+    }
+
+    @Test
+    void deleteComment_NotFound() {
+        Long commentId = 1L;
+
+        when(commentRepository.existsById(commentId)).thenReturn(false);
+
+        boolean result = commentService.deleteComment(commentId);
+
+        assertFalse(result);
+        verify(commentRepository, times(1)).existsById(commentId);
+        verify(commentRepository, never()).deleteById(commentId);
     }
 }
