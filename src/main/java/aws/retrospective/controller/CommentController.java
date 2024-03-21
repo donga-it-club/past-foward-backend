@@ -1,5 +1,6 @@
 package aws.retrospective.controller;
 
+import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +23,16 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Comment>> getAllComments() {
-        List<Comment> comments = commentService.getAllComments();
+    public ResponseEntity<List<CommentDto>> getAllComments() {
+        List<CommentDto> comments = commentService.getAllComments();
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Comment>> getCommentById(@PathVariable Long id) {
-        Optional<Comment> commentDto = commentService.getCommentId(id);
-        return ResponseEntity.ok(commentDto);
+    public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
+        Optional<Comment> comment = commentService.getCommentById(id);
+        return comment != null ? (ResponseEntity<Comment>) ResponseEntity.ok()
+            : ResponseEntity.notFound().build();
     }
 
     @PostMapping
@@ -48,7 +50,7 @@ public class CommentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
-        commentService.deleteComment(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        boolean deleted = commentService.deleteComment(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 }
