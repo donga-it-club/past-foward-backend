@@ -1,6 +1,6 @@
 package aws.retrospective.controller;
 
-import aws.retrospective.common.ApiResponse;
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
@@ -42,10 +42,10 @@ public class SectionController {
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201")})
     @PostMapping
-    public ApiResponse<CreateSectionResponseDto> createSection(
+    public CommonApiResponse<CreateSectionResponseDto> createSection(
         @Valid @RequestBody CreateSectionDto request) {
         CreateSectionResponseDto response = sectionService.createSection(request);
-        return ApiResponse.successResponse(HttpStatus.CREATED, response);
+        return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
     // 특정 섹션 수정
@@ -53,10 +53,10 @@ public class SectionController {
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200")})
     @PatchMapping("/{sectionId}")
-    public ApiResponse<EditSectionResponseDto> editSectionContent(@PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
+    public CommonApiResponse<EditSectionResponseDto> editSectionContent(@PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
         EditSectionResponseDto response = sectionService.updateSectionContent(
             sectionId, request);
-        return ApiResponse.successResponse(HttpStatus.OK, response);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     // 섹션 좋아요
@@ -64,10 +64,10 @@ public class SectionController {
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200")})
     @PostMapping("/{sectionId}/likes")
-    public ApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(@PathVariable Long sectionId, @Valid @RequestBody IncreaseSectionLikesRequestDto request) {
+    public CommonApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(@PathVariable Long sectionId, @Valid @RequestBody IncreaseSectionLikesRequestDto request) {
         IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
             sectionId, request);
-        return ApiResponse.successResponse(HttpStatus.OK, response);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     // 특정 섹션 삭제
@@ -75,8 +75,8 @@ public class SectionController {
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204")})
     @DeleteMapping("/{sectionId}")
-    public ApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
+    public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
         sectionService.deleteSection(sectionId);
-        return ApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+        return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 }

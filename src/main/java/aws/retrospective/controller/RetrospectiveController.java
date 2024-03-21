@@ -1,7 +1,7 @@
 package aws.retrospective.controller;
 
 
-import aws.retrospective.common.ApiResponse;
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
 import aws.retrospective.dto.GetRetrospectivesDto;
@@ -34,22 +34,22 @@ public class RetrospectiveController {
 
     @Operation(summary = "회고 조회")
     @GetMapping()
-    public ApiResponse<PaginationResponseDto<RetrospectiveResponseDto>> getRetrospectives(
+    public CommonApiResponse<PaginationResponseDto<RetrospectiveResponseDto>> getRetrospectives(
         @Valid GetRetrospectivesDto dto) {
         PaginationResponseDto<RetrospectiveResponseDto> response = retrospectiveService.getRetrospectives(
             dto);
 
-        return ApiResponse.successResponse(HttpStatus.OK, response);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     @Operation(summary = "회고 생성")
     @PostMapping()
-    public ApiResponse<CreateRetrospectiveResponseDto> createRetrospective(
+    public CommonApiResponse<CreateRetrospectiveResponseDto> createRetrospective(
         @RequestBody @Valid CreateRetrospectiveDto createRetrospectiveDto) {
         CreateRetrospectiveResponseDto response = retrospectiveService.createRetrospective(
             createRetrospectiveDto);
 
-        return ApiResponse.successResponse(HttpStatus.CREATED, response);
+        return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
 
     }
 
