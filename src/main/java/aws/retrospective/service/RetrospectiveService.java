@@ -49,7 +49,11 @@ public class RetrospectiveService {
 
         Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
 
-        return PaginationResponseDto.fromPage(page, RetrospectiveResponseDto::from);
+        boolean hasBookmarksByUser = page.stream()
+            .anyMatch(retrospective -> hasBookmarksByUser(retrospective, dto.getUserId()));
+
+        return PaginationResponseDto.fromPage(page, retrospective -> RetrospectiveResponseDto
+            .of(retrospective, hasBookmarksByUser));
     }
 
     @Transactional
@@ -61,7 +65,14 @@ public class RetrospectiveService {
 
         retrospective.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail());
 
-        return RetrospectiveResponseDto.from(retrospective);
+        boolean hasBookmarksByUser = hasBookmarksByUser(retrospective, dto.getUserId());
+
+        return RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser);
+    }
+
+    private boolean hasBookmarksByUser(Retrospective retrospective, Long userId) {
+        return retrospective.getBookmarks().stream()
+            .anyMatch(bookmark -> bookmark.getUser().getId().equals(userId));
     }
 
 

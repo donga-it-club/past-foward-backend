@@ -35,7 +35,8 @@ public class RetrospectiveResponseDto {
 
     }
 
-    public static RetrospectiveResponseDto from(Retrospective retrospective) {
+    public static RetrospectiveResponseDto of(Retrospective retrospective,
+        boolean hasBookmarksByUser) {
         return new RetrospectiveResponseDto(
             retrospective.getId(),
             retrospective.getTitle(),
@@ -43,8 +44,7 @@ public class RetrospectiveResponseDto {
             retrospective.getTeam() != null ? retrospective.getTeam().getId() : null,
             retrospective.getTemplate().getId(),
             retrospective.getStatus().name(),
-            retrospective.getBookmarks().stream().anyMatch(
-                bookmark -> bookmark.getUser().getId().equals(retrospective.getUser().getId())),
+            hasBookmarksByUser,
             retrospective.getThumbnail()
         );
     }
