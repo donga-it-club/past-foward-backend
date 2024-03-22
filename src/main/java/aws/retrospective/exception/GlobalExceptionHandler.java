@@ -15,14 +15,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> validMissingParameterException(MethodArgumentNotValidException ex) {
         log.error("유효성 검사 실패", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER);
+        ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
         log.error("엔티티 조회 실패", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.EMPTY_DATA_ACCESS);
+        ErrorResponse response = new ErrorResponse(ErrorCode.EMPTY_DATA_ACCESS, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
