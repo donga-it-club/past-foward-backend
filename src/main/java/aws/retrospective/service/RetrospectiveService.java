@@ -49,7 +49,7 @@ public class RetrospectiveService {
 
         Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
 
-        return PaginationResponseDto.fromPage(page, RetrospectiveResponseDto::of);
+        return PaginationResponseDto.fromPage(page, RetrospectiveResponseDto::from);
     }
 
     @Transactional
@@ -61,7 +61,7 @@ public class RetrospectiveService {
 
         retrospective.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail());
 
-        return RetrospectiveResponseDto.of(retrospective);
+        return RetrospectiveResponseDto.from(retrospective);
     }
 
 

@@ -35,7 +35,7 @@ public class RetrospectiveResponseDto {
 
     }
 
-    public static RetrospectiveResponseDto of(Retrospective retrospective) {
+    public static RetrospectiveResponseDto from(Retrospective retrospective) {
         return new RetrospectiveResponseDto(
             retrospective.getId(),
             retrospective.getTitle(),
