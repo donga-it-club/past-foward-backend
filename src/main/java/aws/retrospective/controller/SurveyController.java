@@ -26,10 +26,10 @@ public class SurveyController {
 
     @Operation(summary = "설문조사 조회")
     @GetMapping
-    public ResponseEntity<CommonApiResponse<List<SurveyDto>>> getAllSurveys() {
+    public CommonApiResponse<List<SurveyDto>> getAllSurveys() {
         List<SurveyDto> surveys = (List<SurveyDto>) surveyService.getAllSurveys();
 
         // 정상적으로 데이터를 조회한 경우 successResponse 메서드로 응답을 구성
-        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, surveys));
+        return (CommonApiResponse.successResponse(HttpStatus.OK, surveys));
     }
 }
