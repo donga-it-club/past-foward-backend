@@ -1,5 +1,6 @@
 package aws.retrospective.controller;
 
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.service.CommentService;
@@ -23,34 +24,40 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CommentDto>> getAllComments() {
+    public ResponseEntity<CommonApiResponse<List<CommentDto>>> getAllComments() {
         List<CommentDto> comments = commentService.getAllComments();
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, comments));
     }
 
+
     @GetMapping("/{id}")
-    public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
+    public ResponseEntity<CommonApiResponse<Comment>> getCommentById(@PathVariable Long id) {
         Optional<Comment> comment = commentService.getCommentById(id);
-        return comment != null ? (ResponseEntity<Comment>) ResponseEntity.ok()
-            : ResponseEntity.notFound().build();
+        return comment.map(value -> ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, value)))
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(CommonApiResponse.errorResponse(HttpStatus.NOT_FOUND, "Comment not found")));
     }
 
     @PostMapping
-    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
+    public ResponseEntity<CommonApiResponse<Comment>> createComment(@RequestBody Comment comment) {
         Comment createdComment = commentService.createComment(comment);
-        return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(CommonApiResponse.successResponse(HttpStatus.CREATED, createdComment));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
+    public ResponseEntity<CommonApiResponse<Comment>> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
         Comment updated = commentService.updateComment(id, updatedComment);
-        return updated != null ? new ResponseEntity<>(updated, HttpStatus.OK)
-            : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return updated != null ? ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, updated))
+            : ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(CommonApiResponse.errorResponse(HttpStatus.NOT_FOUND, "Comment not found"));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
+    public ResponseEntity<CommonApiResponse<Void>> deleteComment(@PathVariable Long id) {
         boolean deleted = commentService.deleteComment(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        return deleted ? ResponseEntity.noContent().build()
+            : ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CommonApiResponse.errorResponse(HttpStatus.BAD_REQUEST, "Failed to delete comment"));
     }
 }
