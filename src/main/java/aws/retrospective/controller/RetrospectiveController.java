@@ -46,13 +46,13 @@ public class RetrospectiveController {
 
     @Operation(summary = "회고 수정")
     @PutMapping("/{retrospectiveId}")
-    public ApiResponse<RetrospectiveResponseDto> updateRetrospective(
+    public CommonApiResponse<RetrospectiveResponseDto> updateRetrospective(
         @PathVariable Long retrospectiveId,
         @RequestBody @Valid UpdateRetrospectiveDto dto) {
         RetrospectiveResponseDto response = retrospectiveService.updateRetrospective(
             retrospectiveId, dto);
 
-        return ApiResponse.successResponse(HttpStatus.OK, response);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     @Operation(summary = "회고 생성")
