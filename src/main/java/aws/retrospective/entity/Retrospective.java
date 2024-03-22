@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +37,8 @@ public class Retrospective extends BaseEntity {
 
     @NotNull
     private String title; // 회고 제목
+
+    private UUID thumbnail; // 회고 썸네일
 
     private LocalDateTime deletedDate; // 삭제 일자
 
@@ -60,10 +63,12 @@ public class Retrospective extends BaseEntity {
     private List<Bookmark> bookmarks = new ArrayList<>();
 
     @Builder
-    public Retrospective(String title, LocalDateTime deletedDate, ProjectStatus status, Team team,
+    public Retrospective(String title, UUID thumbnail, LocalDateTime deletedDate,
+        ProjectStatus status, Team team,
         User user,
         RetrospectiveTemplate template) {
         this.title = title;
+        this.thumbnail = thumbnail;
         this.deletedDate = deletedDate;
         this.status = status;
         this.team = team;
@@ -73,5 +78,11 @@ public class Retrospective extends BaseEntity {
 
     public boolean isOwnedByUser(Long userId) {
         return this.user.getId().equals(userId);
+    }
+
+    public void update(String title, ProjectStatus status, UUID thumbnail) {
+        this.title = title;
+        this.status = status;
+        this.thumbnail = thumbnail;
     }
 }

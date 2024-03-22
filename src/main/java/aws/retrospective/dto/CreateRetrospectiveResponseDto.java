@@ -1,5 +1,7 @@
 package aws.retrospective.dto;
 
+import aws.retrospective.entity.ProjectStatus;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,4 +14,6 @@ public class CreateRetrospectiveResponseDto {
     private Long teamId;
     private Long userId;
     private Long templateId;
+    private ProjectStatus status;
+    private UUID thumbnail;
 }

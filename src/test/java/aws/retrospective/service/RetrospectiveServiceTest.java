@@ -17,6 +17,7 @@ import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectivesOrderType;
+import aws.retrospective.dto.UpdateRetrospectiveDto;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
@@ -31,6 +32,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
@@ -78,6 +80,7 @@ public class RetrospectiveServiceTest {
 
         Retrospective retrospective = new Retrospective("New Retro",
             null,
+            null,
             ProjectStatus.IN_PROGRESS,
             new Team("Team Name"), new User("user1", "test", "test", "test"),
             new RetrospectiveTemplate("Template Name"));
@@ -122,6 +125,7 @@ public class RetrospectiveServiceTest {
         BDDMockito.given(templateRepository.findById(1L)).willReturn(Optional.of(template));
 
         Retrospective retrospective = new Retrospective("New Retro",
+            null,
             null,
             ProjectStatus.IN_PROGRESS,
             team, user, template);
@@ -203,6 +207,51 @@ public class RetrospectiveServiceTest {
         // Act & Assert
         EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
             retrospectiveService.deleteRetrospective(1L, 1L);
+        });
+
+        assertTrue(thrown.getMessage().contains("Not found retrospective"));
+    }
+
+    @Test
+    void updateRetrospective_Success() {
+        // Arrange
+        User user = TestUtil.createUser();
+        Team team = TestUtil.createTeam();
+        RetrospectiveTemplate retrospectiveTemplate = TestUtil.createTemplate();
+        Retrospective retrospective = TestUtil.createRetrospective(retrospectiveTemplate, user,
+            team);
+
+        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(retrospective, "id", 1L);
+        ReflectionTestUtils.setField(retrospective, "user", user);
+
+        UpdateRetrospectiveDto dto = new UpdateRetrospectiveDto();
+        ReflectionTestUtils.setField(dto, "title", "New Retro");
+        ReflectionTestUtils.setField(dto, "teamId", 1L);
+        ReflectionTestUtils.setField(dto, "userId", 1L);
+        ReflectionTestUtils.setField(dto, "status", ProjectStatus.IN_PROGRESS);
+        ReflectionTestUtils.setField(dto, "thumbnail", UUID.randomUUID());
+
+        when(retrospectiveRepository.findById(1L)).thenReturn(Optional.of(retrospective));
+
+        // Act
+        RetrospectiveResponseDto response = retrospectiveService.updateRetrospective(1L,
+            dto);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(retrospective.getId());
+        assertThat(response.getThumbnail()).isEqualTo(retrospective.getThumbnail());
+    }
+
+    @Test
+    void updateRetrospective_Failure_RetrospectiveNotFound() {
+        // Arrange
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
+            retrospectiveService.updateRetrospective(1L, new UpdateRetrospectiveDto());
         });
 
         assertTrue(thrown.getMessage().contains("Not found retrospective"));
