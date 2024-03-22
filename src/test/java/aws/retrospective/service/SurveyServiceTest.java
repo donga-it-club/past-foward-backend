@@ -1,5 +1,6 @@
 package aws.retrospective.service;
 
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import aws.retrospective.repository.SurveyRepository;
@@ -44,10 +45,10 @@ public class SurveyServiceTest {
         when(surveyRepository.findAll()).thenReturn(surveys);
 
         // 테스트 실행
-        List<SurveyDto> surveyDtos = surveyService.getAllSurveys();
+        CommonApiResponse<List<SurveyDto>> response = surveyService.getAllSurveys();
 
         // 결과 확인
-        assertEquals(surveys.size(), surveyDtos.size());
+        assertEquals(surveys.size(), response.getData().size());
         // 추가적인 검증을 원하는 경우 surveyDtos 내용을 검사할 수 있음
     }
 }
