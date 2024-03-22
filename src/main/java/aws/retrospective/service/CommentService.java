@@ -1,5 +1,6 @@
 package aws.retrospective.service;
 
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.repository.CommentRepository;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,42 +24,46 @@ public class CommentService {
         this.commentRepository = commentRepository;
     }
 
-    public List<CommentDto> getAllComments() {
+    public CommonApiResponse<List<CommentDto>> getAllComments() {
         List<Comment> comments = commentRepository.findAll();
-        return comments.stream()
+        List<CommentDto> commentDtos = comments.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
+        return CommonApiResponse.successResponse(HttpStatus.OK, commentDtos);
     }
-    public CommentDto getCommentDTOById(Long id) {
+    public CommonApiResponse<CommentDto> getCommentDTOById(Long id) {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
-
-        return convertToDTO(comment);
+        CommentDto commentDto = convertToDTO(comment);
+        return CommonApiResponse.successResponse(HttpStatus.OK, commentDto);
     }
 
-    public Optional<Comment> getCommentById(Long id) {
-        return commentRepository.findById(id);
+    public CommonApiResponse<Comment> getCommentById(Long id) {
+        Optional<Comment> comment = commentRepository.findById(id);
+        return comment.map(value -> CommonApiResponse.successResponse(HttpStatus.OK, value))
+            .orElseGet(() -> CommonApiResponse.errorResponse(HttpStatus.NOT_FOUND, "Comment not found"));
     }
 
-    public Comment createComment(Comment comment) {
-        return commentRepository.save(comment);
+    public CommonApiResponse<Comment> createComment(Comment comment) {
+        Comment createdComment = commentRepository.save(comment);
+        return CommonApiResponse.successResponse(HttpStatus.CREATED, createdComment);
     }
 
-    public Comment updateComment(Long id, Comment updateComment) {
+    public CommonApiResponse<Comment> updateComment(Long id, Comment updatedComment) {
         Comment existingComment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 
-        existingComment.setContent(updateComment.getContent());
-
-        return commentRepository.save(existingComment);
+        existingComment.setContent(updatedComment.getContent());
+        Comment savedComment = commentRepository.save(existingComment);
+        return CommonApiResponse.successResponse(HttpStatus.OK, savedComment);
     }
 
-    public boolean deleteComment(Long id) {
+    public CommonApiResponse<Void> deleteComment(Long id) {
         if (commentRepository.existsById(id)) {
             commentRepository.deleteById(id);
-            return true;
+            return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
         }
-        return false;
+        return CommonApiResponse.errorResponse(HttpStatus.BAD_REQUEST, "Failed to delete comment");
     }
 
     private CommentDto convertToDTO(Comment comment) {
