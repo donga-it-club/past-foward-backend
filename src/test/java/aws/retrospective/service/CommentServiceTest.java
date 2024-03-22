@@ -1,5 +1,6 @@
 package aws.retrospective.service;
 
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Section;
@@ -37,9 +38,9 @@ public class CommentServiceTest {
         List<Comment> comments = new ArrayList<>();
         when(commentRepository.findAll()).thenReturn(comments);
 
-        List<CommentDto> result = commentService.getAllComments();
+        CommonApiResponse<List<CommentDto>> result = commentService.getAllComments();
 
-        assertEquals(comments.size(), result.size());
+        assertEquals(comments.size(), result.getData().size());
         verify(commentRepository, times(1)).findAll();
     }
 
@@ -53,10 +54,10 @@ public class CommentServiceTest {
             .build();
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-        Optional<Comment> result = commentService.getCommentById(commentId);
+        CommonApiResponse<Comment> result = commentService.getCommentById(commentId);
 
-        assertTrue(result.isPresent());
-        assertEquals(comment, result.get());
+        assertTrue(result.getData()!= null);
+        assertEquals(comment, result.getData());
         verify(commentRepository, times(1)).findById(commentId);
     }
 
@@ -65,9 +66,9 @@ public class CommentServiceTest {
         Long commentId = 1L;
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-        Optional<Comment> result = commentService.getCommentById(commentId);
+        CommonApiResponse<Comment> result = commentService.getCommentById(commentId);
 
-        assertFalse(result.isPresent());
+        assertNull(result.getData());
         verify(commentRepository, times(1)).findById(commentId);
     }
 
@@ -80,9 +81,9 @@ public class CommentServiceTest {
             .build();
         when(commentRepository.save(comment)).thenReturn(comment);
 
-        Comment result = commentService.createComment(comment);
+        CommonApiResponse<Comment> result = commentService.createComment(comment);
 
-        assertEquals(comment, result);
+        assertEquals(comment, result.getData());
         verify(commentRepository, times(1)).save(comment);
     }
 
@@ -103,9 +104,9 @@ public class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(existingComment));
         when(commentRepository.save(existingComment)).thenReturn(updatedComment);
 
-        Comment result = commentService.updateComment(commentId, updatedComment);
+        CommonApiResponse<Comment> result = commentService.updateComment(commentId, updatedComment);
 
-        assertEquals(updatedComment, result);
+        assertEquals(updatedComment, result.getData());
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, times(1)).save(existingComment);
     }
@@ -133,8 +134,9 @@ public class CommentServiceTest {
 
         when(commentRepository.existsById(commentId)).thenReturn(true);
 
-        commentService.deleteComment(commentId);
+        CommonApiResponse<Void> result = commentService.deleteComment(commentId);
 
+        assertTrue(result.getData() == null);
         verify(commentRepository, times(1)).existsById(commentId);
         verify(commentRepository, times(1)).deleteById(commentId);
     }
@@ -145,9 +147,9 @@ public class CommentServiceTest {
 
         when(commentRepository.existsById(commentId)).thenReturn(false);
 
-        boolean result = commentService.deleteComment(commentId);
+        CommonApiResponse<Void> result = commentService.deleteComment(commentId);
 
-        assertFalse(result);
+        assertTrue(result.getData() == null);
         verify(commentRepository, times(1)).existsById(commentId);
         verify(commentRepository, never()).deleteById(commentId);
     }
