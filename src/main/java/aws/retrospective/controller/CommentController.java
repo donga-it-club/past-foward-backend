@@ -20,33 +20,28 @@ public class CommentController {
 
     @GetMapping
     public ResponseEntity<CommonApiResponse<List<CommentDto>>> getAllComments() {
-        List<CommentDto> commentDtoList = commentService.getAllComments();
-        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, commentDtoList));
+        return ResponseEntity.ok(commentService.getAllComments());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CommonApiResponse<CommentDto>> getCommentById(@PathVariable Long id) {
-        CommentDto commentDto = commentService.getCommentDTOById(id);
-        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, commentDto));
+        return ResponseEntity.ok(commentService.getCommentDTOById(id));
     }
 
     @PostMapping
     public ResponseEntity<CommonApiResponse<Comment>> createComment(@RequestBody Comment comment) {
-        Comment createdComment = commentService.createComment(comment);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(CommonApiResponse.successResponse(HttpStatus.CREATED, createdComment));
+            .body(commentService.createComment(comment));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CommonApiResponse<Comment>> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
-        Comment updated = commentService.updateComment(id, updatedComment);
-        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, updated));
+        return ResponseEntity.ok(commentService.updateComment(id, updatedComment));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonApiResponse<Void>> deleteComment(@PathVariable Long id) {
-        commentService.deleteComment(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-            .body(CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null));
+            .body(commentService.deleteComment(id));
     }
 }
