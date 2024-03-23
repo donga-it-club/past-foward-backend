@@ -4,7 +4,7 @@ import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.service.CommentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,44 +13,35 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/comments")
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    @Autowired
-    public CommentController(CommentService commentService) {
-        this.commentService = commentService;
-    }
-
     @GetMapping
     public ResponseEntity<CommonApiResponse<List<CommentDto>>> getAllComments() {
-        CommonApiResponse<List<CommentDto>> response = commentService.getAllComments();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(commentService.getAllComments());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CommonApiResponse<Comment>> getCommentById(@PathVariable Long id) {
-        CommonApiResponse<Comment> response = commentService.getCommentById(id);
-        return response.getData() != null
-            ? ResponseEntity.ok(response)
-            : ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    public ResponseEntity<CommonApiResponse<CommentDto>> getCommentById(@PathVariable Long id) {
+        return ResponseEntity.ok(commentService.getCommentDTOById(id));
     }
 
     @PostMapping
     public ResponseEntity<CommonApiResponse<Comment>> createComment(@RequestBody Comment comment) {
-        CommonApiResponse<Comment> response = commentService.createComment(comment);
-        return ResponseEntity.status(response.getCode()).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(commentService.createComment(comment));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CommonApiResponse<Comment>> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
-        CommonApiResponse<Comment> response = commentService.updateComment(id, updatedComment);
-        return ResponseEntity.status(response.getCode()).body(response);
+        return ResponseEntity.ok(commentService.updateComment(id, updatedComment));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonApiResponse<Void>> deleteComment(@PathVariable Long id) {
-        CommonApiResponse<Void> response = commentService.deleteComment(id);
-        return ResponseEntity.status(response.getCode()).body(response);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            .body(commentService.deleteComment(id));
     }
 }
