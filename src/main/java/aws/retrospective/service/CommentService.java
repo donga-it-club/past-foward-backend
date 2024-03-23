@@ -5,24 +5,21 @@ import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.repository.CommentRepository;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class CommentService {
 
     private final CommentRepository commentRepository;
-
-    @Autowired
-    public CommentService(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
 
     public CommonApiResponse<List<CommentDto>> getAllComments() {
         List<Comment> comments = commentRepository.findAll();
@@ -31,6 +28,7 @@ public class CommentService {
             .collect(Collectors.toList());
         return CommonApiResponse.successResponse(HttpStatus.OK, commentDtos);
     }
+
     public CommonApiResponse<CommentDto> getCommentDTOById(Long id) {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
