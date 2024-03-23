@@ -1,65 +1,76 @@
 package aws.retrospective.service;
 
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.repository.CommentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CommentService {
 
     private final CommentRepository commentRepository;
 
-    @Transactional(readOnly = true)
-    public List<CommentDto> getAllComments() {
+    public CommonApiResponse<List<CommentDto>> getAllComments() {
         List<Comment> comments = commentRepository.findAll();
-        return comments.stream()
+        List<CommentDto> commentDtos = comments.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
+        return CommonApiResponse.successResponse(HttpStatus.OK, commentDtos);
     }
 
-    @Transactional(readOnly = true)
-    public CommentDto getCommentDTOById(Long id) {
+    public CommonApiResponse<CommentDto> getCommentDTOById(Long id) {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
-        return convertToDTO(comment);
+        CommentDto commentDto = convertToDTO(comment);
+        return CommonApiResponse.successResponse(HttpStatus.OK, commentDto);
     }
 
-    @Transactional
-    public Comment createComment(Comment comment) {
-        return commentRepository.save(comment);
+    public CommonApiResponse<Comment> getCommentById(Long id) {
+        Optional<Comment> comment = commentRepository.findById(id);
+        return comment.map(value -> CommonApiResponse.successResponse(HttpStatus.OK, value))
+            .orElseGet(() -> CommonApiResponse.errorResponse(HttpStatus.NOT_FOUND, "Comment not found"));
     }
 
-    @Transactional
-    public Comment updateComment(Long id, Comment updatedComment) {
+    public CommonApiResponse<Comment> createComment(Comment comment) {
+        Comment createdComment = commentRepository.save(comment);
+        return CommonApiResponse.successResponse(HttpStatus.CREATED, createdComment);
+    }
+
+    public CommonApiResponse<Comment> updateComment(Long id, Comment updatedComment) {
         Comment existingComment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 
-        existingComment.updateContent(updatedComment.getContent());
-        return existingComment;
+        existingComment.getUpdatedDate();
+        Comment savedComment = commentRepository.save(existingComment);
+        return CommonApiResponse.successResponse(HttpStatus.OK, savedComment);
     }
 
-    @Transactional
-    public void deleteComment(Long id) {
-        Comment commentToDelete = findCommentById(id);
-        commentRepository.delete(commentToDelete);
-    }
 
-    private Comment findCommentById(Long id) {
-        return commentRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+    public CommonApiResponse<Void> deleteComment(Long id) {
+        if (commentRepository.existsById(id)) {
+            commentRepository.deleteById(id);
+            return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+        }
+        return CommonApiResponse.errorResponse(HttpStatus.BAD_REQUEST, "Failed to delete comment");
     }
-
 
     private CommentDto convertToDTO(Comment comment) {
-        return new CommentDto(comment.getId(), comment.getContent());
+        CommentDto commentDto = new CommentDto();
+        commentDto.setId(comment.getId());
+        commentDto.setComment(comment.getContent());
         // 필요한 다른 필드들도 엔티티에서 DTO로 복사합니다.
+
+        return commentDto;
     }
 }
