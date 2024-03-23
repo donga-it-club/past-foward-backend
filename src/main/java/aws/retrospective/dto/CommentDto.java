@@ -1,33 +1,20 @@
 package aws.retrospective.dto;
 
+import lombok.Getter;
+
 public class CommentDto {
 
-    private Long id;
+    @Getter
+    private final Long id;
 
-    private String comment;
+    private final String content;
 
-    public CommentDto() {
-
-    }
-
-    public CommentDto(Long id, String comment) {
+    public CommentDto(Long id, String content) {
         this.id = id;
-        this.comment = comment;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        this.content = content;
     }
 
     public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
+        return content;
     }
 }
