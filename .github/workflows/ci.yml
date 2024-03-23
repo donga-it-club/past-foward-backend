@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: past-forward-backend
+    name: Test Build
     runs-on: ubuntu-latest
 
     steps:
