@@ -18,6 +18,7 @@ public class RetrospectiveResponseDto {
     private String status;
     private Boolean isBookmarked;
     private UUID thumbnail;
+    private LocalDateTime startDate;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
@@ -26,6 +27,7 @@ public class RetrospectiveResponseDto {
         String status,
         Boolean isBookmarked,
         UUID thumbnail,
+        LocalDateTime startDate,
         LocalDateTime createdDate,
         LocalDateTime updatedDate
     ) {
@@ -37,6 +39,7 @@ public class RetrospectiveResponseDto {
         this.status = status;
         this.isBookmarked = isBookmarked;
         this.thumbnail = thumbnail;
+        this.startDate = startDate;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
 
@@ -53,6 +56,7 @@ public class RetrospectiveResponseDto {
             retrospective.getStatus().name(),
             hasBookmarksByUser,
             retrospective.getThumbnail(),
+            retrospective.getStartDate(),
             retrospective.getCreatedDate(),
             retrospective.getUpdatedDate()
         );
