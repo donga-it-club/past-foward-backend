@@ -3,6 +3,7 @@ package aws.retrospective.controller;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
@@ -73,8 +74,8 @@ public class SectionController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204")})
     @DeleteMapping("/{sectionId}")
-    public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
-        sectionService.deleteSection(sectionId);
+    public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId, @Valid @RequestBody DeleteSectionRequestDto request) {
+        sectionService.deleteSection(sectionId, request);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 }
