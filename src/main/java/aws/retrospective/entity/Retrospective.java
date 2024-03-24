@@ -38,6 +38,8 @@ public class Retrospective extends BaseEntity {
     @NotNull
     private String title; // 회고 제목
 
+    private String description; // 회고 설명
+
     private UUID thumbnail; // 회고 썸네일
 
     private LocalDateTime deletedDate; // 삭제 일자
