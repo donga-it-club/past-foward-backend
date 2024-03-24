@@ -11,6 +11,7 @@ import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
+import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -67,7 +68,7 @@ public class SectionService {
 
         // 섹션 수정은 해당 섹션 작성자만 가능하다.
         if (!findSection.getUser().equals(loginedUser)) {
-            throw new IllegalStateException("섹션 수정은 해당 섹션 작성자만 가능합니다.");
+            throw new ForbiddenAccessException("해당 섹션을 수정할 권한이 없습니다.");
         }
 
         // 섹션 수정

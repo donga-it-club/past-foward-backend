@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
     BAD_REQUEST(400, "BAD_REQUEST_400"),
+    FORBIDDEN_ACCESS(403, "리소스 접근 권한이 없습니다."),
     NOT_FOUND(404, "NOT_FOUND_404"),
     MISSING_REQUEST_PARAMETER(404, "MISSING REQUEST PARAMETER"),
     EMPTY_DATA_ACCESS(404, "EMPTY DATA ACCESS"),
