@@ -69,7 +69,7 @@ public class SectionService {
 
         // 섹션 수정은 해당 섹션 작성자만 가능하다.
         if (!findSection.getUser().equals(loginedUser)) {
-            throw new ForbiddenAccessException("해당 섹션을 수정할 권한이 없습니다.");
+            throw new ForbiddenAccessException("해당 section을 수정할 권한이 없습니다.");
         }
 
         // 섹션 수정
@@ -123,7 +123,7 @@ public class SectionService {
 
         // 작성자만 섹션을 삭제할 수 있다.
         if(!findSection.getUser().equals(findUser)) {
-            throw new ForbiddenAccessException("작성자만 섹션을 삭제할 수 있습니다.");
+            throw new ForbiddenAccessException("작성자만 section을 삭제할 수 있습니다.");
         }
 
         sectionRepository.delete(findSection);
