@@ -6,6 +6,8 @@ import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.User;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class TestUtil {
 
@@ -29,6 +31,8 @@ public class TestUtil {
             .title("test")
             .team(team)
             .user(user)
+            .thumbnail(UUID.randomUUID())
+            .startDate(LocalDateTime.now())
             .build();
     }
 
