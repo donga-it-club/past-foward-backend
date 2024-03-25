@@ -20,6 +20,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
 
+    @Transactional(readOnly = true)
     public CommonApiResponse<List<CommentDto>> getAllComments() {
         List<Comment> comments = commentRepository.findAll();
         List<CommentDto> commentDtos = comments.stream()
@@ -28,6 +29,7 @@ public class CommentService {
         return CommonApiResponse.successResponse(HttpStatus.OK, commentDtos);
     }
 
+    @Transactional(readOnly = true)
     public CommonApiResponse<CommentDto> getCommentDTOById(Long id) {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
