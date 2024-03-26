@@ -86,7 +86,7 @@ public class SectionController {
      * ex. Keep 섹션이 등록된 게시물 개수 조회
      */
     @GetMapping("/counts")
-    public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody FindSectionCountRequestDto request) {
+    public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody @Valid FindSectionCountRequestDto request) {
         FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
