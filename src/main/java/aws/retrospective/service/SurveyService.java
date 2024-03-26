@@ -4,9 +4,10 @@ import aws.retrospective.dto.SaveSurveyDto;
 import aws.retrospective.entity.Survey;
 import aws.retrospective.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
+@Service
 @RequiredArgsConstructor
 public class SurveyService {
 
@@ -14,7 +15,7 @@ public class SurveyService {
 
     // 설문지 결과 등록
     @Transactional
-    public void addSurvey(@RequestBody SaveSurveyDto request) {
+    public void addSurvey(SaveSurveyDto request) {
 
         Survey survey = Survey.builder()
             .age(request.getAge())
