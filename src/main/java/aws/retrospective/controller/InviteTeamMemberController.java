@@ -16,7 +16,7 @@ public class InviteTeamMemberController {
     private final InviteTeamMemberService inviteTeamMemberService;
 
     @GetMapping("/teams/{teamId}/invitation")
-    public ResponseEntity<CommonApiResponse<InviteTeamMemberDTO>> getInvitation(@PathVariable(required = false) Long teamId) {
+    public ResponseEntity<CommonApiResponse<InviteTeamMemberDTO>> getInvitation(@PathVariable Long teamId) {
         CommonApiResponse<InviteTeamMemberDTO> response = inviteTeamMemberService.generateInvitation(teamId);
         return ResponseEntity.ok(response);
     }
