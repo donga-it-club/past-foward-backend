@@ -5,6 +5,8 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.FindSectionCountRequestDto;
+import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.service.SectionService;
@@ -16,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -76,5 +79,15 @@ public class SectionController {
     public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
         sectionService.deleteSection(sectionId);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+    }
+
+    /**
+     * 섹션 개수 조회
+     * ex. Keep 섹션이 등록된 게시물 개수 조회
+     */
+    @GetMapping("/counts")
+    public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody FindSectionCountRequestDto request) {
+        FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }
