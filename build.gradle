@@ -12,22 +12,6 @@ java {
     sourceCompatibility = '17'
 }
 
-jar {
-    enabled = false
-}
-
-ext {
-    profile = (!project.hasProperty('profile') || !profile) ? 'local' : profile
-}
-
-
-sourceSets {
-    main {
-        resources {
-            srcDirs "src/main/resources", "src/main/resources-${profile}"
-        }
-    }
-}
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -48,8 +32,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:4.1.1'
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws-secrets-manager-config:2.2.6.RELEASE'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
@@ -59,7 +41,6 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-    implementation 'software.amazon.awssdk:s3:2.17.71'
 }
 
 tasks.named('test') {
@@ -70,10 +51,4 @@ tasks.named('test') {
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
-}
-
-tasks {
-    processResources {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    }
 }
