@@ -1,8 +1,16 @@
 package aws.retrospective.dto;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-public record CommentDto(Long id, String content) {
+@RequiredArgsConstructor
+public class CommentDto {
 
+    private final Long id;
+    private final String content;
+
+    public String getComment() {
+        return content;
+    }
 }
