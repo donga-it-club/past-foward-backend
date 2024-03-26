@@ -10,9 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+
 
 @SpringBootTest
 @Transactional
@@ -40,17 +41,16 @@ public class SurveyServiceTest {
         // When
         surveyService.addSurvey(surveyDto);
 
-        // Then
-        verify(surveyRepository).save(new Survey(surveyDto.getAge(), surveyDto.getGender(),
-            surveyDto.getJob(), surveyDto.getResidence(), surveyDto.getDiscoverySource(),
-            surveyDto.getPurpose()));
+        // Survey 객체 주소가 다른 문제 해결
 
-        // Additional assertions
-        assertThat(surveyDto.getAge()).isEqualTo(22);
-        assertThat(surveyDto.getGender()).isEqualTo("female");
-        assertThat(surveyDto.getJob()).isEqualTo("student");
-        assertThat(surveyDto.getResidence()).isEqualTo("Korea");
-        assertThat(surveyDto.getDiscoverySource()).isEqualTo("internet");
-        assertThat(surveyDto.getPurpose()).containsExactly("research", "analysis");
+        // Then
+        verify(surveyRepository).save(any(Survey.class));
+
+        assert surveyDto.getAge() == 22;
+        assert surveyDto.getGender() == "female";
+        assert surveyDto.getJob() == "student";
+        assert surveyDto.getResidence() == "Korea";
+        assert surveyDto.getDiscoverySource() == "internet";
+        assert surveyDto.getPurpose().equals(List.of("research", "analysis"));
     }
 }

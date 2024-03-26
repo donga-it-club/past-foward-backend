@@ -4,6 +4,7 @@ import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.SaveSurveyDto;
 import aws.retrospective.service.SurveyService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,8 @@ public class SurveyController {
 
     private final SurveyService surveyService;
 
-    @PostMapping("/surveys/{surveyId}/response")
+    @Valid
+    @PostMapping("/{surveyId}/response")
     @Operation(summary = "설문조사 저장")
     public CommonApiResponse<String> addSurvey(@RequestBody SaveSurveyDto surveyDto) {
         surveyService.addSurvey(surveyDto);
