@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: /build/libs/past-forward.jar
+    destination: /home/ec2-user/past-forward
+hooks:
+  ApplicationStart:
+    - location: scripts/start.sh
+      timeout: 300
+      runas: ec2-user
+  ApplicationStop:
+    - location: scripts/stop.sh
+      timeout: 300
+      runas: ec2-user
