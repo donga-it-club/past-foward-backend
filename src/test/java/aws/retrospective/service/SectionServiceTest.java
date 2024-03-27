@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
@@ -106,8 +107,12 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
+        DeleteSectionRequestDto request = new DeleteSectionRequestDto();
+        ReflectionTestUtils.setField(request, "userId", user.getId());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
         //when
-        sectionService.deleteSection(sectionId);
+        sectionService.deleteSection(sectionId, request);
 
         //then
         verify(sectionRepository).delete(section);
@@ -119,11 +124,15 @@ class SectionServiceTest {
 
         //given
         Long notExistSectionId = 1L;
+
+        DeleteSectionRequestDto request = new DeleteSectionRequestDto();
+        ReflectionTestUtils.setField(request, "userId", 1L);
+
         //when
         when(sectionRepository.findById(notExistSectionId)).thenThrow(NoSuchElementException.class);
         //then
         assertThrows(NoSuchElementException.class,
-            () -> sectionService.deleteSection(notExistSectionId));
+            () -> sectionService.deleteSection(notExistSectionId, request));
     }
 
     @Test

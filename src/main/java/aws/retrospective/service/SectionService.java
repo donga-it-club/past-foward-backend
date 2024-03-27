@@ -2,6 +2,7 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
@@ -68,7 +69,7 @@ public class SectionService {
 
         // 섹션 수정은 해당 섹션 작성자만 가능하다.
         if (!findSection.getUser().equals(loginedUser)) {
-            throw new ForbiddenAccessException("해당 섹션을 수정할 권한이 없습니다.");
+            throw new ForbiddenAccessException("해당 section을 수정할 권한이 없습니다.");
         }
 
         // 섹션 수정
@@ -115,9 +116,16 @@ public class SectionService {
     }
 
     @Transactional
-    public void deleteSection(Long sectionId) {
+    public void deleteSection(Long sectionId, DeleteSectionRequestDto request) {
         Section findSection = sectionRepository.findById(sectionId)
             .orElseThrow(() -> new NoSuchElementException("section이 조회되지 않습니다."));
+        User findUser = getUser(request.getUserId());
+
+        // 작성자만 섹션을 삭제할 수 있다.
+        if(!findSection.getUser().equals(findUser)) {
+            throw new ForbiddenAccessException("작성자만 section을 삭제할 수 있습니다.");
+        }
+
         sectionRepository.delete(findSection);
     }
 
