@@ -6,6 +6,8 @@ import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetSectionsRequestDto;
+import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.service.SectionService;
@@ -14,9 +16,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,5 +81,12 @@ public class SectionController {
     public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId, @Valid @RequestBody DeleteSectionRequestDto request) {
         sectionService.deleteSection(sectionId, request);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+    }
+
+    // 섹션 전체 조회
+    @GetMapping
+    public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
+        List<GetSectionsResponseDto> response = sectionService.getSections(request);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }
