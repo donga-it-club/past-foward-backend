@@ -5,13 +5,21 @@ on:
     branches:
       - main
       - feat/#83-deploy-to-aws
-      
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -33,11 +41,13 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           SOURCE_DIR: 'build/libs'
 
+      - name: Install AWS CLI
+        run: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install
+
+
       - name: Deploy to AWS CodeDeploy
-        uses: webfactory/create-aws-codedeploy-deployment@v1
-        with:
-          application: ${{ secrets.AWS_CODEDEPLOY_APPLICATION }}
-          deployment-group: ${{ secrets.AWS_CODEDEPLOY_DEPLOYMENT_GROUP }}
-          s3-bucket: ${{ secrets.AWS_S3_BUCKET }}
-          s3-key: past-forward.jar
-          region: ${{ secrets.AWS_REGION }}
+        run: |
+          aws deploy create-deployment \
+            --application-name ${{ secrets.AWS_CODEDEPLOY_APPLICATION }} \
+            --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_DEPLOYMENT_GROUP }} \
+            --s3-location bucket=${{ secrets.AWS_S3_BUCKET }},bundleType=zip,key=past-forward.jar
