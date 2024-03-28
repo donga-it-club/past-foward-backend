@@ -3,6 +3,13 @@ os: linux
 files:
   - source: /build/libs/past-forward.jar
     destination: /home/ec2-user/past-forward
+permissions:
+  - object: /home/ec2-user
+    owner: ec2-user
+    group: ec2-user
+    type:
+      - directory
+      - file
 hooks:
   ApplicationStart:
     - location: scripts/start.sh
