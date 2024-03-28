@@ -7,6 +7,8 @@ import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
+import aws.retrospective.dto.FindSectionCountRequestDto;
+import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.Likes;
@@ -64,12 +66,14 @@ public class SectionService {
         sectionRepository.save(createSection);
 
         return new CreateSectionResponseDto(createSection.getId(),
-            createSection.getUser().getId(), request.getRetrospectiveId(), request.getSectionContent());
+            createSection.getUser().getId(), request.getRetrospectiveId(),
+            request.getSectionContent());
     }
 
     // 섹션 수정
     @Transactional
-    public EditSectionResponseDto updateSectionContent(Long sectionId, EditSectionRequestDto request) {
+    public EditSectionResponseDto updateSectionContent(Long sectionId,
+        EditSectionRequestDto request) {
         Section findSection = getSection(sectionId);
         User loginedUser = getUser(request.getUserId());
 
@@ -86,7 +90,8 @@ public class SectionService {
 
     // 섹션 좋아요 API
     @Transactional
-    public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId, IncreaseSectionLikesRequestDto request) {
+    public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId,
+        IncreaseSectionLikesRequestDto request) {
         // 섹션 조회
         Section findSection = getSection(sectionId);
         User findUser = getUser(request.getUserId());
@@ -95,7 +100,7 @@ public class SectionService {
         Optional<Likes> findLikes = likesRepository.findByUserAndSection(findUser,
             findSection);
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
-        if(findLikes.isEmpty()) {
+        if (findLikes.isEmpty()) {
             Likes createLikes = Likes.builder()
                 .section(findSection)
                 .user(findUser)
@@ -109,6 +114,28 @@ public class SectionService {
         }
 
         return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+    }
+
+    // 섹션 개수 조회
+    @Transactional(readOnly = true)
+    public FindSectionCountResponseDto getSectionCounts(FindSectionCountRequestDto request) {
+        Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
+        TemplateSection templateSection = getTemplateSection(request.getTemplateSectionId());
+
+        int sectionCounts = sectionRepository.countByRetrospectiveAndTemplateSection(retrospective,
+            templateSection);
+
+        return new FindSectionCountResponseDto(sectionCounts);
+    }
+
+    private TemplateSection getTemplateSection(Long sectionId) {
+        return templateSectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("Template Section이 조회되지 않습니다."));
+    }
+
+    private Retrospective getRetrospective(Long retrospectiveId) {
+        return retrospectiveRepository.findById(retrospectiveId)
+            .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다."));
     }
 
     private Section getSection(Long sectionId) {

@@ -8,6 +8,8 @@ import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
+import aws.retrospective.dto.FindSectionCountRequestDto;
+import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.service.SectionService;
@@ -87,6 +89,16 @@ public class SectionController {
     @GetMapping
     public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
+          return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+  
+    /**
+     * 섹션 개수 조회
+     * ex. Keep 섹션이 등록된 게시물 개수 조회
+     */
+    @GetMapping("/counts")
+    public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody @Valid FindSectionCountRequestDto request) {
+        FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }
