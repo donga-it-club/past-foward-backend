@@ -1,16 +1,22 @@
 package aws.retrospective.service;
 
+import static aws.retrospective.entity.QRetrospective.retrospective;
+import static aws.retrospective.entity.QSection.section;
+import static aws.retrospective.entity.QTemplateSection.templateSection;
+import static aws.retrospective.entity.QUser.user;
+
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetSectionsRequestDto;
-import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
+import aws.retrospective.dto.GetSectionsRequestDto;
+import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.dto.QGetSectionsResponseDto;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
@@ -24,6 +30,7 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -41,6 +48,7 @@ public class SectionService {
     private final TemplateSectionRepository templateSectionRepository;
     private final LikesRepository likesRepository;
     private final TeamRepository teamRepository;
+    private final JPAQueryFactory queryFactory;
 
     // Section 등록
     @Transactional
@@ -177,15 +185,24 @@ public class SectionService {
     // 섹션 전체 조회
     @Transactional(readOnly = true)
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
-        Retrospective retrospective = getRetrospective(request);
-        Team team = getTeam(request);
+        Retrospective findRetrospective = getRetrospective(request);
+        Team findTeam = getTeam(request);
 
         // 다른 팀이 작성한 회고보드는 조회할 수 없다.
-        if(retrospective.getTeam().getId() != team.getId()) {
+        if(findRetrospective.getTeam().getId() != findTeam.getId()) {
             throw new ForbiddenAccessException("해당 팀의 회고보드만 조회할 수 있습니다.");
         }
 
-        return sectionRepository.findSections(request.getRetrospectiveId());
+        return queryFactory.
+            select(
+                new QGetSectionsResponseDto(section.id, user.username, section.content,
+                    section.likeCnt, templateSection.sectionName, section.createdDate))
+            .from(section)
+            .join(section.retrospective, retrospective)
+            .join(section.user, user)
+            .join(section.templateSection, templateSection)
+            .where(retrospective.id.eq(request.getRetrospectiveId()))
+            .fetch();
     }
 
     private Team getTeam(GetSectionsRequestDto request) {
