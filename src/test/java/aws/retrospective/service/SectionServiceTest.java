@@ -10,6 +10,8 @@ import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.FindSectionCountRequestDto;
+import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.Likes;
@@ -191,6 +193,32 @@ class SectionServiceTest {
         //then
         assertThat(response.getSectionId()).isEqualTo(sectionId);
         assertThat(response.getLikeCnt()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("회고보드의 각 섹션에 등록된 게시물 개수를 조회 할 수 있다.")
+    void getSectionCountsTest() {
+        //given
+        Long retrospectiveId = 1L;
+        Retrospective retrospective = createRetrospective(createTemplate(), createUser(), createTeam());
+        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
+
+        Long templateSectionId = 1L;
+        TemplateSection templateSection = createTemplateSection(createTemplate());
+        ReflectionTestUtils.setField(templateSection, "id", templateSectionId);
+        when(templateSectionRepository.findById(templateSectionId)).thenReturn(Optional.of(templateSection));
+
+        when(sectionRepository.countByRetrospectiveAndTemplateSection(retrospective, templateSection)).thenReturn(1);
+
+        //when
+        FindSectionCountRequestDto request = new FindSectionCountRequestDto();
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "templateSectionId", templateSectionId);
+        FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
+
+        //then
+        assertThat(response.getCount()).isEqualTo(1);
     }
 
     private static Likes createLikes(Section section, User user) {
