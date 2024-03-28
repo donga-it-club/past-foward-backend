@@ -40,7 +40,9 @@ jobs:
         run: zip -r ./$GITHUB_SHA.zip .
 
       - name: Copy script
-        run: cp ./scripts/*.sh ./deploy
+        run: |
+          mkdir -p deploy
+          cp ./scripts/*.sh ./deploy
 
       - name: Deploy to S3
         run: aws s3 cp --region ${{ secrets.AWS_REGION }} $GITHUB_SHA.zip s3://${{ secrets.AWS_DEPLOY_S3_BUCKET }}/past-forward/$GITHUB_SHA.zip
