@@ -50,8 +50,8 @@ jobs:
       - name: Deploy to AWS CodeDeploy
         run: |
           aws deploy create-deployment \
-          --application-name ${ { secrets.AWS_CODEDEPLOY_APPLICATION }} \
-          --deployment-group-name ${ { secrets.AWS_CODEDEPLOY_DEPLOYMENT_GROUP }} \
+          --application-name ${{ secrets.AWS_CODEDEPLOY_APPLICATION }} \
+          --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_DEPLOYMENT_GROUP }} \
           --file-exists-behavior OVERWRITE \
           --s3-location bucket=project-bucket-v1,bundleType=zip,key=past-forward/$GITHUB_SHA.zip \
           --region ${{ secrets.AWS_REGION }}
