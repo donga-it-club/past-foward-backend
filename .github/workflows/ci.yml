@@ -1,4 +1,4 @@
-name: past-forward-backend
+name: CI
 
 on:
   push:
