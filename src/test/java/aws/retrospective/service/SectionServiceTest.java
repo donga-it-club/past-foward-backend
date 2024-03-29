@@ -371,14 +371,14 @@ class SectionServiceTest {
 
         Long retrospectiveId = 1L;
         Retrospective createdRetrospective = createRetrospective(createdTemplate ,createdUser, createdTeam2);
-        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
+        ReflectionTestUtils.setField(createdRetrospective, "id", retrospectiveId);
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
 
         TemplateSection createdTemplateSection = createTemplateSection(createdTemplate);
 
         Long sectionId = 1L;
         Section createdSection = createSection(createdUser, createdTemplateSection, createdRetrospective);
-        ReflectionTestUtils.setField(section, "id", sectionId);
+        ReflectionTestUtils.setField(createdSection, "id", sectionId);
 
         //when
         GetSectionsRequestDto request = new GetSectionsRequestDto();
