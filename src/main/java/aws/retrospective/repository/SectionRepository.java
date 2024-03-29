@@ -9,7 +9,7 @@ import aws.retrospective.entity.TemplateSection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface SectionRepository extends JpaRepository<Section, Long> {
+public interface SectionRepository extends JpaRepository<Section, Long>, SectionRepositoryCustom {
 
     @Query("select new aws.retrospective"
         + ".dto.GetSectionsResponseDto(s.id, u.username, s.content, s.likeCnt, ts.sectionName, s.createdDate)"
@@ -20,4 +20,6 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
         + " where r.id = :retrospectiveId")
     List<GetSectionsResponseDto> findSections(Long retrospectiveId);
     int countByRetrospectiveAndTemplateSection(Retrospective retrospective, TemplateSection templateSection);
+
+
 }

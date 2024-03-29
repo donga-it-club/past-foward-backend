@@ -1,9 +1,5 @@
 package aws.retrospective.service;
 
-import static aws.retrospective.entity.QRetrospective.*;
-import static aws.retrospective.entity.QSection.*;
-import static aws.retrospective.entity.QTemplateSection.*;
-import static aws.retrospective.entity.QUser.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -20,7 +16,6 @@ import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
-import aws.retrospective.dto.QGetSectionsResponseDto;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
@@ -319,22 +314,7 @@ class SectionServiceTest {
             createdTemplateSection.getSectionName(), createdSection.getCreatedDate()
         );
 
-        when(queryFactory.select(
-            new QGetSectionsResponseDto(section.id, user.username,
-                section.content,
-                section.likeCnt, templateSection.sectionName,
-                section.createdDate)))
-            .thenReturn(jpaQuery);
-        when(jpaQuery.from(section)).thenReturn(jpaQuery);
-        when(jpaQuery.join(section.retrospective, retrospective))
-            .thenReturn(jpaQuery);
-        when(jpaQuery.join(section.user, user))
-            .thenReturn(jpaQuery);
-        when(jpaQuery.join(section.templateSection, templateSection))
-            .thenReturn(jpaQuery);
-        when(jpaQuery.where(retrospective.id.eq(retrospectiveId)))
-            .thenReturn(jpaQuery);
-        when(jpaQuery.fetch()).thenReturn(List.of(response));
+        when(sectionRepository.getSections(retrospectiveId)).thenReturn(List.of(response));
 
         //when
         GetSectionsRequestDto request = new GetSectionsRequestDto();
