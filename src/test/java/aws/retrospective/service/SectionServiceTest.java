@@ -10,14 +10,19 @@ import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetSectionsRequestDto;
-import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
+import aws.retrospective.dto.GetSectionsRequestDto;
+import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.dto.QGetSectionsResponseDto;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
+import aws.retrospective.entity.QRetrospective;
+import aws.retrospective.entity.QSection;
+import aws.retrospective.entity.QTemplateSection;
+import aws.retrospective.entity.QUser;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
@@ -31,13 +36,14 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.commons.support.ReflectionSupport;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,6 +66,10 @@ class SectionServiceTest {
     LikesRepository likesRepository;
     @Mock
     TeamRepository teamRepository;
+    @Mock
+    JPAQueryFactory queryFactory;
+    @Mock
+    JPAQuery jpaQuery;
     @InjectMocks
     SectionService sectionService;
 
@@ -294,7 +304,7 @@ class SectionServiceTest {
         User user = createUser();
 
         Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(template ,user, team);
+        Retrospective retrospective = createRetrospective(template, user, team);
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
 
@@ -304,18 +314,44 @@ class SectionServiceTest {
         Section section = createSection(user, templateSection, retrospective);
         ReflectionTestUtils.setField(section, "id", sectionId);
 
-        when(sectionRepository.findSections(retrospectiveId)).thenReturn(
-            List.of(new GetSectionsResponseDto(sectionId, user.getUsername(), "test", 0, "Keep",
-                null)));
+        GetSectionsResponseDto response = new GetSectionsResponseDto(
+            sectionId, user.getUsername(), section.getContent(), section.getLikeCnt(),
+            templateSection.getSectionName(), section.getCreatedDate()
+        );
+
+        when(queryFactory.select(
+            new QGetSectionsResponseDto(QSection.section.id, QUser.user.username,
+                QSection.section.content,
+                QSection.section.likeCnt, QTemplateSection.templateSection.sectionName,
+                QSection.section.createdDate)))
+            .thenReturn(jpaQuery);
+        when(jpaQuery.from(QSection.section)).thenReturn(jpaQuery);
+        when(jpaQuery.join(QSection.section.retrospective, QRetrospective.retrospective))
+            .thenReturn(jpaQuery);
+        when(jpaQuery.join(QSection.section.user, QUser.user))
+            .thenReturn(jpaQuery);
+        when(jpaQuery.join(QSection.section.templateSection, QTemplateSection.templateSection))
+            .thenReturn(jpaQuery);
+        when(jpaQuery.where(QRetrospective.retrospective.id.eq(retrospectiveId)))
+            .thenReturn(jpaQuery);
+        when(jpaQuery.fetch()).thenReturn(List.of(response));
 
         //when
         GetSectionsRequestDto request = new GetSectionsRequestDto();
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "teamId", teamId);
-        List<GetSectionsResponseDto> response = sectionService.getSections(request);
+        List<GetSectionsResponseDto> results = sectionService.getSections(request);
 
         //then
-        assertThat(response.size()).isEqualTo(1);
+        assertThat(results.size()).isEqualTo(1);
+        GetSectionsResponseDto result = results.get(0);
+        assertThat(result.getSectionName()).isEqualTo(templateSection.getSectionName());
+        assertThat(result.getSectionId()).isEqualTo(section.getId());
+        assertThat(result.getCreatedDate()).isEqualTo(section.getCreatedDate());
+        assertThat(result.getContent()).isEqualTo(section.getContent());
+        assertThat(result.getUsername()).isEqualTo(user.getUsername());
+        assertThat(result.getLikeCnt()).isEqualTo(section.getLikeCnt());
+
     }
 
     @Test
