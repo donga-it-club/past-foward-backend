@@ -23,10 +23,6 @@ import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.dto.QGetSectionsResponseDto;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
-import aws.retrospective.entity.QRetrospective;
-import aws.retrospective.entity.QSection;
-import aws.retrospective.entity.QTemplateSection;
-import aws.retrospective.entity.QUser;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
@@ -363,25 +359,25 @@ class SectionServiceTest {
     void notSearchRetrospective() {
         //given
         Long teamId = 1L;
-        Team team1 = createTeam();
-        ReflectionTestUtils.setField(team1, "id", teamId);
-        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team1));
+        Team createdTeam1 = createTeam();
+        ReflectionTestUtils.setField(createdTeam1, "id", teamId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(createdTeam1));
 
-        RetrospectiveTemplate template = createTemplate();
-        User user = createUser();
+        RetrospectiveTemplate createdTemplate = createTemplate();
+        User createdUser = createUser();
 
-        Team team2 = createTeam();
-        ReflectionTestUtils.setField(team1, "id", 2L);
+        Team createdTeam2 = createTeam();
+        ReflectionTestUtils.setField(createdTeam1, "id", 2L);
 
         Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(template ,user, team2);
+        Retrospective createdRetrospective = createRetrospective(createdTemplate ,createdUser, createdTeam2);
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
 
-        TemplateSection templateSection = createTemplateSection(template);
+        TemplateSection createdTemplateSection = createTemplateSection(createdTemplate);
 
         Long sectionId = 1L;
-        Section section = createSection(user, templateSection, retrospective);
+        Section createdSection = createSection(createdUser, createdTemplateSection, createdRetrospective);
         ReflectionTestUtils.setField(section, "id", sectionId);
 
         //when
