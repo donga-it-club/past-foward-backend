@@ -11,15 +11,5 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface SectionRepository extends JpaRepository<Section, Long>, SectionRepositoryCustom {
 
-    @Query("select new aws.retrospective"
-        + ".dto.GetSectionsResponseDto(s.id, u.username, s.content, s.likeCnt, ts.sectionName, s.createdDate)"
-        + " from Section s"
-        + " join s.retrospective r"
-        + " join s.user u"
-        + " join s.templateSection ts"
-        + " where r.id = :retrospectiveId")
-    List<GetSectionsResponseDto> findSections(Long retrospectiveId);
     int countByRetrospectiveAndTemplateSection(Retrospective retrospective, TemplateSection templateSection);
-
-
 }
