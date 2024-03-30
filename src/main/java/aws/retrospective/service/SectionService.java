@@ -204,6 +204,7 @@ public class SectionService {
                 "Not Found Retrospective id : " + request.getRetrospectiveId()));
     }
 
+    @Transactional(readOnly = true)
     public List<GetTeamMembersResponseDto> getTeamMembers(Long teamId, GetTeamMembersRequestDto request) {
         Team findTeam = getTeam(teamId);
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
