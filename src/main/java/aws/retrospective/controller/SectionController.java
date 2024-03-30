@@ -42,8 +42,8 @@ public class SectionController {
 
     private final SectionService sectionService;
 
-    // 특정 섹션 추가
-    @Operation(summary = "Section 등록", description = "회고보드 내의 section을 등록하는 API")
+    // 회고 카드 등록
+    @Operation(summary = "회고 카드 등록", description = "회고 카드 등록하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201")})
     @PostMapping
@@ -53,8 +53,8 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
-    // 특정 섹션 수정
-    @Operation(summary = "Section 수정", description = "등록 된 section의 내용을 수정하는 API")
+    // 특정 회고 카드 수정
+    @Operation(summary = "회고 카드 수정", description = "등록 된 회고 카드의 내용을 수정하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")})
     @PatchMapping("/{sectionId}")
@@ -64,8 +64,8 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
-    // 섹션 좋아요
-    @Operation(summary = "Section 좋아요", description = "등록된 section의 좋아요 또는 취소 API")
+    // 회고 카드 좋아요
+    @Operation(summary = "회고 카드 좋아요", description = "등록된 회고 카드의 좋아요 또는 취소 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")})
     @PostMapping("/{sectionId}/likes")
@@ -75,8 +75,8 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
-    // 특정 섹션 삭제
-    @Operation(summary = "Section 삭제", description = "등록된 section을 삭제하는 API")
+    // 특정 회고 카드 삭제
+    @Operation(summary = "회고 카드 삭제", description = "등록된 회고 카드를 삭제하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204")})
     @DeleteMapping("/{sectionId}")
@@ -85,8 +85,8 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 
-    // 섹션 전체 조회
-    @Operation(summary = "Section 전체 조회", description = "회고보드 내의 section을 전체 조회하는 API")
+    // 회고 카드 전체 조회
+    @Operation(summary = "회고 카드 전체 조회", description = "회고보드 내의 회고 카드를 전체 조회하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")
     })
@@ -97,10 +97,10 @@ public class SectionController {
     }
 
     /**
-     * 섹션 개수 조회
-     * ex. Keep 섹션이 등록된 게시물 개수 조회
+     * 회고 카드 개수 조회
+     * ex. Keep 섹션이 등록된 회고 카드 개수 조회
      */
-    @Operation(summary = "섹션에 등록된 카드 개수 조회", description = "섹션에 등록된 카드 개수를 조회하는 API")
+    @Operation(summary = "섹션에 등록된 회고 카드 개수 조회", description = "섹션에 등록된 카드 개수를 조회하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")
     })

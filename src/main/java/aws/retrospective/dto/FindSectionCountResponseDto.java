@@ -8,6 +8,6 @@ import lombok.Getter;
 @Getter
 public class FindSectionCountResponseDto {
 
-    @Schema(description = "섹션에 등록된 카드 개수", example = "1")
+    @Schema(description = "섹션에 등록된 카드 개수", example = "2")
     private int count;
 }
