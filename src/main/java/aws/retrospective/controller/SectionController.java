@@ -86,10 +86,10 @@ public class SectionController {
     }
 
     // 섹션 전체 조회
-    @Operation(summary = "Section 전체 조회", description = "등록된 section 전체를 조회하는 API")
+    @Operation(summary = "Section 전체 조회", description = "회고보드 내의 section을 전체 조회하는 API")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200")}
-    )
+        @ApiResponse(responseCode = "200")
+    })
     @GetMapping
     public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
