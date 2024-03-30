@@ -31,8 +31,6 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -61,10 +59,6 @@ class SectionServiceTest {
     LikesRepository likesRepository;
     @Mock
     TeamRepository teamRepository;
-    @Mock
-    JPAQueryFactory queryFactory;
-    @Mock
-    JPAQuery jpaQuery;
     @InjectMocks
     SectionService sectionService;
 
