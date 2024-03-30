@@ -10,6 +10,8 @@ import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
+import aws.retrospective.dto.GetTeamMembersResponseDto;
+import aws.retrospective.dto.GetTeamMembersRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.service.SectionService;
@@ -107,6 +109,15 @@ public class SectionController {
     @GetMapping("/counts")
     public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody @Valid FindSectionCountRequestDto request) {
         FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    // Action Items 눌렀을 때 팀에 속한 모든 회원 조회
+    @GetMapping("/teams/{teamId}/members")
+    public CommonApiResponse<List<GetTeamMembersResponseDto>> getTeamMembers(@PathVariable Long teamId,
+        @RequestBody @Valid GetTeamMembersRequestDto request) {
+        List<GetTeamMembersResponseDto> response = sectionService.getTeamMembers(teamId,
+            request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }
