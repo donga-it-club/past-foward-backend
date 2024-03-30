@@ -42,7 +42,7 @@ public class SectionService {
     private final LikesRepository likesRepository;
     private final TeamRepository teamRepository;
 
-    // Section 등록
+    // 회고 카드 등록
     @Transactional
     public CreateSectionResponseDto createSection(CreateSectionDto request) {
 
@@ -52,15 +52,15 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다"));
         TemplateSection findTemplateSection = templateSectionRepository.findById(
                 request.getTemplateSectionId())
-            .orElseThrow(() -> new NoSuchElementException("템플릿 섹션이 조회되지 않습니다."));
+            .orElseThrow(() -> new NoSuchElementException("섹션이 조회되지 않습니다."));
 
-        // 회고보드와 템플릿 섹션에 등록된 회고보드 유형 이름이 다르면 예외를 발생한다.
+        // 회고 템플릿 정보가 일치하는지 확인한다.
         if (!findRetrospective.getTemplate().getName()
             .equals(findTemplateSection.getTemplate().getName())) {
-            throw new IllegalArgumentException("템플릿 정보가 일치하지 않습니다.");
+            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
         }
 
-        // 섹션 등록
+        // 회고 카드 등록
         Section createSection = createSection(request.getSectionContent(), findTemplateSection,
             findRetrospective, findUser);
         sectionRepository.save(createSection);
@@ -70,33 +70,33 @@ public class SectionService {
             request.getSectionContent());
     }
 
-    // 섹션 수정
+    // 회고 카드 수정
     @Transactional
     public EditSectionResponseDto updateSectionContent(Long sectionId,
         EditSectionRequestDto request) {
         Section findSection = getSection(sectionId);
         User loginedUser = getUser(request.getUserId());
 
-        // 섹션 수정은 해당 섹션 작성자만 가능하다.
+        // 회고 카드 수정은 작성자만 가능하다.
         if (!findSection.getUser().equals(loginedUser)) {
-            throw new ForbiddenAccessException("해당 section을 수정할 권한이 없습니다.");
+            throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
         }
 
-        // 섹션 수정
+        // 회고 카드 수정
         findSection.updateSection(request.getSectionContent());
 
         return new EditSectionResponseDto(sectionId, request.getSectionContent());
     }
 
-    // 섹션 좋아요 API
+    // 회고 카드 좋아요 API
     @Transactional
     public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId,
         IncreaseSectionLikesRequestDto request) {
-        // 섹션 조회
+        // 회고 카드 조회
         Section findSection = getSection(sectionId);
         User findUser = getUser(request.getUserId());
 
-        // 사용자가 해당 Section에 좋아요를 눌렀는지 확인한다.
+        // 사용자가 해당 회고 카드에 좋아요를 눌렀는지 확인한다.
         Optional<Likes> findLikes = likesRepository.findByUserAndSection(findUser,
             findSection);
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
@@ -116,7 +116,7 @@ public class SectionService {
         return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
     }
 
-    // 섹션 개수 조회
+    // 회고 카드 개수 조회
     @Transactional(readOnly = true)
     public FindSectionCountResponseDto getSectionCounts(FindSectionCountRequestDto request) {
         Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
@@ -130,7 +130,7 @@ public class SectionService {
 
     private TemplateSection getTemplateSection(Long sectionId) {
         return templateSectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("Template Section이 조회되지 않습니다."));
+            .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
     }
 
     private Retrospective getRetrospective(Long retrospectiveId) {
@@ -140,7 +140,7 @@ public class SectionService {
 
     private Section getSection(Long sectionId) {
         return sectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
+            .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
     }
 
     private User getUser(Long userId) {
@@ -151,18 +151,18 @@ public class SectionService {
     @Transactional
     public void deleteSection(Long sectionId, DeleteSectionRequestDto request) {
         Section findSection = sectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("section이 조회되지 않습니다."));
+            .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
         User findUser = getUser(request.getUserId());
 
-        // 작성자만 섹션을 삭제할 수 있다.
+        // 작성자만 회고 카드를 삭제할 수 있다.
         if(!findSection.getUser().equals(findUser)) {
-            throw new ForbiddenAccessException("작성자만 section을 삭제할 수 있습니다.");
+            throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
         }
 
         sectionRepository.delete(findSection);
     }
 
-    // 섹션 등록
+    // 회고 카드 등록
     private Section createSection(String sectionContent, TemplateSection findTemplateSection,
         Retrospective findRetrospective, User findUser) {
         return Section.builder()
@@ -174,7 +174,7 @@ public class SectionService {
             .build();
     }
 
-    // 섹션 전체 조회
+    // 회고 카드 전체 조회
     @Transactional(readOnly = true)
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective findRetrospective = getRetrospective(request);
