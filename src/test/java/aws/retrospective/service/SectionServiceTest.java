@@ -14,7 +14,7 @@ import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.GetTeamMembersRequestDto;
+import aws.retrospective.dto.GetTeamUsersRequestDto;
 import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
@@ -438,7 +438,7 @@ class SectionServiceTest {
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
 
         //when
-        GetTeamMembersRequestDto request = new GetTeamMembersRequestDto();
+        GetTeamUsersRequestDto request = new GetTeamUsersRequestDto();
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         List<GetTeamUsersResponseDto> result = sectionService.getTeamMembers(teamId,
             request);
