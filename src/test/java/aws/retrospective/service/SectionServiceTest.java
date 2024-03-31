@@ -428,7 +428,7 @@ class SectionServiceTest {
         UserTeam createdUserTeam = createUserTeam(createdUser, createdTeam);
         ReflectionTestUtils.setField(createdUserTeam, "id", userTeamId);
 
-        GetTeamUsersResponseDto response = new GetTeamUsersResponseDto(userId, "test");
+        GetTeamUsersResponseDto response = new GetTeamUsersResponseDto(userId, "test", "test");
         when(userTeamRepository.findTeamMembers(teamId)).thenReturn(List.of(response));
 
         Long retrospectiveId = 1L;
@@ -448,6 +448,7 @@ class SectionServiceTest {
         GetTeamUsersResponseDto searchUser = result.get(0);
         assertThat(searchUser.getUserId()).isEqualTo(userId);
         assertThat(searchUser.getUsername()).isEqualTo("test");
+        assertThat(searchUser.getProfileImageUrl()).isEqualTo("test");
 
     }
 
