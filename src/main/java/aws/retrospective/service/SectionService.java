@@ -10,7 +10,7 @@ import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.GetTeamMembersRequestDto;
-import aws.retrospective.dto.GetTeamMembersResponseDto;
+import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.Likes;
@@ -205,7 +205,7 @@ public class SectionService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetTeamMembersResponseDto> getTeamMembers(Long teamId, GetTeamMembersRequestDto request) {
+    public List<GetTeamUsersResponseDto> getTeamMembers(Long teamId, GetTeamMembersRequestDto request) {
         Team findTeam = getTeam(teamId);
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
 

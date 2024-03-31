@@ -15,7 +15,7 @@ import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.GetTeamMembersRequestDto;
-import aws.retrospective.dto.GetTeamMembersResponseDto;
+import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.Likes;
@@ -428,7 +428,7 @@ class SectionServiceTest {
         UserTeam createdUserTeam = createUserTeam(createdUser, createdTeam);
         ReflectionTestUtils.setField(createdUserTeam, "id", userTeamId);
 
-        GetTeamMembersResponseDto response = new GetTeamMembersResponseDto(userId, "test");
+        GetTeamUsersResponseDto response = new GetTeamUsersResponseDto(userId, "test");
         when(userTeamRepository.findTeamMembers(teamId)).thenReturn(List.of(response));
 
         Long retrospectiveId = 1L;
@@ -440,12 +440,12 @@ class SectionServiceTest {
         //when
         GetTeamMembersRequestDto request = new GetTeamMembersRequestDto();
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
-        List<GetTeamMembersResponseDto> result = sectionService.getTeamMembers(teamId,
+        List<GetTeamUsersResponseDto> result = sectionService.getTeamMembers(teamId,
             request);
 
         //then
         assertThat(result.size()).isEqualTo(1);
-        GetTeamMembersResponseDto searchUser = result.get(0);
+        GetTeamUsersResponseDto searchUser = result.get(0);
         assertThat(searchUser.getUserId()).isEqualTo(userId);
         assertThat(searchUser.getUsername()).isEqualTo("test");
 

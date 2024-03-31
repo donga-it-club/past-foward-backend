@@ -10,8 +10,8 @@ import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.GetTeamMembersResponseDto;
 import aws.retrospective.dto.GetTeamMembersRequestDto;
+import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.service.SectionService;
@@ -117,10 +117,10 @@ public class SectionController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")
     })
-    @GetMapping("/teams/{teamId}/members")
-    public CommonApiResponse<List<GetTeamMembersResponseDto>> getTeamMembers(@PathVariable Long teamId,
+    @GetMapping("/teams/{teamId}/users")
+    public CommonApiResponse<List<GetTeamUsersResponseDto>> getTeamMembers(@PathVariable Long teamId,
         @RequestBody @Valid GetTeamMembersRequestDto request) {
-        List<GetTeamMembersResponseDto> response = sectionService.getTeamMembers(teamId,
+        List<GetTeamUsersResponseDto> response = sectionService.getTeamMembers(teamId,
             request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }

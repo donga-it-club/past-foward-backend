@@ -1,9 +1,9 @@
 package aws.retrospective.repository;
 
-import aws.retrospective.dto.GetTeamMembersResponseDto;
+import aws.retrospective.dto.GetTeamUsersResponseDto;
 import java.util.List;
 
 public interface UserTeamRepositoryCustom {
 
-    List<GetTeamMembersResponseDto> findTeamMembers(Long teamId);
+    List<GetTeamUsersResponseDto> findTeamMembers(Long teamId);
 }
