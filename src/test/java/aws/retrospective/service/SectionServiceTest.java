@@ -448,7 +448,7 @@ class SectionServiceTest {
         GetTeamUsersResponseDto searchUser = result.get(0);
         assertThat(searchUser.getUserId()).isEqualTo(userId);
         assertThat(searchUser.getUsername()).isEqualTo("test");
-        assertThat(searchUser.getProfileImageUrl()).isEqualTo("test");
+        assertThat(searchUser.getProfileImage()).isEqualTo("test");
 
     }
 

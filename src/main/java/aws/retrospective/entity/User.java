@@ -39,7 +39,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
 
-    private String profileImageUrl; // 프로필 이미지 URL
+    private String profileImage; // 프로필 이미지 URL
 
     @Builder
     public User(String email, String password, String username, String phone) {
