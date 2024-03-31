@@ -1,0 +1,53 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test -Pprod
+
+      - name: Make zip file
+        run: zip -r ./$GITHUB_SHA.zip .
+
+      - name: Copy script
+        run: |
+          mkdir -p deploy
+          cp ./scripts/*.sh ./deploy
+
+      - name: Deploy to S3
+        run: aws s3 cp --region ${{ secrets.AWS_REGION }} $GITHUB_SHA.zip s3://${{ secrets.AWS_DEPLOY_S3_BUCKET }}/$GITHUB_SHA.zip
+
+      - name: Deploy to AWS CodeDeploy
+        run: |
+          aws deploy create-deployment \
+          --application-name ${{ secrets.AWS_CODEDEPLOY_APPLICATION }} \
+          --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_DEPLOYMENT_GROUP }} \
+          --file-exists-behavior OVERWRITE \
+          --s3-location bucket=${{ secrets.AWS_DEPLOY_S3_BUCKET }},bundleType=zip,key=$GITHUB_SHA.zip \
+          --region ${{ secrets.AWS_REGION }}
