@@ -18,7 +18,6 @@ public class UserService {
     private final AmazonS3Service s3Service;
     private final UserRepository userRepository;
 
-
     @Transactional
     public GetPreSignedUrlResponseDto getPreSignedUrl(GetPreSignedUrlRequestDto request) {
         String preSignedUrl = s3Service.getPresignUrl(request.getFilename());
