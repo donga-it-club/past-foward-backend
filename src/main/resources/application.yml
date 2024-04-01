@@ -2,7 +2,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: "jdbc:mysql://localhost:3306/past-forward"
+    url: "jdbc:mysql://localhost:3307/past-forward"
     username: dev
     password: 1234
   jpa:
@@ -15,6 +15,9 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+  profiles:
+    include:
+      - aws
 
 # Swagger
 springdoc:

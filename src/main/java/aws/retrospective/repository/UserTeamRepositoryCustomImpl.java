@@ -18,7 +18,7 @@ public class UserTeamRepositoryCustomImpl implements UserTeamRepositoryCustom {
     @Override
     public List<GetTeamUsersResponseDto> findTeamMembers(Long teamId) {
         return queryFactory.select(
-                new QGetTeamUsersResponseDto(userTeam.user.id, userTeam.user.username, userTeam.user.profileImage))
+                new QGetTeamUsersResponseDto(userTeam.user.id, userTeam.user.username, userTeam.user.thumbnail))
             .from(userTeam)
             .join(userTeam.team, team)
             .join(userTeam.user, user)
