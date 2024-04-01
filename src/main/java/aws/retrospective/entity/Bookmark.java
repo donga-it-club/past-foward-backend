@@ -32,6 +32,14 @@ public class Bookmark extends BaseEntity {
         this.user = user;
         this.retrospective = retrospective;
     }
+
+    public void addBookmark() {
+        this.retrospective.getBookmarks().add(this);
+    }
+
+    public void removeBookmark() {
+        this.retrospective.getBookmarks().remove(this);
+    }
 }
 
 

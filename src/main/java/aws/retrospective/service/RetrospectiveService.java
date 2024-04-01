@@ -35,6 +35,7 @@ public class RetrospectiveService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final RetrospectiveTemplateRepository templateRepository;
+    private final BookmarkService bookmarkService;
 
     @Transactional(readOnly = true)
     public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(
@@ -109,6 +110,11 @@ public class RetrospectiveService {
         }
 
         retrospectiveRepository.deleteById(retrospectiveId);
+    }
+
+    @Transactional
+    public boolean bookmarkRetrospective(Long retrospectiveId, Long userId) {
+        return bookmarkService.toggleBookmark(userId, retrospectiveId);
     }
 
 
