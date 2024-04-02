@@ -30,4 +30,3 @@ springdoc:
 
 # Custom Properties
 domain:
-  url: "http://example.com"
