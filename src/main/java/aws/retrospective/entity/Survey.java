@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +24,7 @@ public class Survey extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long surveyId; // 설문 아이디 - PK
 
-    @NotEmpty
+    @NotNull
     private Integer age; // 연령
 
     @NotEmpty
