@@ -1,10 +1,7 @@
 package aws.retrospective.service;
 
-import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
-import aws.retrospective.entity.Section;
-import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class CommentServiceTest {
+class CommentServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
@@ -35,121 +32,117 @@ public class CommentServiceTest {
 
     @Test
     void getAllComments() {
+        // Arrange
         List<Comment> comments = new ArrayList<>();
+        comments.add(Comment.builder().content("Comment 1").build());
+        comments.add(Comment.builder().content("Comment 2").build());
         when(commentRepository.findAll()).thenReturn(comments);
 
-        CommonApiResponse<List<CommentDto>> result = commentService.getAllComments();
+        // Act
+        List<CommentDto> commentDtos = commentService.getAllComments();
 
-        assertEquals(comments.size(), result.getData().size());
+        // Assert
+        assertEquals(comments.size(), commentDtos.size());
         verify(commentRepository, times(1)).findAll();
     }
 
     @Test
-    void getCommentById() {
-        Long commentId = 1L;
-        Comment comment = Comment.builder()
-            .content("Sample content")
-            .user(User.builder().build())
-            .section(Section.builder().build())
-            .build();
-        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+    void getCommentDTOById() {
+        // Arrange
+        Long id = 1L;
+        Comment comment = Comment.builder().content("Sample comment").build();
+        when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
 
-        CommonApiResponse<Comment> result = commentService.getCommentById(commentId);
+        // Act
+        CommentDto commentDto = commentService.getCommentDTOById(id);
 
-        assertTrue(result.getData()!= null);
-        assertEquals(comment, result.getData());
-        verify(commentRepository, times(1)).findById(commentId);
+        // Assert
+        assertNotNull(commentDto);
+        assertEquals(id, commentDto.getId());
+        verify(commentRepository, times(1)).findById(id);
     }
 
     @Test
-    void getCommentById_NotFound() {
-        Long commentId = 1L;
-        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+    void getCommentDTOById_NotFound() {
+        // Arrange
+        Long id = 1L;
+        when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
-        CommonApiResponse<Comment> result = commentService.getCommentById(commentId);
-
-        assertNull(result.getData());
-        verify(commentRepository, times(1)).findById(commentId);
+        // Act & Assert
+        assertThrows(EntityNotFoundException.class, () -> commentService.getCommentDTOById(id));
+        verify(commentRepository, times(1)).findById(id);
     }
 
     @Test
     void createComment() {
-        Comment comment = Comment.builder()
-            .content("Sample content")
-            .user(User.builder().build())
-            .section(Section.builder().build())
-            .build();
+        // Arrange
+        Comment comment = Comment.builder().content("New comment").build();
         when(commentRepository.save(comment)).thenReturn(comment);
 
-        CommonApiResponse<Comment> result = commentService.createComment(comment);
+        // Act
+        Comment createdComment = commentService.createComment(comment);
 
-        assertEquals(comment, result.getData());
+        // Assert
+        assertNotNull(createdComment.getId());
+        assertEquals("New comment", createdComment.getContent());
         verify(commentRepository, times(1)).save(comment);
     }
 
     @Test
     void updateComment() {
-        Long commentId = 1L;
-        Comment existingComment = Comment.builder()
-            .content("Sample content")
-            .user(User.builder().build())
-            .section(Section.builder().build())
-            .build();
-        Comment updatedComment = Comment.builder()
-            .content("Updated content")
-            .user(User.builder().build())
-            .section(Section.builder().build())
-            .build();
-        when(commentRepository.findById(commentId)).thenReturn(Optional.of(existingComment));
+        // Arrange
+        Long id = 1L;
+        Comment existingComment = Comment.builder().content("Existing comment").build();
+        Comment updatedComment = Comment.builder().content("Updated comment").build();
+        when(commentRepository.findById(id)).thenReturn(Optional.of(existingComment));
         when(commentRepository.save(existingComment)).thenReturn(updatedComment);
 
-        CommonApiResponse<Comment> result = commentService.updateComment(commentId, updatedComment);
+        // Act
+        Comment savedComment = commentService.updateComment(id, updatedComment);
 
-        assertEquals(updatedComment, result.getData());
-        verify(commentRepository, times(1)).findById(commentId);
+        // Assert
+        assertEquals("Updated comment", savedComment.getContent());
+        verify(commentRepository, times(1)).findById(id);
         verify(commentRepository, times(1)).save(existingComment);
     }
 
     @Test
     void updateComment_NotFound() {
-        Long commentId = 1L;
-        Comment updatedComment = Comment.builder()
-            .content("Updated content")
-            .user(User.builder().build())
-            .section(Section.builder().build())
-            .build();
-        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+        // Arrange
+        Long id = 1L;
+        Comment updatedComment = Comment.builder().content("Updated comment").build();
+        when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
-        // Check if EntityNotFoundException is thrown when updating a non-existent comment
-        assertThrows(EntityNotFoundException.class, () -> commentService.updateComment(commentId, updatedComment));
-
-        verify(commentRepository, times(1)).findById(commentId);
+        // Act & Assert
+        assertThrows(EntityNotFoundException.class, () -> commentService.updateComment(id, updatedComment));
+        verify(commentRepository, times(1)).findById(id);
         verify(commentRepository, never()).save(any());
     }
 
     @Test
     void deleteComment() {
-        Long commentId = 1L;
+        // Arrange
+        Long id = 1L;
+        Comment commentToDelete = Comment.builder().content("Comment to delete").build();
+        when(commentRepository.findById(id)).thenReturn(Optional.of(commentToDelete));
 
-        when(commentRepository.existsById(commentId)).thenReturn(true);
+        // Act
+        commentService.deleteComment(id);
 
-        CommonApiResponse<Void> result = commentService.deleteComment(commentId);
-
-        assertTrue(result.getData() == null);
-        verify(commentRepository, times(1)).existsById(commentId);
-        verify(commentRepository, times(1)).deleteById(commentId);
+        // Assert
+        verify(commentRepository, times(1)).findById(id);
+        verify(commentRepository, times(1)).delete(commentToDelete);
     }
 
     @Test
     void deleteComment_NotFound() {
-        Long commentId = 1L;
+        // Arrange
+        Long id = 1L;
+        when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
-        when(commentRepository.existsById(commentId)).thenReturn(false);
-
-        CommonApiResponse<Void> result = commentService.deleteComment(commentId);
-
-        assertTrue(result.getData() == null);
-        verify(commentRepository, times(1)).existsById(commentId);
-        verify(commentRepository, never()).deleteById(commentId);
+        // Act & Assert
+        assertThrows(EntityNotFoundException.class, () -> commentService.deleteComment(id));
+        verify(commentRepository, times(1)).findById(id);
+        verify(commentRepository, never()).delete(any());
     }
 }
