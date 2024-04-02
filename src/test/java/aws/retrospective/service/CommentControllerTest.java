@@ -65,7 +65,7 @@ class CommentControllerTest {
     @Test
     void createComment() {
         // Arrange
-        Comment comment = new Comment(1L, "Sample content", null, null); // Proper user and section should be passed
+        Comment comment = new Comment("Sample content", null, null); // Proper user and section should be passed
         when(commentService.createComment(comment)).thenReturn(comment);
 
         // Act
@@ -81,7 +81,7 @@ class CommentControllerTest {
     void updateComment() {
         // Arrange
         Long commentId = 1L;
-        Comment updatedComment = new Comment(1L, "Updated content", null, null); // Proper user and section should be passed
+        Comment updatedComment = new Comment("Updated content", null, null); // Proper user and section should be passed
         when(commentService.updateComment(commentId, updatedComment)).thenReturn(updatedComment);
 
         // Act
