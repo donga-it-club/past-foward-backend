@@ -2,6 +2,8 @@ package aws.retrospective.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +15,7 @@ import lombok.Setter;
 public class SaveSurveyDto {
     private Long surveyId;
 
-    @NotEmpty
+    @NotNull
     private Integer age;
 
     @NotEmpty
