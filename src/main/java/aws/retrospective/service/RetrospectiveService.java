@@ -52,16 +52,15 @@ public class RetrospectiveService {
         boolean hasBookmarksByUser = page.stream()
             .anyMatch(retrospective -> hasBookmarksByUser(retrospective, dto.getUserId()));
 
-        return PaginationResponseDto.fromPage(page, retrospective -> RetrospectiveResponseDto
-            .of(retrospective, hasBookmarksByUser));
+        return PaginationResponseDto.fromPage(page,
+            retrospective -> RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser));
     }
 
     @Transactional
     public RetrospectiveResponseDto updateRetrospective(Long retrospectiveId,
         UpdateRetrospectiveDto dto) {
-        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
-            .orElseThrow(
-                () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId).orElseThrow(
+            () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
 
         retrospective.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail());
 
@@ -91,7 +90,8 @@ public class RetrospectiveService {
         Optional<Team> team = findTeamByIdOptional(dto.getTeamId());
 
         Retrospective retrospective = Retrospective.builder().title(dto.getTitle())
-            .status(dto.getStatus()).team(team.orElse(null)).user(user).template(template).build();
+            .status(dto.getStatus()).team(team.orElse(null)).user(user).template(template)
+            .thumbnail(dto.getThumbnail()).startDate(dto.getStartDate()).build();
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
 
@@ -100,9 +100,8 @@ public class RetrospectiveService {
 
     @Transactional
     public void deleteRetrospective(Long retrospectiveId, Long userId) {
-        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
-            .orElseThrow(
-                () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId).orElseThrow(
+            () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
 
         if (!retrospective.isOwnedByUser(userId)) {
             throw new IllegalArgumentException(
@@ -132,9 +131,7 @@ public class RetrospectiveService {
             .title(retrospective.getTitle())
             .teamId(Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null))
             .userId(retrospective.getUser().getId()).templateId(retrospective.getTemplate().getId())
-            .status(retrospective.getStatus())
-            .thumbnail(retrospective.getThumbnail())
-            .build();
+            .status(retrospective.getStatus()).thumbnail(retrospective.getThumbnail()).build();
     }
 
 }

@@ -1,6 +1,7 @@
 package aws.retrospective.dto;
 
 import aws.retrospective.entity.Retrospective;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,12 +18,18 @@ public class RetrospectiveResponseDto {
     private String status;
     private Boolean isBookmarked;
     private UUID thumbnail;
+    private LocalDateTime startDate;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 
     public RetrospectiveResponseDto(Long id, String title, Long userId, Long teamId,
         Long templateId,
         String status,
         Boolean isBookmarked,
-        UUID thumbnail
+        UUID thumbnail,
+        LocalDateTime startDate,
+        LocalDateTime createdDate,
+        LocalDateTime updatedDate
     ) {
         this.id = id;
         this.title = title;
@@ -32,6 +39,9 @@ public class RetrospectiveResponseDto {
         this.status = status;
         this.isBookmarked = isBookmarked;
         this.thumbnail = thumbnail;
+        this.startDate = startDate;
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
 
     }
 
@@ -45,7 +55,10 @@ public class RetrospectiveResponseDto {
             retrospective.getTemplate().getId(),
             retrospective.getStatus().name(),
             hasBookmarksByUser,
-            retrospective.getThumbnail()
+            retrospective.getThumbnail(),
+            retrospective.getStartDate(),
+            retrospective.getCreatedDate(),
+            retrospective.getUpdatedDate()
         );
     }
 }
