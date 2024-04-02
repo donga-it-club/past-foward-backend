@@ -13,7 +13,7 @@ public class CreateSectionDto {
     @Schema(description = "template_section id", example = "3")
     private Long templateSectionId;
 
-    @NotEmpty(message = "Section content is required")
-    @Schema(description = "section content", example = "프로젝트 관리 - 일정 관리와 작업 분배가 효과적으로 이루어졌다.")
+    @NotEmpty(message = "회고 카드의 내용은 필수 입력 값입니다.")
+    @Schema(description = "회고 카드의 내용", example = "프로젝트 관리 - 일정 관리와 작업 분배가 효과적으로 이루어졌다.")
     private String sectionContent;
 }

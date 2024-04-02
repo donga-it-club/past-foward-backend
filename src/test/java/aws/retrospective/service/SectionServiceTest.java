@@ -7,8 +7,13 @@ import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.FindSectionCountRequestDto;
+import aws.retrospective.dto.FindSectionCountResponseDto;
+import aws.retrospective.dto.GetSectionsRequestDto;
+import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.Likes;
@@ -19,11 +24,14 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
+import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
+import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +57,8 @@ class SectionServiceTest {
     TemplateSectionRepository templateSectionRepository;
     @Mock
     LikesRepository likesRepository;
+    @Mock
+    TeamRepository teamRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -106,8 +116,12 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
+        DeleteSectionRequestDto request = new DeleteSectionRequestDto();
+        ReflectionTestUtils.setField(request, "userId", user.getId());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
         //when
-        sectionService.deleteSection(sectionId);
+        sectionService.deleteSection(sectionId, request);
 
         //then
         verify(sectionRepository).delete(section);
@@ -119,11 +133,15 @@ class SectionServiceTest {
 
         //given
         Long notExistSectionId = 1L;
+
+        DeleteSectionRequestDto request = new DeleteSectionRequestDto();
+        ReflectionTestUtils.setField(request, "userId", 1L);
+
         //when
         when(sectionRepository.findById(notExistSectionId)).thenThrow(NoSuchElementException.class);
         //then
         assertThrows(NoSuchElementException.class,
-            () -> sectionService.deleteSection(notExistSectionId));
+            () -> sectionService.deleteSection(notExistSectionId, request));
     }
 
     @Test
@@ -184,6 +202,32 @@ class SectionServiceTest {
         assertThat(response.getLikeCnt()).isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("회고보드의 각 섹션에 등록된 게시물 개수를 조회 할 수 있다.")
+    void getSectionCountsTest() {
+        //given
+        Long retrospectiveId = 1L;
+        Retrospective retrospective = createRetrospective(createTemplate(), createUser(), createTeam());
+        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
+
+        Long templateSectionId = 1L;
+        TemplateSection templateSection = createTemplateSection(createTemplate());
+        ReflectionTestUtils.setField(templateSection, "id", templateSectionId);
+        when(templateSectionRepository.findById(templateSectionId)).thenReturn(Optional.of(templateSection));
+
+        when(sectionRepository.countByRetrospectiveAndTemplateSection(retrospective, templateSection)).thenReturn(1);
+
+        //when
+        FindSectionCountRequestDto request = new FindSectionCountRequestDto();
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "templateSectionId", templateSectionId);
+        FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
+
+        //then
+        assertThat(response.getCount()).isEqualTo(1);
+    }
+
     private static Likes createLikes(Section section, User user) {
         return Likes.builder()
             .section(section)
@@ -234,6 +278,90 @@ class SectionServiceTest {
         //then
         assertThat(response.getSectionId()).isEqualTo(sectionId);
         assertThat(response.getContent()).isEqualTo(request.getSectionContent());
+    }
+
+    @Test
+    @DisplayName("회고 보드에 등록된 모든 섹션을 조회 할 수 있다.")
+    void getSectionsTest() {
+        //given
+        Long teamId = 1L;
+        Team createdTeam = createTeam();
+        ReflectionTestUtils.setField(createdTeam, "id", teamId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(createdTeam));
+
+        RetrospectiveTemplate createdTemplate = createTemplate();
+        User createdUser = createUser();
+
+        Long retrospectiveId = 1L;
+        Retrospective createdRetrospective = createRetrospective(createdTemplate, createdUser, createdTeam);
+        ReflectionTestUtils.setField(createdRetrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
+
+        TemplateSection createdTemplateSection = createTemplateSection(createdTemplate);
+
+        Long sectionId = 1L;
+        Section createdSection = createSection(createdUser, createdTemplateSection, createdRetrospective);
+        ReflectionTestUtils.setField(createdSection, "id", sectionId);
+
+        GetSectionsResponseDto response = new GetSectionsResponseDto(
+            sectionId, createdUser.getUsername(), createdSection.getContent(), createdSection.getLikeCnt(),
+            createdTemplateSection.getSectionName(), createdSection.getCreatedDate()
+        );
+
+        when(sectionRepository.getSections(retrospectiveId)).thenReturn(List.of(response));
+
+        //when
+        GetSectionsRequestDto request = new GetSectionsRequestDto();
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "teamId", teamId);
+        List<GetSectionsResponseDto> results = sectionService.getSections(request);
+
+        //then
+        assertThat(results.size()).isEqualTo(1);
+        GetSectionsResponseDto result = results.get(0);
+        assertThat(result.getSectionName()).isEqualTo(createdTemplateSection.getSectionName());
+        assertThat(result.getSectionId()).isEqualTo(createdSection.getId());
+        assertThat(result.getCreatedDate()).isEqualTo(createdSection.getCreatedDate());
+        assertThat(result.getContent()).isEqualTo(createdSection.getContent());
+        assertThat(result.getUsername()).isEqualTo(createdUser.getUsername());
+        assertThat(result.getLikeCnt()).isEqualTo(createdSection.getLikeCnt());
+
+    }
+
+    @Test
+    @DisplayName("다른 팀의 회고보드를 조회 할 수 없다.")
+    void notSearchRetrospective() {
+        //given
+        Long teamId = 1L;
+        Team createdTeam1 = createTeam();
+        ReflectionTestUtils.setField(createdTeam1, "id", teamId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(createdTeam1));
+
+        RetrospectiveTemplate createdTemplate = createTemplate();
+        User createdUser = createUser();
+
+        Team createdTeam2 = createTeam();
+        ReflectionTestUtils.setField(createdTeam1, "id", 2L);
+
+        Long retrospectiveId = 1L;
+        Retrospective createdRetrospective = createRetrospective(createdTemplate ,createdUser, createdTeam2);
+        ReflectionTestUtils.setField(createdRetrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
+
+        TemplateSection createdTemplateSection = createTemplateSection(createdTemplate);
+
+        Long sectionId = 1L;
+        Section createdSection = createSection(createdUser, createdTemplateSection, createdRetrospective);
+        ReflectionTestUtils.setField(createdSection, "id", sectionId);
+
+        //when
+        GetSectionsRequestDto request = new GetSectionsRequestDto();
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "teamId", teamId);
+
+        //then
+        assertThrows(ForbiddenAccessException.class, () -> sectionService.getSections(request));
+
     }
 
     private static Section createSection(User loginedUser) {
