@@ -1,9 +1,10 @@
 package aws.retrospective.repository;
 
 import aws.retrospective.entity.Bookmark;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
-    Bookmark findByUserIdAndRetrospectiveId(Long userId, Long retrospectiveId);
+    Optional<Bookmark> findByUserIdAndRetrospectiveId(Long userId, Long retrospectiveId);
 }
