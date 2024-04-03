@@ -3,6 +3,7 @@ package aws.retrospective.service;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
+import aws.retrospective.entity.Survey.Gender;
 import aws.retrospective.repository.SurveyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ public class SurveyServiceTest {
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
             .age("30")
-            .gender("Male")
+            .gender(Gender.valueOf("Male"))
             .occupation("Engineer")
             .region("Seoul")
             .source("Internet")
