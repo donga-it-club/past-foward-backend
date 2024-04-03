@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -46,11 +48,11 @@ public class SurveyServiceTest {
         // Then
         verify(surveyRepository).save(any(Survey.class));
 
-        assert surveyDto.getAge() == 22;
-        assert surveyDto.getGender() == "female";
-        assert surveyDto.getJob() == "student";
-        assert surveyDto.getResidence() == "Korea";
-        assert surveyDto.getDiscoverySource() == "internet";
-        assert surveyDto.getPurpose().equals(List.of("research", "analysis"));
+        assertEquals(22, surveyDto.getAge());
+        assertEquals("female", surveyDto.getGender());
+        assertEquals("student", surveyDto.getJob());
+        assertEquals("Korea", surveyDto.getResidence());
+        assertEquals("internet", surveyDto.getDiscoverySource());
+        assertTrue(surveyDto.getPurpose().containsAll(List.of("research", "analysis")));
     }
 }
