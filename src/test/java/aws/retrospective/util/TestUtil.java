@@ -1,5 +1,6 @@
 package aws.retrospective.util;
 
+import aws.retrospective.entity.Bookmark;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
@@ -54,6 +55,13 @@ public class TestUtil {
             .password("test")
             .phone("010-1234-1234")
             .email("test@naver.com")
+            .build();
+    }
+
+    public static Bookmark createBookmark(User user, Retrospective retrospective) {
+        return Bookmark.builder()
+            .user(user)
+            .retrospective(retrospective)
             .build();
     }
 
