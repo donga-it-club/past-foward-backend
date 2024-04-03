@@ -9,11 +9,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Survey extends BaseEntity {
 
@@ -22,17 +20,21 @@ public class Survey extends BaseEntity {
     @Column(name = "survey_id")
     private Long id;
 
-    //설문조사 관련 필드 추가
+    // 설문조사 관련 필드 추가
     private String age;
-    private String gender;
+    private Gender gender;
     private String occupation;
     private String region;
     private String source;
     private String purpose;
 
+    public enum Gender {
+        MALE,
+        FEMALE
+    }
 
     @Builder
-    public Survey(String age, String gender, String occupation, String region, String source,
+    public Survey(String age, Gender gender, String occupation, String region, String source,
         String purpose) {
         this.age = age;
         this.gender = gender;
