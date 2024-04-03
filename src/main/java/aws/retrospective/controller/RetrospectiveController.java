@@ -77,12 +77,12 @@ public class RetrospectiveController {
 
     @Operation(summary = "회고 북마크")
     @PatchMapping("/{retrospectiveId}/bookmark")
-    public CommonApiResponse<Boolean> bookmarkRetrospective(
+    public CommonApiResponse<Boolean> toggleBookmark(
         @PathVariable Long retrospectiveId, @RequestParam Long userId) {
-        boolean response = retrospectiveService.bookmarkRetrospective(
+        boolean isBookmarked = retrospectiveService.toggleBookmark(
             retrospectiveId, userId);
 
-        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+        return CommonApiResponse.successResponse(HttpStatus.OK, isBookmarked);
     }
 
 }
