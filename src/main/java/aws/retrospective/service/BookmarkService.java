@@ -7,6 +7,7 @@ import aws.retrospective.repository.BookmarkRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,18 +33,19 @@ public class BookmarkService {
             .orElseThrow(
                 () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
 
-        Bookmark bookmark = bookmarkRepository.findByUserIdAndRetrospectiveId(userId,
+        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndRetrospectiveId(userId,
             retrospectiveId);
 
-        if (bookmark != null) {
-            bookmark.removeBookmark();
-            bookmarkRepository.delete(bookmark);
-            return false;
-        } else {
-            bookmark = new Bookmark(user, retrospective);
-            bookmark.addBookmark();
-            bookmarkRepository.save(bookmark);
+        if (bookmark.isEmpty()) {
+            Bookmark createdBookmark = Bookmark.builder()
+                .user(user)
+                .retrospective(retrospective)
+                .build();
+            bookmarkRepository.save(createdBookmark);
             return true;
+        } else {
+            bookmarkRepository.delete(bookmark.get());
+            return false;
         }
     }
 
