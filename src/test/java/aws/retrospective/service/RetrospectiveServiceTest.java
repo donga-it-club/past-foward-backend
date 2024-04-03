@@ -29,6 +29,7 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.util.TestUtil;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +84,8 @@ public class RetrospectiveServiceTest {
             null,
             ProjectStatus.IN_PROGRESS,
             new Team("Team Name"), new User("user1", "test", "test", "test"),
-            new RetrospectiveTemplate("Template Name"));
+            new RetrospectiveTemplate("Template Name"),
+            LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
 
@@ -128,7 +130,8 @@ public class RetrospectiveServiceTest {
             null,
             null,
             ProjectStatus.IN_PROGRESS,
-            team, user, template);
+            team, user, template,
+            LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
         BDDMockito.given(retrospectiveRepository.save(any(Retrospective.class)))

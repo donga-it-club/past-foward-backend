@@ -3,8 +3,13 @@ package aws.retrospective.controller;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.FindSectionCountRequestDto;
+import aws.retrospective.dto.FindSectionCountResponseDto;
+import aws.retrospective.dto.GetSectionsRequestDto;
+import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.service.SectionService;
@@ -13,9 +18,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,8 +42,8 @@ public class SectionController {
 
     private final SectionService sectionService;
 
-    // 특정 섹션 추가
-    @Operation(summary = "Section 등록", description = "회고보드 내의 section을 등록하는 API")
+    // 회고 카드 등록
+    @Operation(summary = "회고 카드 등록", description = "회고 카드 등록하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201")})
     @PostMapping
@@ -46,8 +53,8 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
-    // 특정 섹션 수정
-    @Operation(summary = "Section 수정", description = "등록 된 section의 내용을 수정하는 API")
+    // 특정 회고 카드 수정
+    @Operation(summary = "회고 카드 수정", description = "등록 된 회고 카드의 내용을 수정하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")})
     @PatchMapping("/{sectionId}")
@@ -57,8 +64,8 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
-    // 섹션 좋아요
-    @Operation(summary = "Section 좋아요", description = "등록된 section의 좋아요 또는 취소 API")
+    // 회고 카드 좋아요
+    @Operation(summary = "회고 카드 좋아요", description = "등록된 회고 카드의 좋아요 또는 취소 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")})
     @PostMapping("/{sectionId}/likes")
@@ -68,13 +75,38 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
-    // 특정 섹션 삭제
-    @Operation(summary = "Section 삭제", description = "등록된 section을 삭제하는 API")
+    // 특정 회고 카드 삭제
+    @Operation(summary = "회고 카드 삭제", description = "등록된 회고 카드를 삭제하는 API")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204")})
     @DeleteMapping("/{sectionId}")
-    public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId) {
-        sectionService.deleteSection(sectionId);
+    public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId, @Valid @RequestBody DeleteSectionRequestDto request) {
+        sectionService.deleteSection(sectionId, request);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+    }
+
+    // 회고 카드 전체 조회
+    @Operation(summary = "회고 카드 전체 조회", description = "회고보드 내의 회고 카드를 전체 조회하는 API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200")
+    })
+    @GetMapping
+    public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
+        List<GetSectionsResponseDto> response = sectionService.getSections(request);
+          return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    /**
+     * 회고 카드 개수 조회
+     * ex. Keep 섹션이 등록된 회고 카드 개수 조회
+     */
+    @Operation(summary = "섹션에 등록된 회고 카드 개수 조회", description = "섹션에 등록된 카드 개수를 조회하는 API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200")
+    })
+    @GetMapping("/counts")
+    public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody @Valid FindSectionCountRequestDto request) {
+        FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }

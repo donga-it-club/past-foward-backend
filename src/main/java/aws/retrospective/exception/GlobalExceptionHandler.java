@@ -16,7 +16,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> validMissingParameterException(MethodArgumentNotValidException ex) {
         log.error("유효성 검사 실패", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER, ex.getMessage());
+        String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
+        ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER, errorMessage);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

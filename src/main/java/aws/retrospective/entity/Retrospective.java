@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
@@ -39,6 +40,9 @@ public class Retrospective extends BaseEntity {
     private String title; // 회고 제목
 
     private UUID thumbnail; // 회고 썸네일
+
+    @CreatedDate
+    private LocalDateTime startDate; // 회고 시작 일자
 
     private LocalDateTime deletedDate; // 삭제 일자
 
@@ -66,7 +70,9 @@ public class Retrospective extends BaseEntity {
     public Retrospective(String title, UUID thumbnail, LocalDateTime deletedDate,
         ProjectStatus status, Team team,
         User user,
-        RetrospectiveTemplate template) {
+        RetrospectiveTemplate template,
+        LocalDateTime startDate
+    ) {
         this.title = title;
         this.thumbnail = thumbnail;
         this.deletedDate = deletedDate;
@@ -74,6 +80,7 @@ public class Retrospective extends BaseEntity {
         this.team = team;
         this.user = user;
         this.template = template;
+        this.startDate = startDate;
     }
 
     public boolean isOwnedByUser(Long userId) {
