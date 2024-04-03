@@ -112,8 +112,7 @@ public class RetrospectiveService {
         retrospectiveRepository.deleteById(retrospectiveId);
     }
 
-    @Transactional
-    public boolean bookmarkRetrospective(Long retrospectiveId, Long userId) {
+    public boolean toggleBookmark(Long retrospectiveId, Long userId) {
         return bookmarkService.toggleBookmark(userId, retrospectiveId);
     }
 
