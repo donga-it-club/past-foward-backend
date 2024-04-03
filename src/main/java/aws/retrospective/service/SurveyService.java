@@ -28,7 +28,7 @@ public class SurveyService {
         return SurveyDto.builder()
             .id(survey.getId())
             .age(survey.getAge())
-            .gender(survey.getGender())
+            .gender(survey.getGender().toString())
             .occupation(survey.getOccupation())
             .region(survey.getRegion())
             .source(survey.getSource())
