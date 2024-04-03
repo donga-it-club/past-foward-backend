@@ -50,7 +50,8 @@ class CommentServiceTest {
     void getCommentDTOById() {
         // Arrange
         Long id = 1L;
-        Comment comment = Comment.builder().content("Sample comment").build();
+        String content = "Sample comment";
+        Comment comment = Comment.builder().id(id).content(content).build();
         when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
 
         // Act
@@ -59,8 +60,10 @@ class CommentServiceTest {
         // Assert
         assertNotNull(commentDto);
         assertEquals(id, commentDto.getId());
+        assertEquals(content, commentDto.getContent());
         verify(commentRepository, times(1)).findById(id);
     }
+
 
     @Test
     void getCommentDTOById_NotFound() {
@@ -77,23 +80,26 @@ class CommentServiceTest {
     void createComment() {
         // Arrange
         Comment comment = Comment.builder().content("New comment").build();
-        when(commentRepository.save(comment)).thenReturn(comment);
+        Comment savedComment = Comment.builder().id(1L).content("New comment").build(); // 예시로 ID를 1L로 설정
+        when(commentRepository.save(comment)).thenReturn(savedComment);
 
         // Act
         Comment createdComment = commentService.createComment(comment);
 
         // Assert
         assertNotNull(createdComment.getId());
+        assertEquals(1L, createdComment.getId()); // 예시로 ID가 1L인지 확인
         assertEquals("New comment", createdComment.getContent());
         verify(commentRepository, times(1)).save(comment);
     }
+
 
     @Test
     void updateComment() {
         // Arrange
         Long id = 1L;
-        Comment existingComment = Comment.builder().content("Existing comment").build();
-        Comment updatedComment = Comment.builder().content("Updated comment").build();
+        Comment existingComment = Comment.builder().id(id).content("Existing comment").build();
+        Comment updatedComment = Comment.builder().id(id).content("Updated comment").build();
         when(commentRepository.findById(id)).thenReturn(Optional.of(existingComment));
         when(commentRepository.save(existingComment)).thenReturn(updatedComment);
 
@@ -110,7 +116,7 @@ class CommentServiceTest {
     void updateComment_NotFound() {
         // Arrange
         Long id = 1L;
-        Comment updatedComment = Comment.builder().content("Updated comment").build();
+        Comment updatedComment = Comment.builder().id(id).content("Updated comment").build();
         when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -123,7 +129,7 @@ class CommentServiceTest {
     void deleteComment() {
         // Arrange
         Long id = 1L;
-        Comment commentToDelete = Comment.builder().content("Comment to delete").build();
+        Comment commentToDelete = Comment.builder().id(id).content("Comment to delete").build();
         when(commentRepository.findById(id)).thenReturn(Optional.of(commentToDelete));
 
         // Act
