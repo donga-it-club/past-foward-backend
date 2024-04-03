@@ -36,7 +36,7 @@ public class SurveyServiceTest {
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
             .age("30")
-            .gender(Gender.valueOf("Male"))
+            .gender(Gender.valueOf("MALE"))
             .occupation("Engineer")
             .region("Seoul")
             .source("Internet")
