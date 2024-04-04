@@ -43,13 +43,17 @@ public class InviteTeamMemberService {
         byte[] qrCodeImage = qrCodeService.generateQRCode(invitationUrl, expirationTime);
 
         // 초대 정보 DTO 생성
+        if (expirationTime.isBefore(LocalDateTime.now())) {
+            invitationCode = UUID.randomUUID().toString();
+            invitationUrl = domainUrl + "/invitations/" + invitationCode;
+            expirationTime = LocalDateTime.now().plusHours(EXPIRATION_HOURS);
+            qrCodeImage = qrCodeService.generateQRCode(invitationUrl, expirationTime);
+        }
         InviteTeamMemberDTO inviteTeamMemberDTO = new InviteTeamMemberDTO(invitationCode, invitationUrl, expirationTime, qrCodeImage);
 
         // HTTP 상태코드 OK로 응답
         return CommonApiResponse.successResponse(HttpStatus.OK, inviteTeamMemberDTO);
     }
-
-
 
     // 초대 토큰 유효성을 검증하는 메서드
     private void validateInvitation(String invitationCode) {
