@@ -17,14 +17,14 @@ import java.util.Map;
 @Service
 public class QRCodeService {
 
-    public byte[] generateQRCode(String invitionUrl, LocalDateTime expirationTime) {
+    public byte[] generateQRCode(String invitationUrl, LocalDateTime expirationTime) {
         try {
             // Set QR code parameters
             Map<EncodeHintType, Object> hints = new HashMap<>();
             hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 
             // Append expiration time to QR code text
-            String qrCodeText = invitionUrl + "&expiration=" + expirationTime.toString();
+            String qrCodeText = invitationUrl + "&expiration=" + expirationTime.toString();
 
             // Generate QR code matrix
             BitMatrix bitMatrix = new MultiFormatWriter().encode(qrCodeText, BarcodeFormat.QR_CODE, 200, 200, hints);
