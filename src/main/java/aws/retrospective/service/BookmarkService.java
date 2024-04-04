@@ -8,22 +8,18 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
     private final UserRepository userRepository;
     private final RetrospectiveRepository retrospectiveRepository;
 
-    public BookmarkService(BookmarkRepository bookmarkRepository, UserRepository userRepository,
-        RetrospectiveRepository retrospectiveRepository) {
-        this.bookmarkRepository = bookmarkRepository;
-        this.userRepository = userRepository;
-        this.retrospectiveRepository = retrospectiveRepository;
-    }
 
     @Transactional
     public boolean toggleBookmark(Long userId, Long retrospectiveId) {
