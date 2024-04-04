@@ -12,11 +12,13 @@ public class InviteTeamMemberDTO {
     private String invitationCode; // 초대 코드
     private String invitationUrl; // 초대 링크
     private LocalDateTime expirationTime; // 초대 만료 시간
+    private byte[] qrCodeImage; // QR 코드 이미지
 
     // 생성자 추가
-    public InviteTeamMemberDTO(String invitationCode, String invitationUrl, LocalDateTime expirationTime) {
+    public InviteTeamMemberDTO(String invitationCode, String invitationUrl, LocalDateTime expirationTime, byte[] qrCodeImage) {
         this.invitationCode = invitationCode;
         this.invitationUrl = invitationUrl;
         this.expirationTime = expirationTime;
+        this.qrCodeImage = qrCodeImage;
     }
 }
