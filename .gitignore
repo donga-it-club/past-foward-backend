@@ -5,6 +5,7 @@ target/
 .idea
 classes/
 META-INF/
+generated
   
 # OS Files #
 .DS_Store
@@ -144,3 +145,4 @@ fabric.properties
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/intellij
+
