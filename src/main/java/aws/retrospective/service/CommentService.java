@@ -43,16 +43,20 @@ public class CommentService {
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 
         existingComment.updateContent(updatedComment.getContent());
-        return commentRepository.save(existingComment);
+        return existingComment;
     }
 
     @Transactional
     public void deleteComment(Long id) {
-        Comment commentToDelete = commentRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
-
+        Comment commentToDelete = findCommentById(id);
         commentRepository.delete(commentToDelete);
     }
+
+    private Comment findCommentById(Long id) {
+        return commentRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+    }
+
 
     private CommentDto convertToDTO(Comment comment) {
         return new CommentDto(comment.getId(), comment.getContent());
