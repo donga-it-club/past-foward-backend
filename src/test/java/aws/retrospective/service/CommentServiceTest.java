@@ -98,19 +98,22 @@ class CommentServiceTest {
     void updateComment() {
         // Arrange
         Long id = 1L;
-        Comment existingComment = Comment.builder().id(id).content("Existing comment").build();
-        Comment updatedComment = Comment.builder().id(id).content("Updated comment").build();
+        String existingContent = "Existing comment";
+        String updatedContent = "Updated comment";
+        Comment existingComment = Comment.builder().id(id).content(existingContent).build();
+        Comment updatedComment = Comment.builder().id(id).content(updatedContent).build();
         when(commentRepository.findById(id)).thenReturn(Optional.of(existingComment));
-        when(commentRepository.save(existingComment)).thenReturn(updatedComment);
 
         // Act
         Comment savedComment = commentService.updateComment(id, updatedComment);
 
         // Assert
-        assertEquals("Updated comment", savedComment.getContent());
+        assertEquals(updatedContent, savedComment.getContent());
         verify(commentRepository, times(1)).findById(id);
-        verify(commentRepository, times(1)).save(existingComment);
+        // verify that existingComment's content is updated but not save() called explicitly
+        assertEquals(updatedContent, existingComment.getContent());
     }
+
 
     @Test
     void updateComment_NotFound() {
