@@ -1,6 +1,7 @@
 package aws.retrospective.dto;
 
 import aws.retrospective.entity.ProjectStatus;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,4 +17,6 @@ public class CreateRetrospectiveResponseDto {
     private Long templateId;
     private ProjectStatus status;
     private UUID thumbnail;
+    private LocalDateTime startDate;
+    private String description;
 }

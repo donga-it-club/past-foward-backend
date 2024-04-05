@@ -41,6 +41,8 @@ public class Retrospective extends BaseEntity {
 
     private UUID thumbnail; // 회고 썸네일
 
+    private String description; // 회고 설명
+
     @CreatedDate
     private LocalDateTime startDate; // 회고 시작 일자
 
@@ -67,7 +69,9 @@ public class Retrospective extends BaseEntity {
     private List<Bookmark> bookmarks = new ArrayList<>();
 
     @Builder
-    public Retrospective(String title, UUID thumbnail, LocalDateTime deletedDate,
+    public Retrospective(String title, UUID thumbnail,
+        String description,
+        LocalDateTime deletedDate,
         ProjectStatus status, Team team,
         User user,
         RetrospectiveTemplate template,
@@ -75,6 +79,7 @@ public class Retrospective extends BaseEntity {
     ) {
         this.title = title;
         this.thumbnail = thumbnail;
+        this.description = description;
         this.deletedDate = deletedDate;
         this.status = status;
         this.team = team;
@@ -87,9 +92,10 @@ public class Retrospective extends BaseEntity {
         return this.user.getId().equals(userId);
     }
 
-    public void update(String title, ProjectStatus status, UUID thumbnail) {
+    public void update(String title, ProjectStatus status, UUID thumbnail, String description) {
         this.title = title;
         this.status = status;
         this.thumbnail = thumbnail;
+        this.description = description;
     }
 }
