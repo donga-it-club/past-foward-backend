@@ -1,12 +1,10 @@
 package aws.retrospective.service;
 
-import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.entity.Team;
 import aws.retrospective.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,7 +22,7 @@ public class InviteTeamMemberService {
     private String domainUrl;
 
 
-    public CommonApiResponse<InviteTeamMemberDTO> generateInvitation(Long teamId) {
+    public InviteTeamMemberDTO generateInvitation(Long teamId) {
         // 팀 조회
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found for id: " + teamId));
@@ -49,10 +47,7 @@ public class InviteTeamMemberService {
             expirationTime = LocalDateTime.now().plusHours(EXPIRATION_HOURS);
             qrCodeImage = qrCodeService.generateQRCode(invitationUrl, expirationTime);
         }
-        InviteTeamMemberDTO inviteTeamMemberDTO = new InviteTeamMemberDTO(invitationCode, invitationUrl, expirationTime, qrCodeImage);
-
-        // HTTP 상태코드 OK로 응답
-        return CommonApiResponse.successResponse(HttpStatus.OK, inviteTeamMemberDTO);
+        return new InviteTeamMemberDTO(invitationCode, invitationUrl, expirationTime, qrCodeImage);
     }
 
     // 초대 토큰 유효성을 검증하는 메서드
