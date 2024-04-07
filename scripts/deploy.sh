@@ -1,4 +1,6 @@
 #!/bin/bash
+export SPRING_PROFILES_ACTIVE=prod
+
 BUILD_JAR=$(ls /home/ec2-user/action/build/libs/*.jar)
 JAR_NAME=$(basename $BUILD_JAR)
 echo "> build 파일명: $JAR_NAME" >> /home/ec2-user/action/deploy.log
@@ -21,4 +23,4 @@ fi
 
 DEPLOY_JAR=$DEPLOY_PATH$JAR_NAME
 echo "> DEPLOY_JAR 배포"    >> /home/ec2-user/action/deploy.log
-nohup java -jar $DEPLOY_JAR >> /home/ec2-user/deploy.log 2>/home/ec2-user/action/deploy_err.log &
+nohup java -jar $DEPLOY_JAR  >> /home/ec2-user/deploy.log 2>/home/ec2-user/action/deploy_err.log &
