@@ -5,8 +5,7 @@ target/
 .idea
 classes/
 META-INF/
-resources-prod/
-  
+
 # OS Files #
 .DS_Store
   
