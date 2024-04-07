@@ -1,6 +1,5 @@
 package aws.retrospective.service;
 
-import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.entity.Team;
 import aws.retrospective.repository.TeamRepository;
@@ -47,12 +46,10 @@ class InviteTeamMemberServiceTest {
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
 
         // 서비스 메서드 호출
-        CommonApiResponse<InviteTeamMemberDTO> response = inviteTeamMemberService.generateInvitation(teamId);
+        InviteTeamMemberDTO inviteTeamMemberDTO = inviteTeamMemberService.generateInvitation(teamId);
 
         // 반환된 응답 검증
-        assertEquals(HttpStatus.OK.value(), response.getCode(), "HTTP 상태 코드가 OK여야 합니다.");
 
-        InviteTeamMemberDTO inviteTeamMemberDTO = response.getData();
         assertTrue(isValidUUID(inviteTeamMemberDTO.getInvitationCode()), "초대 코드가 올바른 형식이어야 합니다.");
         assertNotNull(inviteTeamMemberDTO.getInvitationUrl(), "초대 링크 URL이 존재해야 합니다.");
         assertNotNull(inviteTeamMemberDTO.getExpirationTime(), "초대 만료 시간이 존재해야 합니다.");
@@ -78,12 +75,9 @@ class InviteTeamMemberServiceTest {
         LocalDateTime expirationTime = LocalDateTime.now().minusHours(2);
 
         // 서비스 메서드 호출
-        CommonApiResponse<InviteTeamMemberDTO> response = inviteTeamMemberService.generateInvitation(teamId);
+        InviteTeamMemberDTO inviteTeamMemberDTO = inviteTeamMemberService.generateInvitation(teamId);
 
         // 반환된 응답 검증
-        assertEquals(HttpStatus.OK.value(), response.getCode(), "HTTP 상태 코드가 OK여야 합니다.");
-
-        InviteTeamMemberDTO inviteTeamMemberDTO = response.getData();
         assertTrue(isValidUUID(inviteTeamMemberDTO.getInvitationCode()), "초대 코드가 올바른 형식이어야 합니다.");
         assertNotNull(inviteTeamMemberDTO.getInvitationUrl(), "초대 링크 URL이 존재해야 합니다.");
         assertNotNull(inviteTeamMemberDTO.getExpirationTime(), "초대 만료 시간이 존재해야 합니다.");
