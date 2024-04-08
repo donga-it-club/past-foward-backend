@@ -15,7 +15,7 @@ public class InviteTeamMemberController {
 
     private final InviteTeamMemberService inviteTeamMemberService;
 
-    @GetMapping("/teams/{teamId}/invitation")
+    @GetMapping("/teams/{teamId}/invitation-url")
     public CommonApiResponse<InviteTeamMemberDTO> getInvitation(@PathVariable Long teamId) { // 팀 ID에 해당하는 초대 정보를 가져오는 메서드
         // 팀 ID를 기반으로 초대 정보를 생성하고, 그 결과를 받아옴
         InviteTeamMemberDTO inviteTeamMemberDTO = inviteTeamMemberService.generateInvitation(teamId);
