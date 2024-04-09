@@ -2,6 +2,7 @@ package aws.retrospective.dto;
 
 import aws.retrospective.entity.ProjectStatus;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,13 +16,13 @@ public class UpdateRetrospectiveDto {
 
     private Long teamId;
 
-    @NotEmpty(message = "User id is required")
+    @NotNull(message = "User id is required")
     private Long userId;
 
     @NotEmpty(message = "Retrospective description is required")
     private String description;
 
-    @NotEmpty(message = "Retrospective status is required")
+    @NotNull(message = "Retrospective status is required")
     private ProjectStatus status = ProjectStatus.IN_PROGRESS;
 
     private UUID thumbnail;
