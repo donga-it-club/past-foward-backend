@@ -39,11 +39,18 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
 
+    private String thumbnail; // 프로필 이미지
+
     @Builder
     public User(String email, String password, String username, String phone) {
         this.email = email;
         this.password = password;
         this.username = username;
         this.phone = phone;
+    }
+
+    // 프로필 이미지 등록
+    public void updateProfileImage(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 }

@@ -30,6 +30,10 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build -Plocal
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
 
       - name: Cache Gradle packages
         uses: actions/cache@v1

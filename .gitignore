@@ -111,6 +111,7 @@ cmake-build-debug/
 /out/
 application.properties
 application.yml
+application-aws.yml
 .gradle
 build
 
