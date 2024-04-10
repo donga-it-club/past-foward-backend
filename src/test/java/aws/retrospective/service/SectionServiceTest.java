@@ -14,8 +14,6 @@ import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.GetTeamUsersRequestDto;
-import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.Likes;
@@ -34,7 +32,6 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import aws.retrospective.repository.UserTeamRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -63,8 +60,6 @@ class SectionServiceTest {
     LikesRepository likesRepository;
     @Mock
     TeamRepository teamRepository;
-    @Mock
-    UserTeamRepository userTeamRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -409,47 +404,6 @@ class SectionServiceTest {
             .phone("010-1234-1234")
             .email("test@naver.com")
             .build();
-    }
-
-    @Test
-    @DisplayName("Action Items를 눌렀을 때 팀에 속한 모든 회원을 조회할 수 있다.")
-    void getTeamMembers() {
-        //given
-        Long teamId = 1L;
-        Team createdTeam = createTeam();
-        ReflectionTestUtils.setField(createdTeam, "id", teamId);
-        when(teamRepository.findById(teamId)).thenReturn(Optional.of(createdTeam));
-
-        Long userId = 1L;
-        User createdUser = createUser();
-        ReflectionTestUtils.setField(createdUser, "id", userId);
-
-        Long userTeamId = 1L;
-        UserTeam createdUserTeam = createUserTeam(createdUser, createdTeam);
-        ReflectionTestUtils.setField(createdUserTeam, "id", userTeamId);
-
-        GetTeamUsersResponseDto response = new GetTeamUsersResponseDto(userId, "test", "test");
-        when(userTeamRepository.findTeamMembers(teamId)).thenReturn(List.of(response));
-
-        Long retrospectiveId = 1L;
-        Retrospective createdRetrospective = createRetrospective(createTemplate(), createdUser,
-            createdTeam);
-        ReflectionTestUtils.setField(createdRetrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
-
-        //when
-        GetTeamUsersRequestDto request = new GetTeamUsersRequestDto();
-        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
-        List<GetTeamUsersResponseDto> result = sectionService.getTeamMembers(teamId,
-            request);
-
-        //then
-        assertThat(result.size()).isEqualTo(1);
-        GetTeamUsersResponseDto searchUser = result.get(0);
-        assertThat(searchUser.getUserId()).isEqualTo(userId);
-        assertThat(searchUser.getUsername()).isEqualTo("test");
-        assertThat(searchUser.getProfileImage()).isEqualTo("test");
-
     }
 
     private static UserTeam createUserTeam(User createdUser, Team createdTeam) {

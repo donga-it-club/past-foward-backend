@@ -9,8 +9,6 @@ import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.GetTeamUsersRequestDto;
-import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.Likes;
@@ -44,7 +42,6 @@ public class SectionService {
     private final TemplateSectionRepository templateSectionRepository;
     private final LikesRepository likesRepository;
     private final TeamRepository teamRepository;
-    private final UserTeamRepository userTeamRepository;
 
     // 회고 카드 등록
     @Transactional
@@ -202,18 +199,5 @@ public class SectionService {
         return retrospectiveRepository.findById(request.getRetrospectiveId())
             .orElseThrow(() -> new NoSuchElementException(
                 "Not Found Retrospective id : " + request.getRetrospectiveId()));
-    }
-
-    @Transactional(readOnly = true)
-    public List<GetTeamUsersResponseDto> getTeamMembers(Long teamId, GetTeamUsersRequestDto request) {
-        Team findTeam = getTeam(teamId);
-        Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
-
-        // 다른 팀의 회고보드에 대한 조회는 불가능하다.
-        if(findRetrospective.getTeam().getId() != findTeam.getId()) {
-            throw new ForbiddenAccessException("해당 팀의 회고보드만 조회할 수 있습니다.");
-        }
-
-        return userTeamRepository.findTeamMembers(teamId);
     }
 }
