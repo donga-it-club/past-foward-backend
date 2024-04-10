@@ -1,0 +1,9 @@
+aws:
+  secretsmanager:
+    name: ${AWS_SECRETS_MANAGER_NAME}
+    prefix: ${AWS_SECRETS_MANAGER_PREFIX}
+
+cloud:
+  aws:
+    region:
+      static: ${AWS_REGION}

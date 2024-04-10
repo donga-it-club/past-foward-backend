@@ -30,4 +30,6 @@ public class CreateRetrospectiveDto {
 
     private LocalDateTime startDate;
 
+    @NotEmpty(message = "Retrospective description is required.")
+    private String description;
 }

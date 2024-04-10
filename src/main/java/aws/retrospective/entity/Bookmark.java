@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,9 +29,18 @@ public class Bookmark extends BaseEntity {
     @JoinColumn(name = "retrospective_id")
     private Retrospective retrospective;
 
+    @Builder
     public Bookmark(User user, Retrospective retrospective) {
         this.user = user;
         this.retrospective = retrospective;
+    }
+
+    public void addBookmark() {
+        this.retrospective.getBookmarks().add(this);
+    }
+
+    public void removeBookmark() {
+        this.retrospective.getBookmarks().remove(this);
     }
 }
 

@@ -81,6 +81,7 @@ public class RetrospectiveServiceTest {
 
         Retrospective retrospective = new Retrospective("New Retro",
             null,
+            "some description",
             null,
             ProjectStatus.IN_PROGRESS,
             new Team("Team Name"), new User("user1", "test", "test", "test"),
@@ -128,6 +129,7 @@ public class RetrospectiveServiceTest {
 
         Retrospective retrospective = new Retrospective("New Retro",
             null,
+            "some description",
             null,
             ProjectStatus.IN_PROGRESS,
             team, user, template,
@@ -142,6 +144,9 @@ public class RetrospectiveServiceTest {
         ReflectionTestUtils.setField(dto, "teamId", 1L);
         ReflectionTestUtils.setField(dto, "userId", 1L);
         ReflectionTestUtils.setField(dto, "templateId", 1L);
+        ReflectionTestUtils.setField(dto, "status", ProjectStatus.IN_PROGRESS);
+        ReflectionTestUtils.setField(dto, "thumbnail", UUID.randomUUID());
+        ReflectionTestUtils.setField(dto, "description", "some description");
 
         // when
         CreateRetrospectiveResponseDto response = retrospectiveService.createRetrospective(dto);
@@ -234,6 +239,7 @@ public class RetrospectiveServiceTest {
         ReflectionTestUtils.setField(dto, "userId", 1L);
         ReflectionTestUtils.setField(dto, "status", ProjectStatus.IN_PROGRESS);
         ReflectionTestUtils.setField(dto, "thumbnail", UUID.randomUUID());
+        ReflectionTestUtils.setField(dto, "description", "New Description");
 
         when(retrospectiveRepository.findById(1L)).thenReturn(Optional.of(retrospective));
 
