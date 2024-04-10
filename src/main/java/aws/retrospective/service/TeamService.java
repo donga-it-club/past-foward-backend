@@ -23,7 +23,6 @@ public class TeamService {
     private final UserTeamRepository userTeamRepository;
 
 
-
     @Transactional(readOnly = true)
     public List<GetTeamUsersResponseDto> getTeamMembers(Long teamId, GetTeamUsersRequestDto request) {
         Team findTeam = getTeam(teamId);
