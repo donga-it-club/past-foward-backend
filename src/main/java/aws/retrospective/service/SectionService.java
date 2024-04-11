@@ -24,6 +24,7 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import aws.retrospective.repository.UserTeamRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -178,7 +179,7 @@ public class SectionService {
     @Transactional(readOnly = true)
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective findRetrospective = getRetrospective(request);
-        Team findTeam = getTeam(request);
+        Team findTeam = getTeam(request.getTeamId());
 
         // 다른 팀이 작성한 회고보드는 조회할 수 없다.
         if(findRetrospective.getTeam().getId() != findTeam.getId()) {
@@ -188,10 +189,10 @@ public class SectionService {
         return sectionRepository.getSections(request.getRetrospectiveId());
     }
 
-    private Team getTeam(GetSectionsRequestDto request) {
-        return teamRepository.findById(request.getTeamId())
+    private Team getTeam(Long teamId) {
+        return teamRepository.findById(teamId)
             .orElseThrow(
-                () -> new NoSuchElementException("Not Found Team id : " + request.getTeamId()));
+                () -> new NoSuchElementException("Not Found Team id : " + teamId));
     }
 
     private Retrospective getRetrospective(GetSectionsRequestDto request) {

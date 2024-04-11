@@ -24,6 +24,7 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
+import aws.retrospective.entity.UserTeam;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
@@ -402,6 +403,13 @@ class SectionServiceTest {
             .password("test")
             .phone("010-1234-1234")
             .email("test@naver.com")
+            .build();
+    }
+
+    private static UserTeam createUserTeam(User createdUser, Team createdTeam) {
+        return UserTeam.builder()
+            .user(createdUser)
+            .team(createdTeam)
             .build();
     }
 }

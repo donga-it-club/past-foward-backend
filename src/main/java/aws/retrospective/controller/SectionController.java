@@ -109,4 +109,5 @@ public class SectionController {
         FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
+
 }
