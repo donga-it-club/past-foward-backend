@@ -5,7 +5,7 @@ target/
 .idea
 classes/
 META-INF/
-  
+
 # OS Files #
 .DS_Store
   
@@ -111,6 +111,7 @@ cmake-build-debug/
 /out/
 application.properties
 application.yml
+application-aws.yml
 .gradle
 build
 

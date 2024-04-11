@@ -33,11 +33,13 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<UserTeam> teams = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Bookmark> bookmarks = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
+
+    private String thumbnail; // 프로필 이미지
 
     @Builder
     public User(String email, String password, String username, String phone) {
@@ -45,5 +47,10 @@ public class User extends BaseEntity {
         this.password = password;
         this.username = username;
         this.phone = phone;
+    }
+
+    // 프로필 이미지 등록
+    public void updateProfileImage(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 }

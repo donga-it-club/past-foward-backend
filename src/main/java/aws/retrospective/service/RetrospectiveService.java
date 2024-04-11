@@ -35,6 +35,7 @@ public class RetrospectiveService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final RetrospectiveTemplateRepository templateRepository;
+    private final BookmarkService bookmarkService;
 
     @Transactional(readOnly = true)
     public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(
@@ -62,7 +63,8 @@ public class RetrospectiveService {
         Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId).orElseThrow(
             () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
 
-        retrospective.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail());
+        retrospective.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail(),
+            dto.getDescription());
 
         boolean hasBookmarksByUser = hasBookmarksByUser(retrospective, dto.getUserId());
 
@@ -91,7 +93,8 @@ public class RetrospectiveService {
 
         Retrospective retrospective = Retrospective.builder().title(dto.getTitle())
             .status(dto.getStatus()).team(team.orElse(null)).user(user).template(template)
-            .thumbnail(dto.getThumbnail()).startDate(dto.getStartDate()).build();
+            .thumbnail(dto.getThumbnail()).startDate(dto.getStartDate())
+            .description(dto.getDescription()).build();
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
 
@@ -109,6 +112,10 @@ public class RetrospectiveService {
         }
 
         retrospectiveRepository.deleteById(retrospectiveId);
+    }
+
+    public boolean toggleBookmark(Long retrospectiveId, Long userId) {
+        return bookmarkService.toggleBookmark(userId, retrospectiveId);
     }
 
 
@@ -131,7 +138,9 @@ public class RetrospectiveService {
             .title(retrospective.getTitle())
             .teamId(Optional.ofNullable(retrospective.getTeam()).map(Team::getId).orElse(null))
             .userId(retrospective.getUser().getId()).templateId(retrospective.getTemplate().getId())
-            .status(retrospective.getStatus()).thumbnail(retrospective.getThumbnail()).build();
+            .status(retrospective.getStatus()).thumbnail(retrospective.getThumbnail())
+            .description(retrospective.getDescription()).startDate(retrospective.getStartDate())
+            .build();
     }
 
 }
