@@ -16,6 +16,7 @@ import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
@@ -304,12 +305,24 @@ class SectionServiceTest {
         Section createdSection = createSection(createdUser, createdTemplateSection, createdRetrospective);
         ReflectionTestUtils.setField(createdSection, "id", sectionId);
 
-        GetSectionsResponseDto response = new GetSectionsResponseDto(
-            sectionId, createdUser.getUsername(), createdSection.getContent(), createdSection.getLikeCnt(),
-            createdTemplateSection.getSectionName(), createdSection.getCreatedDate()
-        );
+        Long commentId1 = 1L;
+        Comment comment1 = Comment.builder()
+            .section(createdSection)
+            .content("content1")
+            .user(createdUser)
+            .build();
+        ReflectionTestUtils.setField(comment1, "id", commentId1);
+        Long commentId2 = 2L;
+        Comment comment2 = Comment.builder()
+            .section(createdSection)
+            .content("content2")
+            .user(createdUser)
+            .build();
+        ReflectionTestUtils.setField(comment2, "id", commentId2);
+        createdSection.getComments().add(comment1);
+        createdSection.getComments().add(comment2);
 
-        when(sectionRepository.getSections(retrospectiveId)).thenReturn(List.of(response));
+        when(sectionRepository.getSectionsWithComments(retrospectiveId)).thenReturn(List.of(createdSection));
 
         //when
         GetSectionsRequestDto request = new GetSectionsRequestDto();
@@ -326,6 +339,10 @@ class SectionServiceTest {
         assertThat(result.getContent()).isEqualTo(createdSection.getContent());
         assertThat(result.getUsername()).isEqualTo(createdUser.getUsername());
         assertThat(result.getLikeCnt()).isEqualTo(createdSection.getLikeCnt());
+        assertThat(result.getComments().size()).isEqualTo(2);
+        assertThat(result.getComments().get(0).getContent()).isEqualTo(comment1.getContent());
+        assertThat(result.getComments().get(1).getContent()).isEqualTo(comment2.getContent());
+
 
     }
 
