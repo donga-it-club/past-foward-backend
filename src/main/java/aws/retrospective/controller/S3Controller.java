@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ public class S3Controller {
     private final S3Service s3Service;
 
     // PreSignedUrl 발급
-    @PostMapping("/pre-signed-url")
+    @GetMapping("/presigned-url")
     @Operation(summary = "AWS S3 PreSignedUrl 발급")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "PreSignedUrl 발급 성공"),
@@ -33,6 +34,17 @@ public class S3Controller {
     public CommonApiResponse<GetPreSignedUrlResponseDto> getPreSignedUrl(
         @RequestBody @Valid GetPreSignedUrlRequestDto request) {
         GetPreSignedUrlResponseDto response = s3Service.getPreSignedUrl(request);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @PostMapping("/presigend-url")
+    @Operation(summary = "AWS S3 preSignedUrl 발급 (업로드 용)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "PreSignedUrl 발급 성공"),
+    })
+    public CommonApiResponse<GetPreSignedUrlResponseDto> getPreSignedUrlForUpload(
+        @RequestBody @Valid GetPreSignedUrlRequestDto request) {
+        GetPreSignedUrlResponseDto response = s3Service.createPresignedUrl(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }

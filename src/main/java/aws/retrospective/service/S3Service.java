@@ -17,4 +17,9 @@ public class S3Service {
         String preSignedUrl = s3Service.getPresignUrl(request.getFilename());
         return new GetPreSignedUrlResponseDto(request.getFilename(), preSignedUrl);
     }
+
+    public GetPreSignedUrlResponseDto createPresignedUrl(GetPreSignedUrlRequestDto request) {
+        String preSignedUrl = s3Service.createPresignedUrl(request.getFilename());
+        return new GetPreSignedUrlResponseDto(request.getFilename(), preSignedUrl);
+    }
 }
