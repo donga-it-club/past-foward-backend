@@ -36,9 +36,15 @@ public class Comment extends BaseEntity {
     private Section section; // 어떤 Section의 게시물에서 작성된 댓글인지
 
     @Builder
-    public Comment(String content, User user, Section section) {
+    public Comment(Long id, String content, User user, Section section) {
+        this.id = id;
         this.content = content;
         this.user = user;
         this.section = section;
     }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
 }
