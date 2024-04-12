@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Component
 public class EmailSenderDto {
-    @Value("${aws.send-mail-to}")
+    @Value("${aws.ses.send-mail-to}")
     private String to;
 
 

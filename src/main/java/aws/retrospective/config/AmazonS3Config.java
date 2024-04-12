@@ -1,7 +1,5 @@
 package aws.retrospective.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,12 +13,8 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Configuration
 public class AmazonS3Config {
 
-    @Value("${AWS_REGION}")
+    @Value("${aws.region}")
     private String region;
-    @Value("${AWS_ACCESS_KEY}")
-    private String accessKey;
-    @Value("${AWS_SECRET_KEY}")
-    private String secretKey;
 
     @Bean
     public S3Client s3Client() {
@@ -41,7 +35,7 @@ public class AmazonS3Config {
     @Bean
     public AmazonSimpleEmailService amazonSimpleEmailService() {
         return AmazonSimpleEmailServiceClientBuilder.standard()
-            .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+            .withCredentials(com.amazonaws.auth.InstanceProfileCredentialsProvider.getInstance())
             .withRegion(region)
             .build();
     }

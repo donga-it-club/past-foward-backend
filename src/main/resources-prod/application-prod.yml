@@ -19,4 +19,8 @@ spring:
       on-profile: prod
 
 aws:
-  send-mail-to: ${AWS_SEND_MAIL_TO}
+  ses:
+    send-mail-to: ${AWS_SEND_MAIL_TO}
+  region: ${AWS_REGION}
+  s3:
+    bucket: "bucket"
