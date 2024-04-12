@@ -38,9 +38,4 @@ management:
     web:
       base-path: /
 
-aws:
-  region: "us-west-2"
-  s3:
-    bucket: "prod-files-secure"
-
 
