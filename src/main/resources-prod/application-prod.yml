@@ -17,3 +17,6 @@ spring:
   config:
     activate:
       on-profile: prod
+
+cors:
+  allowed-origins: ${allowed-origins}

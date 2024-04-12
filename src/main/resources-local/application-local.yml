@@ -22,3 +22,6 @@ spring:
 aws:
   secretsmanager:
     enabled: off
+
+cors:
+  allowed-origins: "some-origin"
