@@ -19,4 +19,4 @@ spring:
       on-profile: prod
 
 cors:
-  allowed-origins: ${allowed-origins}
+  allowed-origins: ${ALLOWED_ORIGINS}
