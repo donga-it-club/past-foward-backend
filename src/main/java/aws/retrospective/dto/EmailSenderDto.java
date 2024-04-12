@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @Getter
 @Component
 public class EmailSenderDto {
-
-    @Value("${AWS_SEND_MAIL_TO}")
+    @Value("${aws.send-mail-to}")
     private String to;
+
 
     public SendEmailRequest toSendRequestDto(SendMailRequestDto request) {
         Destination destination = new Destination()

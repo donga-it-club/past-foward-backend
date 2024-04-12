@@ -17,3 +17,6 @@ spring:
   config:
     activate:
       on-profile: prod
+
+aws:
+  send-mail-to: ${AWS_SEND_MAIL_TO}

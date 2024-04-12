@@ -2,7 +2,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: "jdbc:mysql://localhost:3306/past-forward"
+    url: "jdbc:mysql://localhost:3307/past-forward"
     username: dev
     password: 1234
   jpa:
@@ -22,3 +22,4 @@ spring:
 aws:
   secretsmanager:
     enabled: off
+  send-mail-to: "test@gmail.com"
