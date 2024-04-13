@@ -34,4 +34,6 @@ public class TeamInvite extends BaseEntity {
         this.invitationCode = invitationCode;
         this.expirationTime = expirationTime;
     }
+
+     
 }
