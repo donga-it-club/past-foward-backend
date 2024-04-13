@@ -2,6 +2,8 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.entity.Team;
+import aws.retrospective.entity.TeamInvite;
+import aws.retrospective.repository.TeamInvitationRepository;
 import aws.retrospective.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,7 @@ import java.util.UUID;
 public class InviteTeamMemberService {
 
     private final TeamRepository teamRepository;
+    private final TeamInvitationRepository teamInvitationRepository;
     private final QRCodeService qrCodeService;
     private static final int EXPIRATION_HOURS = 2;
 
@@ -29,13 +32,20 @@ public class InviteTeamMemberService {
 
         // 초대 코드 생성
         String invitationCode = UUID.randomUUID().toString();
-        // 초대 링크 생성
-        String invitationUrl = domainUrl + "/invitations/" + invitationCode;
         // 초대 만료 시간 설정
         LocalDateTime expirationTime = LocalDateTime.now().plusHours(EXPIRATION_HOURS);
 
-        // 초대 토큰 유효성 검증
-        validateInvitation(invitationCode);
+        // 초대 정보를 데이터베이스에 저장
+        TeamInvite teamInvite = TeamInvite.builder()
+                .team(team)
+                .invitationCode(invitationCode)
+                .expirationTime(expirationTime)
+                .build();
+        teamInvitationRepository.save(teamInvite);
+
+        // 초대 링크 생성
+        String invitationUrl = domainUrl + "/invitations/" + invitationCode;
+
 
         // 초대 링크를 QR 코드로 변환
         byte[] qrCodeImage = qrCodeService.generateQRCode(invitationUrl, expirationTime);
