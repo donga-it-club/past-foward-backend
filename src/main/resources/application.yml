@@ -36,5 +36,6 @@ domain:
 management:
   endpoints:
     web:
+      base-path: /
 
-      
+
