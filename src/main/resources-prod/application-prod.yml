@@ -24,3 +24,7 @@ aws:
   region: ${AWS_REGION}
   s3:
     bucket: "bucket"
+
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS}
