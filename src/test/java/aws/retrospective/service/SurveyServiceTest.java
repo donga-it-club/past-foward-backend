@@ -3,6 +3,7 @@ package aws.retrospective.service;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.SaveSurveyDto;
 import aws.retrospective.entity.Survey;
+import aws.retrospective.entity.Survey.Gender;
 import aws.retrospective.repository.SurveyRepository;
 import java.util.List;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,27 +21,29 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import org.junit.jupiter.api.BeforeEach;
 
-import aws.retrospective.entity.Survey.Gender;
 import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest
+//@SpringBootTest
 @Transactional
 public class SurveyServiceTest {
+
+    static {
+        System.setProperty("com.amazonaws.sdk.disableEc2Metadata", "true");
+    }
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @InjectMocks
     private SurveyService surveyService;
 
     @Mock
     private SurveyRepository surveyRepository;
-  
-  
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
   
 
     @Test
@@ -48,7 +52,7 @@ public class SurveyServiceTest {
         // Given
         SaveSurveyDto surveyDto = SaveSurveyDto.builder()
             .age(22)
-            .gender("female")
+            .gender("FEMALE")
             .job("student")
             .residence("Korea")
             .discoverySource("internet")
@@ -64,7 +68,7 @@ public class SurveyServiceTest {
         verify(surveyRepository).save(any(Survey.class));
 
         assertEquals(22, surveyDto.getAge());
-        assertEquals("female", surveyDto.getGender());
+        assertEquals("FEMALE", surveyDto.getGender());
         assertEquals("student", surveyDto.getJob());
         assertEquals("Korea", surveyDto.getResidence());
         assertEquals("internet", surveyDto.getDiscoverySource());
@@ -76,18 +80,18 @@ public class SurveyServiceTest {
         // 가짜 데이터 생성
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
-            .age("30")
-            .gender(Gender.valueOf("MALE"))
-            .occupation("Engineer")
-            .region("Seoul")
-            .source("Internet")
-            .purpose("Research")
+            .age(30)
+            .gender(String.valueOf(Gender.valueOf("MALE")))
+            .job("Engineer")
+            .residence("Seoul")
+            .discoverySource("Internet")
+            .purpose(List.of("research", "analysis"))
             .build());
         // Mock 객체 설정
         when(surveyRepository.findAll()).thenReturn(surveys);
 
         // 테스트 실행
-        CommonApiResponse<List<SurveyDto>> response = surveyService.getAllSurveys();
+        CommonApiResponse<List<SaveSurveyDto>> response = surveyService.getAllSurveys();
 
         // 결과 확인
         assertEquals(surveys.size(), response.getData().size());
