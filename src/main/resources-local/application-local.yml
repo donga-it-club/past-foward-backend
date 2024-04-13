@@ -22,3 +22,8 @@ spring:
 aws:
   secretsmanager:
     enabled: off
+  ses:
+    send-mail-to: "test@gmail.com"
+  region: "region"
+  s3:
+    bucket: "bucket"

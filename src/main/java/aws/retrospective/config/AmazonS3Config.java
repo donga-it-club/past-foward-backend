@@ -1,5 +1,7 @@
 package aws.retrospective.config;
 
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +13,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Configuration
 public class AmazonS3Config {
 
-    @Value("${AWS_REGION}")
+    @Value("${aws.region}")
     private String region;
 
     @Bean
@@ -27,6 +29,14 @@ public class AmazonS3Config {
         return S3Presigner.builder()
             .credentialsProvider(InstanceProfileCredentialsProvider.create())
             .region(Region.of(region))
+            .build();
+    }
+
+    @Bean
+    public AmazonSimpleEmailService amazonSimpleEmailService() {
+        return AmazonSimpleEmailServiceClientBuilder.standard()
+            .withCredentials(com.amazonaws.auth.InstanceProfileCredentialsProvider.getInstance())
+            .withRegion(region)
             .build();
     }
 }

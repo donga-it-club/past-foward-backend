@@ -17,3 +17,10 @@ spring:
   config:
     activate:
       on-profile: prod
+
+aws:
+  ses:
+    send-mail-to: ${AWS_SEND_MAIL_TO}
+  region: ${AWS_REGION}
+  s3:
+    bucket: "bucket"
