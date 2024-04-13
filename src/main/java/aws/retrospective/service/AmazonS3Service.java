@@ -17,7 +17,7 @@ public class AmazonS3Service {
 
     private final S3Presigner presigner;
 
-    @Value("${AWS_S3_BUCKET}")
+    @Value("${aws.s3.bucket}")
     private String bucketName;
 
     public String getPresignUrl(String filename) {
