@@ -23,7 +23,7 @@ aws:
     send-mail-to: ${AWS_SEND_MAIL_TO}
   region: ${AWS_REGION}
   s3:
-    bucket: "bucket"
+    bucket: ${AWS_S3_BUCKET}
 
 
 cors:
