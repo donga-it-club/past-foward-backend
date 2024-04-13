@@ -3,6 +3,8 @@ package aws.retrospective.dto;
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -26,6 +28,8 @@ public class GetSectionsResponseDto {
     @Schema(description = "회고 카드 등록일", example = "2021-07-01T00:00:00")
     private LocalDateTime createdDate;
 
+    private List<GetCommentDto> comments = new ArrayList<>();
+
     @QueryProjection
     public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
         String sectionName, LocalDateTime createdDate) {
@@ -35,5 +39,16 @@ public class GetSectionsResponseDto {
         this.likeCnt = likeCnt;
         this.sectionName = sectionName;
         this.createdDate = createdDate;
+    }
+
+    public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
+        String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments) {
+        this.sectionId = sectionId;
+        this.username = username;
+        this.content = content;
+        this.likeCnt = likeCnt;
+        this.sectionName = sectionName;
+        this.createdDate = createdDate;
+        this.comments = comments;
     }
 }

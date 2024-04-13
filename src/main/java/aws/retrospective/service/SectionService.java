@@ -7,6 +7,7 @@ import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
+import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
@@ -24,10 +25,11 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import aws.retrospective.repository.UserTeamRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -186,7 +188,24 @@ public class SectionService {
             throw new ForbiddenAccessException("해당 팀의 회고보드만 조회할 수 있습니다.");
         }
 
-        return sectionRepository.getSections(request.getRetrospectiveId());
+        List<GetSectionsResponseDto> response = new ArrayList<>();
+        List<Section> sections = sectionRepository.getSectionsWithComments(
+            request.getRetrospectiveId());
+
+        revertDto(sections, response);
+
+        return response;
+    }
+
+    private void revertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
+        for (Section section : sections) {
+            List<GetCommentDto> collect = section.getComments().stream()
+                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername()))
+                .collect(Collectors.toList());
+            response.add(new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
+                section.getContent(), section.getLikeCnt(), section.getTemplateSection().getSectionName(),
+                section.getCreatedDate(), collect));
+        }
     }
 
     private Team getTeam(Long teamId) {
