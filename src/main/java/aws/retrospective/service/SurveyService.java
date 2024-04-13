@@ -1,10 +1,13 @@
 package aws.retrospective.service;
 
+import aws.retrospective.dto.SaveSurveyDto;
+import aws.retrospective.entity.Survey;
+import jakarta.validation.Valid;
 import org.springframework.transaction.annotation.Transactional;
 import aws.retrospective.common.CommonApiResponse;
-import aws.retrospective.dto.SurveyDto;
-import aws.retrospective.entity.Survey;
 import aws.retrospective.repository.SurveyRepository;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +22,7 @@ public class SurveyService {
 
     // 설문지 결과 등록
     @Transactional
-    public void addSurvey(SaveSurveyDto request) {
+    public void addSurvey(@Valid SaveSurveyDto request) {
 
         Survey survey = Survey.builder()
             .age(request.getAge())
@@ -33,23 +36,22 @@ public class SurveyService {
         surveyRepository.save(survey);
     }
 
-    public CommonApiResponse<List<SurveyDto>> getAllSurveys() {
+    public CommonApiResponse<List<SaveSurveyDto>> getAllSurveys() {
         List<Survey> surveys = surveyRepository.findAll();
-        List<SurveyDto> surveyDtos = surveys.stream()
+        List<SaveSurveyDto> surveyDtos = surveys.stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());
         return CommonApiResponse.successResponse(HttpStatus.OK, surveyDtos);
     }
 
-    private SurveyDto convertToDto(Survey survey) {
-        return SurveyDto.builder()
-            .id(survey.getId())
-            .age(survey.getAge())
+    private SaveSurveyDto convertToDto(Survey survey) {
+        return SaveSurveyDto.builder()
+            .age(Integer.valueOf(String.valueOf(survey.getAge())))
             .gender(survey.getGender().toString())
-            .occupation(survey.getOccupation())
-            .region(survey.getRegion())
-            .source(survey.getSource())
-            .purpose(survey.getPurpose())
+            .job(survey.getJob())
+            .residence(survey.getResidence())
+            .discoverySource(survey.getDiscoverySource())
+            .purpose(Collections.singletonList(survey.getPurpose().toString()))
             .build();
     }
 }
