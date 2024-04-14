@@ -22,15 +22,11 @@ public class RetrospectiveTemplateService {
 
     @Transactional(readOnly = true)
     public List<RetrospectiveTemplateResponseDto> getRetrospectiveTemplates() {
-        List<RetrospectiveTemplate> templates = retrospectiveTemplateRepository
-            .findAll();
+        List<RetrospectiveTemplate> templates = retrospectiveTemplateRepository.findAll();
 
-        return templates.stream()
-            .map(template -> RetrospectiveTemplateResponseDto.builder()
-                .id(template.getId())
-                .name(template.getName())
-                .build())
-            .collect(Collectors.toList());
+        return templates.stream().map(
+            template -> RetrospectiveTemplateResponseDto.builder().id(template.getId())
+                .name(template.getName()).build()).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -38,14 +34,10 @@ public class RetrospectiveTemplateService {
         List<TemplateSection> templateSections = templateSectionRepository.findByTemplateId(
             templateId);
 
-        return templateSections.stream()
-            .map(section -> GetTemplateSectionsDto.builder()
-                .id(section.getId())
-                .name(section.getSectionName())
-                .sequence(section.getSequence())
-                .templateId(section.getTemplate().getId())
-                .build())
-            .collect(Collectors.toList());
+        return templateSections.stream().map(
+            section -> GetTemplateSectionsDto.builder().id(section.getId())
+                .name(section.getSectionName()).sequence(section.getSequence())
+                .templateId(section.getTemplate().getId()).build()).collect(Collectors.toList());
 
     }
 
