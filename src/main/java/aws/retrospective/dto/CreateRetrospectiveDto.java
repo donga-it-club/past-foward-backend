@@ -16,7 +16,7 @@ public class CreateRetrospectiveDto {
     @NotEmpty(message = "Retrospective title is required.")
     private String title;
 
-    private Long teamId;
+    private RetrospectiveType type;
 
     //TODO: 추후 Cognito 이용해서 request body에서 받지 않고 perssitence layer에서 받아오도록 수정
     private Long userId;
