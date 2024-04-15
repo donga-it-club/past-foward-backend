@@ -14,17 +14,29 @@ then
 else
   echo "> 애플리케이션 종료: PID $CURRENT_PID" >> /home/ec2-user/action/deploy.log
   kill -15 "$CURRENT_PID"
+  sleep_count=0
   while kill -0 "$CURRENT_PID" >/dev/null 2>&1; do
+    if [ $sleep_count -ge 10 ]
+    then
+      echo "Waiting for process to terminate... Timeout!" >> /home/ec2-user/action/deploy.log
+      break
+    fi
     echo "Waiting for process to terminate..." >> /home/ec2-user/action/deploy.log
     sleep 1
+    sleep_count=$((sleep_count+1))
   done
   echo "> 애플리케이션이 종료되었습니다." >> /home/ec2-user/action/deploy.log
 fi
 
-echo "> build 파일을 $DEPLOY_PATH로 복사" >> /home/ec2-user/action/deploy.log
 DEPLOY_PATH=/home/ec2-user/action/
-cp "$BUILD_JAR" $DEPLOY_PATH
+if [ -f "$BUILD_JAR" ]
+then
+  echo "> build 파일을 $DEPLOY_PATH로 복사" >> /home/ec2-user/action/deploy.log
+  cp "$BUILD_JAR" $DEPLOY_PATH
+else
+  echo "> build 파일이 존재하지 않습니다." >> /home/ec2-user/action/deploy.log
+  exit 1
+fi
 
 DEPLOY_JAR=$DEPLOY_PATH$JAR_NAME
 echo "> $DEPLOY_JAR 배포" >> /home/ec2-user/action/deploy.log
-nohup java -jar "$DEPLOY_JAR" > /home/ec2-user/deploy.log 2> /home/ec2-user/action/deploy_err.log &
