@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - fix/code-deploy-error-deploy.sh
+      - fix/deploy.sh
 
 jobs:
   build-and-deploy:
