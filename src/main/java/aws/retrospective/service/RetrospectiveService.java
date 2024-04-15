@@ -68,6 +68,7 @@ public class RetrospectiveService {
 
     private GetRetrospectiveResponseDto toResponse(Retrospective findRetrospective) {
         return new GetRetrospectiveResponseDto(
+            findRetrospective.getId(),
             findRetrospective.getTitle(), findRetrospective.getTemplate().getId(),
             findRetrospective.getTeam().getId(),
             findRetrospective.getUser().getId(), findRetrospective.getDescription(),

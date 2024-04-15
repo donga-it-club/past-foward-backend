@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class GetRetrospectiveResponseDto {
 
+    private Long retrospectiveId; // 회고 ID
     private String title; // 회고 제목
     private Long templateId; // 회고 템플릿 유형 (Kudos, KPT..)
     private Long teamId; // 회고 유형 (개인, 팀)
