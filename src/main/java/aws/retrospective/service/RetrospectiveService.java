@@ -6,16 +6,19 @@ import aws.retrospective.dto.CreateRetrospectiveResponseDto;
 import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveResponseDto;
+import aws.retrospective.dto.RetrospectiveType;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.dto.UpdateRetrospectiveDto;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.User;
+import aws.retrospective.entity.UserTeam;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
+import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.specification.RetrospectiveSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
@@ -23,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,7 @@ public class RetrospectiveService {
     private final UserRepository userRepository;
     private final RetrospectiveTemplateRepository templateRepository;
     private final BookmarkService bookmarkService;
+    private final UserTeamRepository userTeamRepository;
 
     @Transactional(readOnly = true)
     public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(
@@ -79,20 +84,25 @@ public class RetrospectiveService {
 
     private Sort getSort(RetrospectivesOrderType orderType) {
         if (orderType == RetrospectivesOrderType.OLDEST) {
-            return Sort.by(Sort.Direction.ASC, "createdDate");
+            return Sort.by(Direction.ASC, "createdDate");
         }
 
-        return Sort.by(Sort.Direction.DESC, "createdDate");
+        return Sort.by(Direction.DESC, "createdDate");
     }
 
     @Transactional
     public CreateRetrospectiveResponseDto createRetrospective(CreateRetrospectiveDto dto) {
         User user = findUserById(dto.getUserId());
         RetrospectiveTemplate template = findTemplateById(dto.getTemplateId());
-        Optional<Team> team = findTeamByIdOptional(dto.getTeamId());
+
+        RetrospectiveType retrospectiveType = dto.getType();
+        Team team = null;
+        if (retrospectiveType == RetrospectiveType.TEAM) {
+            team = createTeamWithUserId(dto.getUserId());
+        }
 
         Retrospective retrospective = Retrospective.builder().title(dto.getTitle())
-            .status(dto.getStatus()).team(team.orElse(null)).user(user).template(template)
+            .status(dto.getStatus()).team(team).user(user).template(template)
             .thumbnail(dto.getThumbnail()).startDate(dto.getStartDate())
             .description(dto.getDescription()).build();
 
@@ -132,6 +142,19 @@ public class RetrospectiveService {
     private Optional<Team> findTeamByIdOptional(Long teamId) {
         return (teamId != null) ? teamRepository.findById(teamId) : Optional.empty();
     }
+
+    public Team createTeamWithUserId(Long userId) {
+        Team team = teamRepository.save(Team.builder().build());
+        User user = findUserById(userId);
+
+        userTeamRepository.save(UserTeam.builder()
+            .team(team)
+            .user(user)
+            .build());
+
+        return team;
+    }
+
 
     private CreateRetrospectiveResponseDto toResponseDto(Retrospective retrospective) {
         return CreateRetrospectiveResponseDto.builder().id(retrospective.getId())
