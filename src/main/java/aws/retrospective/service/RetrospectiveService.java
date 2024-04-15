@@ -3,6 +3,7 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
+import aws.retrospective.dto.GetRetrospectiveResponseDto;
 import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveResponseDto;
@@ -60,6 +61,24 @@ public class RetrospectiveService {
 
         return PaginationResponseDto.fromPage(page,
             retrospective -> RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser));
+    }
+
+    @Transactional(readOnly = true)
+    public GetRetrospectiveResponseDto getRetrospective(Long retrospectiveId){
+        Retrospective findRetrospective = retrospectiveRepository.findRetrospectiveById(retrospectiveId)
+            .orElseThrow(() -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+
+        return toResponse(findRetrospective);
+    }
+
+    private GetRetrospectiveResponseDto toResponse(Retrospective findRetrospective) {
+        return new GetRetrospectiveResponseDto(
+            findRetrospective.getId(),
+            findRetrospective.getTitle(), findRetrospective.getTemplate().getId(),
+            findRetrospective.getTeam().getId(),
+            findRetrospective.getUser().getId(), findRetrospective.getDescription(),
+            findRetrospective.getStatus().name(),
+            findRetrospective.getThumbnail());
     }
 
     @Transactional

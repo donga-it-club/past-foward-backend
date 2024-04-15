@@ -4,6 +4,7 @@ package aws.retrospective.controller;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
+import aws.retrospective.dto.GetRetrospectiveResponseDto;
 import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveResponseDto;
@@ -41,6 +42,16 @@ public class RetrospectiveController {
         @Valid GetRetrospectivesDto dto) {
         PaginationResponseDto<RetrospectiveResponseDto> response = retrospectiveService.getRetrospectives(
             dto);
+
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @Operation(summary = "회고 단일 조회")
+    @GetMapping("/{retrospectiveId}")
+    public CommonApiResponse<GetRetrospectiveResponseDto> getRetrospective(
+        @PathVariable Long retrospectiveId) {
+        GetRetrospectiveResponseDto response = retrospectiveService.getRetrospective(
+            retrospectiveId);
 
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }

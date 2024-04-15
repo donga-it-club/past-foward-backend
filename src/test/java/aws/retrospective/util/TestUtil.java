@@ -30,6 +30,7 @@ public class TestUtil {
             .template(retrospectiveTemplate)
             .status(ProjectStatus.IN_PROGRESS)
             .title("test")
+            .description("test")
             .team(team)
             .user(user)
             .thumbnail(UUID.randomUUID())

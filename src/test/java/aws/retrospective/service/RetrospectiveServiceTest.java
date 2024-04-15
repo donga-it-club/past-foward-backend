@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
+import aws.retrospective.dto.GetRetrospectiveResponseDto;
 import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveResponseDto;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
@@ -270,6 +272,45 @@ public class RetrospectiveServiceTest {
         });
 
         assertTrue(thrown.getMessage().contains("Not found retrospective"));
+    }
+
+    @Test
+    @DisplayName("단일 회고를 조회할 수 있다.")
+    void findRetrospective() {
+        // given
+        Long userId = 1L;
+        User user = TestUtil.createUser();
+        ReflectionTestUtils.setField(user, "id", userId);
+
+        Long teamId = 2L;
+        Team team = TestUtil.createTeam();
+        ReflectionTestUtils.setField(team, "id", teamId);
+
+        Long templateId = 3L;
+        RetrospectiveTemplate retrospectiveTemplate = TestUtil.createTemplate(); // KPT
+        ReflectionTestUtils.setField(retrospectiveTemplate, "id", templateId);
+
+        Long retrospectiveId = 4L;
+        Retrospective retrospective = TestUtil.createRetrospective(retrospectiveTemplate, user,
+            team);
+        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findRetrospectiveById(retrospectiveId)).thenReturn(
+            Optional.of(retrospective));
+
+        // when
+        GetRetrospectiveResponseDto findRetrospective = retrospectiveService.getRetrospective(
+            retrospectiveId);
+
+        // then
+        assertThat(findRetrospective.getRetrospectiveId()).isEqualTo(retrospectiveId);
+        assertThat(findRetrospective.getTitle()).isEqualTo("test");
+        assertThat(findRetrospective.getTemplateId()).isEqualTo(templateId);
+        assertThat(findRetrospective.getTeamId()).isEqualTo(teamId);
+        assertThat(findRetrospective.getUserId()).isEqualTo(userId);
+        assertThat(findRetrospective.getDescription()).isEqualTo("test");
+        assertThat(findRetrospective.getStatus()).isEqualTo("IN_PROGRESS");
+        assertThat(findRetrospective.getThumbnail()).isEqualTo(retrospective.getThumbnail());
+
     }
 
 
