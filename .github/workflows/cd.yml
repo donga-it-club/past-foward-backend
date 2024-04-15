@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-      
+      - fix/code-deploy-error-deploy.sh
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
