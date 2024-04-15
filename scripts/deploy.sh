@@ -25,12 +25,12 @@ DEPLOY_JAR=$DEPLOY_PATH$JAR_NAME
 echo "> DEPLOY_JAR 배포"    >> /home/ec2-user/action/deploy.log
 nohup java -jar $DEPLOY_JAR >> /home/ec2-user/deploy.log 2>/home/ec2-user/action/deploy_err.log &
 
-echo "> 애플리케이션 시작 확인" >> /home/ec2-user/action/deploy.log
+echo "$(date) > 애플리케이션 시작 확인" >> /home/ec2-user/action/deploy.log
 sleep 10
 CHECK_PID=$(pgrep -f $JAR_NAME)
 if [ -z $CHECK_PID ]
 then
-  echo "> 애플리케이션 시작 실패" >> /home/ec2-user/action/deploy.log
+  echo "$(date) > 애플리케이션 시작 실패" >> /home/ec2-user/action/deploy.log
 else
-  echo "> 애플리케이션 시작 성공" >> /home/ec2-user/action/deploy.log
+  echo "$(date) > 애플리케이션 시작 성공" >> /home/ec2-user/action/deploy.log
 fi
