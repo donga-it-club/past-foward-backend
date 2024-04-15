@@ -27,8 +27,11 @@ aws:
   region: "region"
   s3:
     bucket: "bucket"
-    
-    
+
+
 cors:
   allowed-origins: "some-origin"
 
+
+server:
+  url: "http://localhost:8080"
