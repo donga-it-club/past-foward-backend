@@ -2,6 +2,7 @@ package aws.retrospective.controller;
 
 
 import aws.retrospective.common.CommonApiResponse;
+import aws.retrospective.dto.GetTemplateSectionsDto;
 import aws.retrospective.dto.RetrospectiveTemplateResponseDto;
 import aws.retrospective.service.RetrospectiveTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +27,15 @@ public class RetrospectiveTemplateController {
     @GetMapping()
     public CommonApiResponse<List<RetrospectiveTemplateResponseDto>> getRetrospectiveTemplates() {
         List<RetrospectiveTemplateResponseDto> response = retrospectiveTemplateService.getRetrospectiveTemplates();
+
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @GetMapping("/{templateId}/template-sections")
+    public CommonApiResponse<List<GetTemplateSectionsDto>> getTemplateSections(
+        @PathVariable Long templateId) {
+        List<GetTemplateSectionsDto> response = retrospectiveTemplateService.getTemplateSections(
+            templateId);
 
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
