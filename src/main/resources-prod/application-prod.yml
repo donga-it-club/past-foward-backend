@@ -28,3 +28,6 @@ aws:
 
 cors:
   allowed-origins: ${ALLOWED_ORIGINS}
+
+server:
+  url: ${SERVER_URL}
