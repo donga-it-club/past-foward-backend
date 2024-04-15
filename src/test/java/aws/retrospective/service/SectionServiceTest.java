@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
@@ -16,6 +18,7 @@ import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
@@ -27,6 +30,7 @@ import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.UserTeam;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
+import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -39,6 +43,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -61,6 +66,8 @@ class SectionServiceTest {
     LikesRepository likesRepository;
     @Mock
     TeamRepository teamRepository;
+    @Mock
+    ActionItemRepository actionItemRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -380,6 +387,94 @@ class SectionServiceTest {
         //then
         assertThrows(ForbiddenAccessException.class, () -> sectionService.getSections(request));
 
+    }
+
+    @Test
+    @DisplayName("Action Items에 사용자를 지정할 수 있다.")
+    void assignUserToActionItemsSuccess() {
+        //given
+        Long userId = 1L;
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Long teamId = 1L;
+        Team team = createTeam();
+        ReflectionTestUtils.setField(team, "id", teamId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+
+        Long retrospectiveId = 1L;
+        RetrospectiveTemplate actionItemsTemplate = RetrospectiveTemplate.builder()
+            .name("Action Items")
+            .build();
+        Retrospective retrospective = createRetrospective(actionItemsTemplate, user, team);
+        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
+
+        Long sectionId = 1L;
+        Section section = Section.builder()
+            .retrospective(retrospective)
+            .build();
+        ReflectionTestUtils.setField(section, "id", sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+
+        //when
+        AssignUserRequestDto request = new AssignUserRequestDto();
+        ReflectionTestUtils.setField(request, "userId", userId);
+        ReflectionTestUtils.setField(request, "teamId", teamId);
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "sectionId", sectionId);
+
+        sectionService.assignUserToActionItem(request);
+
+        //then
+        ArgumentCaptor<ActionItem> actionItemArgumentCaptor = ArgumentCaptor.forClass(ActionItem.class);
+        verify(actionItemRepository, times(1)).save(actionItemArgumentCaptor.capture());
+
+        ActionItem savedActionItem = actionItemArgumentCaptor.getValue();
+        assertThat(savedActionItem.getUser()).isEqualTo(user);
+        assertThat(savedActionItem.getTeam()).isEqualTo(team);
+        assertThat(savedActionItem.getSection()).isEqualTo(section);
+        assertThat(savedActionItem.getRetrospective()).isEqualTo(retrospective);
+    }
+
+    @Test
+    @DisplayName("Action Items 외에는 사용자를 지정할 수 없다.")
+    void assignUserToActionItemsFailed() {
+        //given
+        Long userId = 1L;
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Long teamId = 1L;
+        Team team = createTeam();
+        ReflectionTestUtils.setField(team, "id", teamId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+
+        Long retrospectiveId = 1L;
+        RetrospectiveTemplate actionItemsTemplate = RetrospectiveTemplate.builder()
+            .name("KPT")
+            .build();
+        Retrospective retrospective = createRetrospective(actionItemsTemplate, user, team);
+        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
+
+        Long sectionId = 1L;
+        Section section = Section.builder()
+            .retrospective(retrospective)
+            .build();
+        ReflectionTestUtils.setField(section, "id", sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+
+        //when
+        AssignUserRequestDto request = new AssignUserRequestDto();
+        ReflectionTestUtils.setField(request, "userId", userId);
+        ReflectionTestUtils.setField(request, "teamId", teamId);
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        ReflectionTestUtils.setField(request, "sectionId", sectionId);
+
+        assertThrows(IllegalArgumentException.class, () -> sectionService.assignUserToActionItem(request));
     }
 
     private static Section createSection(User loginedUser) {
