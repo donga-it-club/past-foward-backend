@@ -11,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +25,6 @@ import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.when;
 
 
-//@SpringBootTest
 @Transactional
 public class SurveyServiceTest {
 
