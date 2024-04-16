@@ -30,7 +30,7 @@ springdoc:
 
 # Custom Properties
 domain:
-  url: "https://api.pastforward.link/"
+  url: "https://api.pastforward.link"
 
 management:
   endpoints:
