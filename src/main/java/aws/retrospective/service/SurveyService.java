@@ -1,6 +1,6 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.SaveSurveyDto;
+import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import jakarta.validation.Valid;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import static sun.awt.image.MultiResolutionCachedImage.map;
+
 @Service
 @RequiredArgsConstructor
 public class SurveyService {
@@ -22,36 +24,35 @@ public class SurveyService {
 
     // 설문지 결과 등록
     @Transactional
-    public void addSurvey(@Valid SaveSurveyDto request) {
+    public void addSurvey(@Valid SurveyDto request) {
 
         Survey survey = Survey.builder()
             .age(request.getAge())
             .gender(request.getGender())
-            .job(request.getJob())
-            .residence(request.getResidence())
-            .discoverySource(request.getDiscoverySource())
+            .occupation(request.getOccupation())
+            .region(request.getRegion())
+            .source(request.getSource())
             .purpose(request.getPurpose())
             .build();
 
         surveyRepository.save(survey);
     }
 
-    public CommonApiResponse<List<SaveSurveyDto>> getAllSurveys() {
+    public List<SurveyDto> getAllSurveys() {
         List<Survey> surveys = surveyRepository.findAll();
-        List<SaveSurveyDto> surveyDtos = surveys.stream()
+        return surveys.stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());
-        return CommonApiResponse.successResponse(HttpStatus.OK, surveyDtos);
     }
 
-    private SaveSurveyDto convertToDto(Survey survey) {
-        return SaveSurveyDto.builder()
+    private SurveyDto convertToDto(Survey survey) {
+        return SurveyDto.builder()
             .age(Integer.valueOf(String.valueOf(survey.getAge())))
             .gender(survey.getGender().toString())
-            .job(survey.getJob())
-            .residence(survey.getResidence())
-            .discoverySource(survey.getDiscoverySource())
-            .purpose(Collections.singletonList(survey.getPurpose().toString()))
+            .occupation(survey.getOccupation())
+            .region(survey.getRegion())
+            .source(survey.getSource())
+            .purpose(survey.getPurpose())
             .build();
     }
 }
