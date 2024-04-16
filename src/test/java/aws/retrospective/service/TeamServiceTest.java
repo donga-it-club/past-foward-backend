@@ -14,6 +14,7 @@ import aws.retrospective.entity.UserTeam;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserTeamRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +56,7 @@ class TeamServiceTest {
         UserTeam createdUserTeam = createUserTeam(createdUser, createdTeam);
         ReflectionTestUtils.setField(createdUserTeam, "id", userTeamId);
 
-        GetTeamUsersResponseDto response = new GetTeamUsersResponseDto(userId, "test", "test");
+        GetTeamUsersResponseDto response = new GetTeamUsersResponseDto(userId, "test", "test", "test", LocalDateTime.now());
         when(userTeamRepository.findTeamMembers(teamId)).thenReturn(List.of(response));
 
         Long retrospectiveId = 1L;
@@ -77,6 +78,44 @@ class TeamServiceTest {
         assertThat(searchUser.getUserId()).isEqualTo(userId);
         assertThat(searchUser.getUsername()).isEqualTo("test");
         assertThat(searchUser.getProfileImage()).isEqualTo("test");
+    }
+
+    @Test
+    void findTeamUsers() {
+        Long teamId = 1L;
+        Team createdTeam = createTeam();
+        ReflectionTestUtils.setField(createdTeam, "id", teamId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(createdTeam));
+
+        Long retrospectiveId = 1L;
+        Retrospective createdRetrospective = createRetrospective(createTemplate(), createUser(), createdTeam);
+        ReflectionTestUtils.setField(createdRetrospective, "id", retrospectiveId);
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
+
+        Long userId = 1L;
+        User createdUser = createUser();
+        LocalDateTime now = LocalDateTime.now();
+        ReflectionTestUtils.setField(createdUser, "id", userId);
+        when(userTeamRepository.findTeamMembers(teamId)).thenReturn(List.of(new GetTeamUsersResponseDto(userId, "test", "test", "test", now)));
+
+        UserTeam userTeam = UserTeam.builder()
+            .team(createdTeam)
+            .user(createdUser)
+            .build();
+
+        // when
+        GetTeamUsersRequestDto request = new GetTeamUsersRequestDto();
+        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
+        List<GetTeamUsersResponseDto> result = teamService.getTeamMembers(teamId, request);
+
+        // then
+        assertThat(result.size()).isEqualTo(1);
+        GetTeamUsersResponseDto searchUser = result.get(0);
+        assertThat(searchUser.getUserId()).isEqualTo(userId);
+        assertThat(searchUser.getUsername()).isEqualTo("test");
+        assertThat(searchUser.getProfileImage()).isEqualTo("test");
+        assertThat(searchUser.getEmail()).isEqualTo("test");
+        assertThat(searchUser.getJoinedAt()).isEqualTo(now);
     }
 
     private static RetrospectiveTemplate createTemplate() {

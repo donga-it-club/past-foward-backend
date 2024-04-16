@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,9 +30,12 @@ public class UserTeam {
     @JoinColumn(name = "team_id")
     private Team team;
 
+    private LocalDateTime joinedAt;
+
     @Builder
     public UserTeam(User user, Team team) {
         this.user = user;
         this.team = team;
+        this.joinedAt = LocalDateTime.now();
     }
 }
