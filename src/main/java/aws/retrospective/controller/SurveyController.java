@@ -24,7 +24,6 @@ public class SurveyController {
     @PostMapping("/{surveyId}/response")
     @Operation(summary = "설문조사 저장")
     public CommonApiResponse<String> addSurvey(@Valid @RequestBody SaveSurveyDto surveyDto) {
-        surveyService.addSurvey(surveyDto);
         try {
             surveyService.addSurvey(surveyDto);
             return (CommonApiResponse.successResponse(HttpStatus.OK, "Survey added succesfully"));
