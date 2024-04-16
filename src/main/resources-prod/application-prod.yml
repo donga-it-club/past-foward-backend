@@ -31,3 +31,5 @@ cors:
 
 server:
   url: ${SERVER_URL}
+  shutdown: graceful
+
