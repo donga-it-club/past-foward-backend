@@ -1,7 +1,7 @@
 package aws.retrospective.service;
 
 import aws.retrospective.common.CommonApiResponse;
-import aws.retrospective.dto.SaveSurveyDto;
+import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import aws.retrospective.entity.Survey.Gender;
 import aws.retrospective.repository.SurveyRepository;
@@ -48,13 +48,13 @@ public class SurveyServiceTest {
     @DisplayName("설문조사 결과 추가")
     void addSurveyTest() {
         // Given
-        SaveSurveyDto surveyDto = SaveSurveyDto.builder()
+        SurveyDto surveyDto = SurveyDto.builder()
             .age(22)
             .gender("FEMALE")
-            .job("student")
-            .residence("Korea")
-            .discoverySource("internet")
-            .purpose(List.of("research", "analysis"))
+            .occupation("student")
+            .region("Korea")
+            .source("internet")
+            .purpose("research")
             .build();
 
         // When
@@ -67,10 +67,10 @@ public class SurveyServiceTest {
 
         assertEquals(22, surveyDto.getAge());
         assertEquals("FEMALE", surveyDto.getGender());
-        assertEquals("student", surveyDto.getJob());
-        assertEquals("Korea", surveyDto.getResidence());
-        assertEquals("internet", surveyDto.getDiscoverySource());
-        assertTrue(surveyDto.getPurpose().containsAll(List.of("research", "analysis")));
+        assertEquals("student", surveyDto.getOccupation());
+        assertEquals("Korea", surveyDto.getRegion());
+        assertEquals("internet", surveyDto.getSource());
+        assertEquals("research", surveyDto.getPurpose());
     }
 
     @Test
@@ -80,19 +80,19 @@ public class SurveyServiceTest {
         surveys.add(Survey.builder()
             .age(30)
             .gender(String.valueOf(Gender.valueOf("MALE")))
-            .job("Engineer")
-            .residence("Seoul")
-            .discoverySource("Internet")
-            .purpose(List.of("research", "analysis"))
+            .occupation("Engineer")
+            .region("Seoul")
+            .source("Internet")
+            .purpose("research")
             .build());
         // Mock 객체 설정
         when(surveyRepository.findAll()).thenReturn(surveys);
 
         // 테스트 실행
-        CommonApiResponse<List<SaveSurveyDto>> response = surveyService.getAllSurveys();
+        List<SurveyDto> response = surveyService.getAllSurveys();
 
         // 결과 확인
-        assertEquals(surveys.size(), response.getData().size());
+        assertEquals(surveys.size(), response.size());
         // 추가적인 검증을 원하는 경우 surveyDtos 내용을 검사할 수 있음
     }
 }
