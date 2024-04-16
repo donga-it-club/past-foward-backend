@@ -216,16 +216,20 @@ class SectionServiceTest {
     void getSectionCountsTest() {
         //given
         Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(createTemplate(), createUser(), createTeam());
+        Retrospective retrospective = createRetrospective(createTemplate(), createUser(),
+            createTeam());
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
+            Optional.of(retrospective));
 
         Long templateSectionId = 1L;
         TemplateSection templateSection = createTemplateSection(createTemplate());
         ReflectionTestUtils.setField(templateSection, "id", templateSectionId);
-        when(templateSectionRepository.findById(templateSectionId)).thenReturn(Optional.of(templateSection));
+        when(templateSectionRepository.findById(templateSectionId)).thenReturn(
+            Optional.of(templateSection));
 
-        when(sectionRepository.countByRetrospectiveAndTemplateSection(retrospective, templateSection)).thenReturn(1);
+        when(sectionRepository.countByRetrospectiveAndTemplateSection(retrospective,
+            templateSection)).thenReturn(1);
 
         //when
         FindSectionCountRequestDto request = new FindSectionCountRequestDto();
@@ -302,14 +306,17 @@ class SectionServiceTest {
         User createdUser = createUser();
 
         Long retrospectiveId = 1L;
-        Retrospective createdRetrospective = createRetrospective(createdTemplate, createdUser, createdTeam);
+        Retrospective createdRetrospective = createRetrospective(createdTemplate, createdUser,
+            createdTeam);
         ReflectionTestUtils.setField(createdRetrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
+            Optional.of(createdRetrospective));
 
         TemplateSection createdTemplateSection = createTemplateSection(createdTemplate);
 
         Long sectionId = 1L;
-        Section createdSection = createSection(createdUser, createdTemplateSection, createdRetrospective);
+        Section createdSection = createSection(createdUser, createdTemplateSection,
+            createdRetrospective);
         ReflectionTestUtils.setField(createdSection, "id", sectionId);
 
         Long commentId1 = 1L;
@@ -329,7 +336,8 @@ class SectionServiceTest {
         createdSection.getComments().add(comment1);
         createdSection.getComments().add(comment2);
 
-        when(sectionRepository.getSectionsWithComments(retrospectiveId)).thenReturn(List.of(createdSection));
+        when(sectionRepository.getSectionsWithComments(retrospectiveId)).thenReturn(
+            List.of(createdSection));
 
         //when
         GetSectionsRequestDto request = new GetSectionsRequestDto();
@@ -369,14 +377,17 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(createdTeam1, "id", 2L);
 
         Long retrospectiveId = 1L;
-        Retrospective createdRetrospective = createRetrospective(createdTemplate ,createdUser, createdTeam2);
+        Retrospective createdRetrospective = createRetrospective(createdTemplate, createdUser,
+            createdTeam2);
         ReflectionTestUtils.setField(createdRetrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(createdRetrospective));
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
+            Optional.of(createdRetrospective));
 
         TemplateSection createdTemplateSection = createTemplateSection(createdTemplate);
 
         Long sectionId = 1L;
-        Section createdSection = createSection(createdUser, createdTemplateSection, createdRetrospective);
+        Section createdSection = createSection(createdUser, createdTemplateSection,
+            createdRetrospective);
         ReflectionTestUtils.setField(createdSection, "id", sectionId);
 
         //when
@@ -406,7 +417,8 @@ class SectionServiceTest {
         Long retrospectiveId = 1L;
         Retrospective retrospective = createRetrospective(createTemplate(), user, team);
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
+            Optional.of(retrospective));
 
         TemplateSection actionItemsTemplate = TemplateSection.builder()
             .sectionName("Action Items")
@@ -431,7 +443,8 @@ class SectionServiceTest {
         sectionService.assignUserToActionItem(request);
 
         //then
-        ArgumentCaptor<ActionItem> actionItemArgumentCaptor = ArgumentCaptor.forClass(ActionItem.class);
+        ArgumentCaptor<ActionItem> actionItemArgumentCaptor = ArgumentCaptor.forClass(
+            ActionItem.class);
         verify(actionItemRepository, times(1)).save(actionItemArgumentCaptor.capture());
 
         ActionItem savedActionItem = actionItemArgumentCaptor.getValue();
@@ -458,8 +471,8 @@ class SectionServiceTest {
         Long retrospectiveId = 1L;
         Retrospective retrospective = createRetrospective(createTemplate(), user, team);
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
-
+        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
+            Optional.of(retrospective));
 
         TemplateSection actionItemsTemplate = TemplateSection.builder()
             .sectionName("Keep")
@@ -481,7 +494,8 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "sectionId", sectionId);
 
-        assertThrows(IllegalArgumentException.class, () -> sectionService.assignUserToActionItem(request));
+        assertThrows(IllegalArgumentException.class,
+            () -> sectionService.assignUserToActionItem(request));
     }
 
     private static Section createSection(User loginedUser) {
@@ -519,7 +533,6 @@ class SectionServiceTest {
     private static User createUser() {
         return User.builder()
             .username("test")
-            .password("test")
             .phone("010-1234-1234")
             .email("test@naver.com")
             .build();
