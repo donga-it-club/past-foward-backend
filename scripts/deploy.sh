@@ -31,7 +31,7 @@ fi
 
 DEPLOY_JAR=$DEPLOY_PATH$JAR_NAME
 echo "> DEPLOY_JAR 배포"    >> /home/ec2-user/action/deploy.log
-sudo nohup java -jar $DEPLOY_JAR >> /home/ec2-user/deploy.log 2>/home/ec2-user/action/deploy_err.log &
+nohup java -jar $DEPLOY_JAR --spring.profiles.active=prod >> /home/ec2-user/deploy.log 2>/home/ec2-user/action/deploy_err.log &
 
 NEW_PID=$!
 echo "$(date) > 새 애플리케이션 PID: $NEW_PID" >> /home/ec2-user/action/deploy.log
