@@ -16,13 +16,13 @@ if [ -z "$CURRENT_PID" ]
 then
   echo "> 현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다." >> /home/ec2-user/action/deploy.log
 else
-  echo "> kill -15 $CURRENT_PID" >> /home/ec2-user/action/deploy.log
+  echo "> sudo kill -15 $CURRENT_PID" >> /home/ec2-user/action/deploy.log
   kill -15 $CURRENT_PID
   sleep 10
 
   while ps -p $CURRENT_PID > /dev/null; do
     echo "> 애플리케이션 종료 대기 중..." >> /home/ec2-user/action/deploy.log
-    kill -15 $CURRENT_PID
+    sudo kill -15 $CURRENT_PID
     sleep 5
   done
 
