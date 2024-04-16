@@ -63,6 +63,9 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.17.71'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'com.amazonaws:aws-java-sdk-ses:1.12.3'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
 }
 
 tasks.named('test') {
