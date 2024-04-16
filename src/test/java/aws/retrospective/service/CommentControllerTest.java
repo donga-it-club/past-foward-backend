@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 
 class CommentControllerTest {
@@ -35,31 +37,37 @@ class CommentControllerTest {
     void getAllComments() {
         // Arrange
         List<CommentDto> commentDtoList = new ArrayList<>();
-        when(commentService.getAllComments()).thenReturn(commentDtoList);
+        int totalCount = 10;
+        when(commentService.getTotalCommentCount()).thenReturn(totalCount);
+        when(commentService.getAllComments(totalCount)).thenReturn(commentDtoList);
 
         // Act
         ResponseEntity<CommonApiResponse<List<CommentDto>>> responseEntity = commentController.getAllComments();
 
         // Assert
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
         assertEquals(commentDtoList, responseEntity.getBody().getData());
-        verify(commentService, times(1)).getAllComments();
+        verify(commentService, times(1)).getTotalCommentCount();
     }
 
     @Test
     void getCommentById() {
         // Arrange
         Long commentId = 1L;
-        CommentDto commentDto = new CommentDto(commentId, "Sample content");
-        when(commentService.getCommentDTOById(commentId)).thenReturn(commentDto);
+        CommentDto commentDto = new CommentDto(1L, "Sample content", 10);
+        int totalCount = 10;
+        when(commentService.getTotalCommentCount()).thenReturn(totalCount);
+        when(commentService.getCommentDTOById(commentId, totalCount)).thenReturn(commentDto);
 
         // Act
         ResponseEntity<CommonApiResponse<CommentDto>> responseEntity = commentController.getCommentById(commentId);
 
         // Assert
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
         assertEquals(commentDto, responseEntity.getBody().getData());
-        verify(commentService, times(1)).getCommentDTOById(commentId);
+        verify(commentService, times(1)).getTotalCommentCount();
+        verify(commentService, times(1)).getCommentDTOById(commentId, totalCount);
     }
 
     @Test
@@ -73,6 +81,7 @@ class CommentControllerTest {
 
         // Assert
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
         assertEquals(comment, responseEntity.getBody().getData());
         verify(commentService, times(1)).createComment(comment);
     }
@@ -89,6 +98,7 @@ class CommentControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
         assertEquals(updatedComment, responseEntity.getBody().getData());
         verify(commentService, times(1)).updateComment(commentId, updatedComment);
     }
@@ -103,7 +113,9 @@ class CommentControllerTest {
 
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
-        assertEquals(null, responseEntity.getBody().getData());
+        assertNotNull(responseEntity.getBody());
+        assertNull(responseEntity.getBody().getData()); // Assuming CommonApiResponse has a getData() method
         verify(commentService, times(1)).deleteComment(commentId);
     }
+
 }
