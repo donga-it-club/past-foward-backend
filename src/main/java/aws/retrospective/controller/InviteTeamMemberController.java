@@ -3,6 +3,9 @@ package aws.retrospective.controller;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.service.InviteTeamMemberService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +20,8 @@ public class InviteTeamMemberController {
 
     private final InviteTeamMemberService inviteTeamMemberService;
 
+    // Action Items 눌렀을 때 팀에 속한 모든 회원 조회
+    @Operation(summary = "초대 링크를 통해 팀원 초대")
     @GetMapping("/{teamId}/invitation-url")
     public CommonApiResponse<InviteTeamMemberDTO> getInvitation(@PathVariable Long teamId) { // 팀 ID에 해당하는 초대 정보를 가져오는 메서드
         // 팀 ID를 기반으로 초대 정보를 생성하고, 그 결과를 받아옴
