@@ -25,7 +25,7 @@ else
     echo "> 애플리케이션이 성공적으로 종료되었습니다." >> /home/ec2-user/action/deploy.log
   else
     echo "> 애플리케이션 종료 실패, 재시도" >> /home/ec2-user/action/deploy.log
-    kill -15 $CURRENT_PID
+    kill -9 $CURRENT_PID
     sleep 5
   fi
 fi
