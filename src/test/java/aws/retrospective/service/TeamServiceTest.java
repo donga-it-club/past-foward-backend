@@ -133,7 +133,6 @@ class TeamServiceTest {
     private static User createUser() {
         return User.builder()
             .username("test")
-            .password("test")
             .phone("010-1234-1234")
             .email("test@naver.com")
             .build();

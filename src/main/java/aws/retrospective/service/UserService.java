@@ -28,8 +28,8 @@ public class UserService {
     @Transactional(readOnly = true)
     public GetUserInfoDto getUserInfo(Long userId) {
         User findUser = getUser(userId);
-        return new GetUserInfoDto(findUser.getId(), findUser.getEmail(), findUser.getThumbnail(),
-            findUser.getUsername(), findUser.getPhone(), findUser.getCreatedDate(),
+        return new GetUserInfoDto(findUser.getId(), findUser.getUsername(), findUser.getThumbnail(),
+            findUser.getEmail(), findUser.getPhone(), findUser.getCreatedDate(),
             findUser.getUpdatedDate());
     }
 
