@@ -45,6 +45,8 @@ public class Section extends BaseEntity {
     @OneToMany(mappedBy = "section", cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "section", cascade = CascadeType.REMOVE)
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder
     public Section(String content, long likeCnt, Retrospective retrospective, User user,

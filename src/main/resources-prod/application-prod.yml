@@ -14,6 +14,25 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+  lifecycle:
+    shutdown:
+      timeout-per-shutdown-phase: 20s
   config:
     activate:
       on-profile: prod
+
+aws:
+  ses:
+    send-mail-to: ${AWS_SEND_MAIL_TO}
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS}
+
+server:
+  url: ${SERVER_URL}
+  shutdown: graceful
+

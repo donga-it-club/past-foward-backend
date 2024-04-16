@@ -1,21 +1,3 @@
-# JPA
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: "jdbc:mysql://localhost:3307/past-forward"
-    username: dev
-    password: 1234
-  jpa:
-    database: mysql
-    database-platform: org.hibernate.dialect.MySQLDialect
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-    open-in-view: false
-
 # Swagger
 springdoc:
   api-docs:
@@ -27,6 +9,10 @@ springdoc:
   packages-to-scan: aws.retrospective
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
+
+# Custom Properties
+domain:
+  url: "https://api.pastforward.link"
 
 management:
   endpoints:

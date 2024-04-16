@@ -1,31 +1,21 @@
 package aws.retrospective.service;
 
-import aws.retrospective.common.CommonApiResponse;
-import aws.retrospective.dto.SaveSurveyDto;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import aws.retrospective.entity.Survey.Gender;
 import aws.retrospective.repository.SurveyRepository;
-import java.util.List;
 import java.util.ArrayList;
-import org.junit.jupiter.api.DisplayName;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import org.junit.jupiter.api.BeforeEach;
-
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.Mockito.when;
-
-
-@Transactional
 public class SurveyServiceTest {
 
     static {
@@ -89,10 +79,11 @@ public class SurveyServiceTest {
         when(surveyRepository.findAll()).thenReturn(surveys);
 
         // 테스트 실행
-        CommonApiResponse<List<SaveSurveyDto>> response = surveyService.getAllSurveys();
+
+        List<SurveyDto> response = surveyService.getAllSurveys();
 
         // 결과 확인
-        assertEquals(surveys.size(), response.getData().size());
+        assertEquals(surveys.size(), response.size());
         // 추가적인 검증을 원하는 경우 surveyDtos 내용을 검사할 수 있음
     }
 }
