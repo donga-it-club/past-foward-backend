@@ -1,7 +1,12 @@
 package aws.retrospective.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,18 +22,19 @@ public class Survey extends BaseEntity{
     @Column(name = "survey_id")
     private Long id; // 설문 아이디 - PK
 
-    private Integer age; // 연령
+    // 설문조사 관련 필드 추가
+    private String age;
 
     @Enumerated(EnumType.STRING)
-    private String gender; // 성별
+    private Gender gender;
 
-    private String occupation; // 직업
+    private String occupation;
 
-    private String region; // 거주 지역
+    private String region;
 
-    private String source; // 서비스 발견 경로
+    private String source;
 
-    private String purpose; // 서비스 사용 목적
+    private String purpose;
 
     public enum Gender {
         MALE,
@@ -38,8 +44,8 @@ public class Survey extends BaseEntity{
     @Builder
     public Survey(Integer age, String gender, String occupation, String region,
         String source, String purpose) {
-        this.age = age;
-        this.gender = gender;
+        this.age = String.valueOf(age);
+        this.gender = Gender.valueOf(gender);
         this.occupation = occupation;
         this.region = region;
         this.source = source;

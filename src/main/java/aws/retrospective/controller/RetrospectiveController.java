@@ -4,6 +4,7 @@ package aws.retrospective.controller;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
+import aws.retrospective.dto.GetRetrospectiveResponseDto;
 import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveResponseDto;
@@ -45,11 +46,20 @@ public class RetrospectiveController {
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
+    @Operation(summary = "회고 단일 조회")
+    @GetMapping("/{retrospectiveId}")
+    public CommonApiResponse<GetRetrospectiveResponseDto> getRetrospective(
+        @PathVariable Long retrospectiveId) {
+        GetRetrospectiveResponseDto response = retrospectiveService.getRetrospective(
+            retrospectiveId);
+
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
     @Operation(summary = "회고 수정")
     @PutMapping("/{retrospectiveId}")
     public CommonApiResponse<RetrospectiveResponseDto> updateRetrospective(
-        @PathVariable Long retrospectiveId,
-        @RequestBody @Valid UpdateRetrospectiveDto dto) {
+        @PathVariable Long retrospectiveId, @RequestBody @Valid UpdateRetrospectiveDto dto) {
         RetrospectiveResponseDto response = retrospectiveService.updateRetrospective(
             retrospectiveId, dto);
 
@@ -70,17 +80,15 @@ public class RetrospectiveController {
     @Operation(summary = "회고 삭제")
     @DeleteMapping("/{retrospectiveId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteRetrospective(@PathVariable Long retrospectiveId,
-        @RequestParam Long userId) {
+    public void deleteRetrospective(@PathVariable Long retrospectiveId, @RequestParam Long userId) {
         retrospectiveService.deleteRetrospective(retrospectiveId, userId);
     }
 
     @Operation(summary = "회고 북마크")
     @PatchMapping("/{retrospectiveId}/bookmark")
-    public CommonApiResponse<Boolean> toggleBookmark(
-        @PathVariable Long retrospectiveId, @RequestParam Long userId) {
-        boolean isBookmarked = retrospectiveService.toggleBookmark(
-            retrospectiveId, userId);
+    public CommonApiResponse<Boolean> toggleBookmark(@PathVariable Long retrospectiveId,
+        @RequestParam Long userId) {
+        boolean isBookmarked = retrospectiveService.toggleBookmark(retrospectiveId, userId);
 
         return CommonApiResponse.successResponse(HttpStatus.OK, isBookmarked);
     }

@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +20,10 @@ public class AmazonS3Service {
 
     private final S3Presigner presigner;
 
-    @Value("${AWS_S3_BUCKET}")
+    @Value("${aws.s3.bucket}")
     private String bucketName;
 
-    public String getPresignUrl(String filename) {
+    public String getPresignedUrl(String filename) {
         GetObjectRequest getObjectAclRequest = GetObjectRequest.builder()
             .bucket(bucketName)
             .key(filename)
@@ -35,6 +38,26 @@ public class AmazonS3Service {
             .presignGetObject(getObjectPresignRequest);
 
         String url = presignedGetObjectRequest.url().toString();
+
+        presigner.close();
+        return url;
+    }
+
+    public String getPresignedUrlForUpload(String filename) {
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+            .bucket(bucketName)
+            .key(filename)
+            .build();
+
+        PutObjectPresignRequest putObjectPresignRequest = PutObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofMinutes(5)) // 제한 시간 5분
+            .putObjectRequest(putObjectRequest)
+            .build();
+
+        PresignedPutObjectRequest presignedPutObjectRequest = presigner
+            .presignPutObject(putObjectPresignRequest);
+
+        String url = presignedPutObjectRequest.url().toString();
 
         presigner.close();
         return url;

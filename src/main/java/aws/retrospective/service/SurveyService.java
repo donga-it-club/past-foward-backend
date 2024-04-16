@@ -4,17 +4,13 @@ import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import jakarta.validation.Valid;
 import org.springframework.transaction.annotation.Transactional;
-import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.repository.SurveyRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import static sun.awt.image.MultiResolutionCachedImage.map;
 
 @Service
 @RequiredArgsConstructor

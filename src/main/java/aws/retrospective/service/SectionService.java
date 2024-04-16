@@ -1,5 +1,6 @@
 package aws.retrospective.service;
 
+import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
@@ -7,10 +8,12 @@ import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.FindSectionCountRequestDto;
 import aws.retrospective.dto.FindSectionCountResponseDto;
+import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
@@ -18,16 +21,18 @@ import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
+import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import aws.retrospective.repository.UserTeamRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +47,7 @@ public class SectionService {
     private final TemplateSectionRepository templateSectionRepository;
     private final LikesRepository likesRepository;
     private final TeamRepository teamRepository;
+    private final ActionItemRepository actionItemRepository;
 
     // 회고 카드 등록
     @Transactional
@@ -186,7 +192,24 @@ public class SectionService {
             throw new ForbiddenAccessException("해당 팀의 회고보드만 조회할 수 있습니다.");
         }
 
-        return sectionRepository.getSections(request.getRetrospectiveId());
+        List<GetSectionsResponseDto> response = new ArrayList<>();
+        List<Section> sections = sectionRepository.getSectionsWithComments(
+            request.getRetrospectiveId());
+
+        revertDto(sections, response);
+
+        return response;
+    }
+
+    private void revertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
+        for (Section section : sections) {
+            List<GetCommentDto> collect = section.getComments().stream()
+                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername()))
+                .collect(Collectors.toList());
+            response.add(new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
+                section.getContent(), section.getLikeCnt(), section.getTemplateSection().getSectionName(),
+                section.getCreatedDate(), collect));
+        }
     }
 
     private Team getTeam(Long teamId) {
@@ -199,5 +222,29 @@ public class SectionService {
         return retrospectiveRepository.findById(request.getRetrospectiveId())
             .orElseThrow(() -> new NoSuchElementException(
                 "Not Found Retrospective id : " + request.getRetrospectiveId()));
+    }
+
+    @Transactional
+    // Action Items 사용자 지정
+    public void assignUserToActionItem(AssignUserRequestDto request) {
+        User user = getUser(request.getUserId());
+        Team team = getTeam(request.getTeamId());
+        Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
+        Section section = getSection(request.getSectionId());
+
+        if(!section.getTemplateSection().getSectionName().equals("Action Items")) {
+            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
+        }
+
+        actionItemRepository.save(createActionItem(user, team, section, retrospective));
+    }
+
+    private static ActionItem createActionItem(User findUser, Team findTeam, Section section, Retrospective retrospective) {
+        return ActionItem.builder()
+            .user(findUser)
+            .team(findTeam)
+            .section(section)
+            .retrospective(retrospective)
+            .build();
     }
 }

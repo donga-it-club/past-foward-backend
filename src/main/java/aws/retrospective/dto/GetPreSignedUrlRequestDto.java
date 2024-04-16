@@ -10,4 +10,8 @@ public class GetPreSignedUrlRequestDto {
     @NotNull(message = "파일명은 필수 정보입니다.")
     @Schema(description = "파일명", example = "test.jpg")
     private String filename;
+
+    @NotNull(message = "method는 필수 정보입니다.")
+    @Schema(description = "객체 가져올 시 GET, 업로드 시 PUT", example = "GET")
+    private PresigendUrlMethod method;
 }

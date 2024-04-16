@@ -1,6 +1,7 @@
 package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
+import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
 import aws.retrospective.dto.UpdateUserProfileResponseDto;
 import aws.retrospective.service.UserService;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +37,16 @@ public class UserController {
         @RequestBody @Valid UpdateUserProfileRequestDto request) {
         UpdateUserProfileResponseDto response = userService.updateProfile(
             userId, request);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @GetMapping("/{userId}")
+    @Operation(summary = "유저 정보 조회")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "유저 정보 조회 성공"),
+    })
+    public CommonApiResponse<GetUserInfoDto> getUserInfo(@PathVariable Long userId) {
+        GetUserInfoDto response = userService.getUserInfo(userId);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }

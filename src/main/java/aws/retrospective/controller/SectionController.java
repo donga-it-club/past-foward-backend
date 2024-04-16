@@ -1,6 +1,7 @@
 package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
+import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -93,7 +95,7 @@ public class SectionController {
     @GetMapping
     public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
-          return CommonApiResponse.successResponse(HttpStatus.OK, response);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     /**
@@ -108,6 +110,17 @@ public class SectionController {
     public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody @Valid FindSectionCountRequestDto request) {
         FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    // Action Items 사용자 지정
+    @Operation(summary = "Action Items 사용자 지정", description = "Action Items에 사용자를 지정하는 API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204")
+    })
+    @PutMapping("/action-items")
+    public CommonApiResponse<Void> assignUser(@RequestBody @Valid AssignUserRequestDto request) {
+        sectionService.assignUserToActionItem(request);
+        return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 
 }
