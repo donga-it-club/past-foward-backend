@@ -5,6 +5,7 @@ import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.service.SurveyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
@@ -22,7 +23,8 @@ public class SurveyController {
     private final SurveyService surveyService;
 
     @PostMapping("/{surveyId}/response")
-    @Operation(summary = "설문조사 저장")
+    @Operation(summary = "설문조사 저장", description = "설문조사 결과를 DB에 저장하는 API")
+    @ApiResponse(responseCode = "200", description = "설문조사가 성공적으로 저장됨")
     public CommonApiResponse<String> addSurvey(@Valid @RequestBody SurveyDto surveyDto) {
         try {
             surveyService.addSurvey(surveyDto);
@@ -33,7 +35,8 @@ public class SurveyController {
         }
     }
 
-    @Operation(summary = "설문조사 조회")
+    @Operation(summary = "설문조사 조회", description = "설문조사 데이터를 조회하는 API")
+    @ApiResponse(responseCode = "200", description = "설문조사가 성공적으로 조회됨")
     @GetMapping
     public CommonApiResponse<List<SurveyDto>> getAllSurveys() {
         List<SurveyDto> surveys = surveyService.getAllSurveys();
