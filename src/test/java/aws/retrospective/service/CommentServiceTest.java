@@ -39,7 +39,7 @@ class CommentServiceTest {
         when(commentRepository.findAll()).thenReturn(comments);
 
         // Act
-        List<CommentDto> commentDtos = commentService.getAllComments();
+        List<CommentDto> commentDtos = commentService.getAllComments(comments.size());
 
         // Assert
         assertEquals(comments.size(), commentDtos.size());
@@ -55,15 +55,14 @@ class CommentServiceTest {
         when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
 
         // Act
-        CommentDto commentDto = commentService.getCommentDTOById(id);
+        CommentDto commentDto = commentService.getCommentDTOById(id, 10); // Total count doesn't matter for this test
 
         // Assert
         assertNotNull(commentDto);
-        assertEquals(id, commentDto.getId());
-        assertEquals(content, commentDto.getContent());
+        assertEquals(id, commentDto.id());
+        assertEquals(content, commentDto.content());
         verify(commentRepository, times(1)).findById(id);
     }
-
 
     @Test
     void getCommentDTOById_NotFound() {
@@ -72,7 +71,7 @@ class CommentServiceTest {
         when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> commentService.getCommentDTOById(id));
+        assertThrows(EntityNotFoundException.class, () -> commentService.getCommentDTOById(id, 10)); // Total count doesn't matter for this test
         verify(commentRepository, times(1)).findById(id);
     }
 
@@ -93,7 +92,6 @@ class CommentServiceTest {
         verify(commentRepository, times(1)).save(comment);
     }
 
-
     @Test
     void updateComment() {
         // Arrange
@@ -113,7 +111,6 @@ class CommentServiceTest {
         // verify that existingComment's content is updated but not save() called explicitly
         assertEquals(updatedContent, existingComment.getContent());
     }
-
 
     @Test
     void updateComment_NotFound() {
