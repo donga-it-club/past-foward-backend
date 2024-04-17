@@ -12,6 +12,6 @@ public interface SectionRepository extends JpaRepository<Section, Long>, Section
 
     int countByRetrospectiveAndTemplateSection(Retrospective retrospective, TemplateSection templateSection);
 
-    @Query("select s from Section s join fetch s.retrospective sr join fetch s.comments c where sr.id = :retrospectiveId")
+    @Query("select s from Section s join fetch s.retrospective sr where sr.id = :retrospectiveId")
     List<Section> getSectionsWithComments(@Param("retrospectiveId") Long retrospectiveId);
 }
