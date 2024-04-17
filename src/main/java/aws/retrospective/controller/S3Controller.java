@@ -29,9 +29,7 @@ public class S3Controller {
     // PreSignedUrl 발급
     @PostMapping("/pre-signed-url")
     @Operation(summary = "AWS S3 PreSignedUrl 발급")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "PreSignedUrl 발급 성공"),
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "PreSignedUrl 발급 성공"),})
     public CommonApiResponse<GetPreSignedUrlResponseDto> getPreSignedUrl(
         @RequestBody @Valid GetPreSignedUrlRequestDto request) {
         GetPreSignedUrlResponseDto response = s3Service.getPreSignedUrl(request);

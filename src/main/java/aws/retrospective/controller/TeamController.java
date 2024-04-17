@@ -28,15 +28,11 @@ public class TeamController {
 
     // Action Items 눌렀을 때 팀에 속한 모든 회원 조회
     @Operation(summary = "팀에 속한 모든 회원 조회", description = "회고 보드를 진행 중인 팀에 속한 모든 회원을 조회하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @GetMapping("/{teamId}/users")
     public CommonApiResponse<List<GetTeamUsersResponseDto>> getTeamMembers(
-        @PathVariable Long teamId,
-        @RequestBody @Valid GetTeamUsersRequestDto request) {
-        List<GetTeamUsersResponseDto> response = teamService.getTeamMembers(teamId,
-            request);
+        @PathVariable Long teamId, @RequestBody @Valid GetTeamUsersRequestDto request) {
+        List<GetTeamUsersResponseDto> response = teamService.getTeamMembers(teamId, request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 }
