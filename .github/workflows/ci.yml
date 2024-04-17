@@ -36,6 +36,7 @@ jobs:
           AWS_SEND_MAIL_TO: ${{ secrets.AWS_SEND_MAIL_TO }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ISSUER_URI: ${{ secrets.ISSUER_URI }}
 
 
       - name: Cache Gradle packages
