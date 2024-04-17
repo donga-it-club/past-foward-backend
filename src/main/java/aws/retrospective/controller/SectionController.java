@@ -1,20 +1,21 @@
 package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
+import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
-import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.entity.User;
 import aws.retrospective.service.SectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/sections")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 @Tag(name = "Section", description = "Section API<br>"
     + "200 OK : 요청을 정상적으로 처리<br>"
     + "201 Created : 요청을 정상적으로 처리하여 새로운 엔티티를 생성<br>"
@@ -48,8 +50,9 @@ public class SectionController {
         @ApiResponse(responseCode = "201")})
     @PostMapping
     public CommonApiResponse<CreateSectionResponseDto> createSection(
+        @CurrentUser User user,
         @Valid @RequestBody CreateSectionDto request) {
-        CreateSectionResponseDto response = sectionService.createSection(request);
+        CreateSectionResponseDto response = sectionService.createSection(user, request);
         return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
@@ -58,8 +61,11 @@ public class SectionController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")})
     @PatchMapping("/{sectionId}")
-    public CommonApiResponse<EditSectionResponseDto> editSectionContent(@PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
+    public CommonApiResponse<EditSectionResponseDto> editSectionContent(
+        @CurrentUser User user,
+        @PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
         EditSectionResponseDto response = sectionService.updateSectionContent(
+            user,
             sectionId, request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
@@ -69,9 +75,11 @@ public class SectionController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200")})
     @PostMapping("/{sectionId}/likes")
-    public CommonApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(@PathVariable Long sectionId, @Valid @RequestBody IncreaseSectionLikesRequestDto request) {
+    public CommonApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(
+        @CurrentUser User user,
+        @PathVariable Long sectionId) {
         IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
-            sectionId, request);
+            sectionId, user);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
@@ -80,8 +88,11 @@ public class SectionController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204")})
     @DeleteMapping("/{sectionId}")
-    public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId, @Valid @RequestBody DeleteSectionRequestDto request) {
-        sectionService.deleteSection(sectionId, request);
+    public CommonApiResponse<Void> deleteSection(
+        @CurrentUser User user,
+        @PathVariable("sectionId") Long sectionId
+    ) {
+        sectionService.deleteSection(sectionId, user);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 
@@ -91,7 +102,8 @@ public class SectionController {
         @ApiResponse(responseCode = "200")
     })
     @GetMapping
-    public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
+    public CommonApiResponse<List<GetSectionsResponseDto>> getSections(
+        @RequestBody @Valid GetSectionsRequestDto request) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
@@ -102,8 +114,10 @@ public class SectionController {
         @ApiResponse(responseCode = "204")
     })
     @PutMapping("/action-items")
-    public CommonApiResponse<Void> assignUser(@RequestBody @Valid AssignUserRequestDto request) {
-        sectionService.assignUserToActionItem(request);
+    public CommonApiResponse<Void> assignUser(
+        @CurrentUser User user,
+        @RequestBody @Valid AssignUserRequestDto request) {
+        sectionService.assignUserToActionItem(user, request);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 

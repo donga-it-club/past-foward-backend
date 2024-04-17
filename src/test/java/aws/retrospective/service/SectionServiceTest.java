@@ -78,7 +78,6 @@ class SectionServiceTest {
         Long userId = 1L;
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Team team = createTeam();
         RetrospectiveTemplate kptTemplate = createTemplate();
@@ -96,13 +95,12 @@ class SectionServiceTest {
             Optional.of(templateSection));
 
         CreateSectionDto request = new CreateSectionDto();
-        ReflectionTestUtils.setField(request, "userId", userId);
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "templateSectionId", templateSectionId);
         ReflectionTestUtils.setField(request, "sectionContent", "test");
 
         //when
-        CreateSectionResponseDto response = sectionService.createSection(request);
+        CreateSectionResponseDto response = sectionService.createSection(user, request);
 
         //then
         assertThat(response.getSectionContent()).isEqualTo("test");
@@ -125,12 +123,8 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
-        DeleteSectionRequestDto request = new DeleteSectionRequestDto();
-        ReflectionTestUtils.setField(request, "userId", user.getId());
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
         //when
-        sectionService.deleteSection(sectionId, request);
+        sectionService.deleteSection(sectionId, user);
 
         //then
         verify(sectionRepository).delete(section);
@@ -142,6 +136,7 @@ class SectionServiceTest {
 
         //given
         Long notExistSectionId = 1L;
+        User user = createUser();
 
         DeleteSectionRequestDto request = new DeleteSectionRequestDto();
         ReflectionTestUtils.setField(request, "userId", 1L);
@@ -150,7 +145,7 @@ class SectionServiceTest {
         when(sectionRepository.findById(notExistSectionId)).thenThrow(NoSuchElementException.class);
         //then
         assertThrows(NoSuchElementException.class,
-            () -> sectionService.deleteSection(notExistSectionId, request));
+            () -> sectionService.deleteSection(notExistSectionId, user));
     }
 
     @Test
@@ -160,7 +155,6 @@ class SectionServiceTest {
         Long userId = 1L;
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Long sectionId = 1L;
         Section section = createSection(user);
@@ -174,7 +168,7 @@ class SectionServiceTest {
 
         //when
         IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
-            sectionId, request);
+            sectionId, user);
 
         //then
         assertThat(response.getSectionId()).isEqualTo(sectionId);
@@ -188,7 +182,6 @@ class SectionServiceTest {
         Long userId = 1L;
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Long sectionId = 1L;
         Section section = createSection(user);
@@ -204,7 +197,7 @@ class SectionServiceTest {
 
         //when
         IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
-            sectionId, request);
+            sectionId, user);
 
         //then
         assertThat(response.getSectionId()).isEqualTo(sectionId);
@@ -274,7 +267,6 @@ class SectionServiceTest {
         Long userId = 1L;
         User loginedUser = createUser();
         ReflectionTestUtils.setField(loginedUser, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(loginedUser));
 
         Long sectionId = 1L;
         Section section = createSection(loginedUser);
@@ -283,9 +275,9 @@ class SectionServiceTest {
 
         //when
         EditSectionRequestDto request = new EditSectionRequestDto();
-        ReflectionTestUtils.setField(request, "userId", userId);
         ReflectionTestUtils.setField(request, "sectionContent", request.getSectionContent());
         EditSectionResponseDto response = sectionService.updateSectionContent(
+            loginedUser,
             sectionId, request);
 
         //then
@@ -407,7 +399,6 @@ class SectionServiceTest {
         Long userId = 1L;
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Long teamId = 1L;
         Team team = createTeam();
@@ -435,12 +426,11 @@ class SectionServiceTest {
 
         //when
         AssignUserRequestDto request = new AssignUserRequestDto();
-        ReflectionTestUtils.setField(request, "userId", userId);
         ReflectionTestUtils.setField(request, "teamId", teamId);
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "sectionId", sectionId);
 
-        sectionService.assignUserToActionItem(request);
+        sectionService.assignUserToActionItem(user, request);
 
         //then
         ArgumentCaptor<ActionItem> actionItemArgumentCaptor = ArgumentCaptor.forClass(
@@ -461,7 +451,6 @@ class SectionServiceTest {
         Long userId = 1L;
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         Long teamId = 1L;
         Team team = createTeam();
@@ -489,13 +478,12 @@ class SectionServiceTest {
 
         //when
         AssignUserRequestDto request = new AssignUserRequestDto();
-        ReflectionTestUtils.setField(request, "userId", userId);
         ReflectionTestUtils.setField(request, "teamId", teamId);
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "sectionId", sectionId);
 
         assertThrows(IllegalArgumentException.class,
-            () -> sectionService.assignUserToActionItem(request));
+            () -> sectionService.assignUserToActionItem(user, request));
     }
 
     private static Section createSection(User loginedUser) {
