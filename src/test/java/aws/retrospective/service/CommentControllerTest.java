@@ -41,7 +41,7 @@ class CommentControllerTest {
         CommonApiResponse<List<CommentDto>> response = commentController.getAllComments();
 
         // Assert
-        assertEquals(HttpStatus.OK, response.getCode());
+        assertEquals(HttpStatus.OK.value(), response.getCode());
         assertEquals(commentDtoList, response.getData());
         verify(commentService, times(1)).getAllComments();
     }
@@ -50,16 +50,20 @@ class CommentControllerTest {
     void getCommentById() {
         // Arrange
         Long commentId = 1L;
-        CommentDto commentDto = new CommentDto(1L, "Sample content");
+        CommentDto expectedCommentDto = new CommentDto(commentId, "Sample content");
+        when(commentService.getCommentDTOById(commentId)).thenReturn(expectedCommentDto);
 
         // Act
         CommonApiResponse<CommentDto> response = commentController.getCommentById(commentId);
 
         // Assert
-        assertEquals(HttpStatus.OK, response.getCode());
-        assertEquals(commentDto, response.getData());
+        assertEquals(HttpStatus.OK.value(), response.getCode());
+        assertNotNull(response.getData());
+        assertEquals(expectedCommentDto, response.getData());
         verify(commentService, times(1)).getCommentDTOById(commentId);
     }
+
+
 
     @Test
     void createComment() {
