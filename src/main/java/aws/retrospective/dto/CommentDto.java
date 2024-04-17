@@ -1,5 +1,15 @@
 package aws.retrospective.dto;
 
-public record CommentDto(Long id, String content, int totalCount) {
+import lombok.Getter;
 
+@Getter
+public class CommentDto {
+
+    private final Long id;
+    private final String content;
+
+    public CommentDto(Long id, String content) {
+        this.id = id;
+        this.content = content;
+    }
 }
