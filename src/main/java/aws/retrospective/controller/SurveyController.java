@@ -4,6 +4,7 @@ import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.service.SurveyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/surveys")
 @Tag(name = "surveys")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class SurveyController {
 
     private final SurveyService surveyService;

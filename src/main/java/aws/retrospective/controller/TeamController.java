@@ -7,6 +7,7 @@ import aws.retrospective.service.TeamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/teams")
+@SecurityRequirement(name = "JWT")
 public class TeamController {
 
     private final TeamService teamService;
@@ -30,7 +32,8 @@ public class TeamController {
         @ApiResponse(responseCode = "200")
     })
     @GetMapping("/{teamId}/users")
-    public CommonApiResponse<List<GetTeamUsersResponseDto>> getTeamMembers(@PathVariable Long teamId,
+    public CommonApiResponse<List<GetTeamUsersResponseDto>> getTeamMembers(
+        @PathVariable Long teamId,
         @RequestBody @Valid GetTeamUsersRequestDto request) {
         List<GetTeamUsersResponseDto> response = teamService.getTeamMembers(teamId,
             request);
