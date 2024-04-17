@@ -43,7 +43,7 @@ public class SurveyService {
 
     private SurveyDto convertToDto(Survey survey) {
         return SurveyDto.builder()
-            .age(Integer.valueOf(survey.getAge()))
+            .age(survey.getAge())
             .gender(survey.getGender().toString())
             .occupation(survey.getOccupation())
             .region(survey.getRegion())
