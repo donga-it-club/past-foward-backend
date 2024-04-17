@@ -49,7 +49,6 @@ public class BookmarkServiceTest {
         ReflectionTestUtils.setField(retrospective, "id", 1L);
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(retrospectiveRepository.findById(retrospective.getId())).thenReturn(
             Optional.of(retrospective));
 
@@ -59,7 +58,7 @@ public class BookmarkServiceTest {
         when(bookmarkRepository.save(any())).thenReturn(null);
 
         // Act
-        boolean result = bookmarkService.toggleBookmark(user.getId(), retrospective.getId());
+        boolean result = bookmarkService.toggleBookmark(user, retrospective.getId());
 
         // Assert
         assertTrue(result);
@@ -77,14 +76,13 @@ public class BookmarkServiceTest {
         ReflectionTestUtils.setField(retrospective, "id", 1L);
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(retrospectiveRepository.findById(retrospective.getId())).thenReturn(
             Optional.of(retrospective));
         when(bookmarkRepository.findByUserIdAndRetrospectiveId(user.getId(),
             retrospective.getId())).thenReturn(Optional.of(bookmark));
 
         // Act
-        boolean result = bookmarkService.toggleBookmark(user.getId(), retrospective.getId());
+        boolean result = bookmarkService.toggleBookmark(user, retrospective.getId());
 
         // Assert
         assertThat(result).isFalse();

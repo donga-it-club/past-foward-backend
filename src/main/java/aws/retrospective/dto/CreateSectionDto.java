@@ -6,8 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class CreateSectionDto {
-    @Schema(description = "user id", example = "1")
-    private Long userId;
+
     @Schema(description = "retrospective id", example = "2")
     private Long retrospectiveId;
     @Schema(description = "template_section id", example = "3")

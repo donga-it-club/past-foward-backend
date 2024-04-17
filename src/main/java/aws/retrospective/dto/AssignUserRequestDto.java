@@ -10,10 +10,7 @@ public class AssignUserRequestDto {
     @NotNull
     @Schema(description = "팀 ID")
     private Long teamId;
-
-    @NotNull
-    @Schema(description = "사용자 ID")
-    private Long userId;
+    
 
     @NotNull
     @Schema(description = "회고 보드 ID")
