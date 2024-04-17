@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,24 +31,24 @@ public class CommentController {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved comments"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<CommonApiResponse<List<CommentDto>>> getAllComments() {
+    public CommonApiResponse<List<CommentDto>> getAllComments() {
         int totalCount = commentService.getTotalCommentCount(); // 전체 댓글 수 조회
         List<CommentDto> commentDtoList = commentService.getAllComments(totalCount);
-        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, commentDtoList));
+        return CommonApiResponse.successResponse(HttpStatus.OK, commentDtoList);
     }
 
 
     // 특정 댓글 조회
-    @GetMapping("/{id}")
+    @GetMapping("/sections/{sectionId}/comments")
     @Operation(summary = "Get comment by ID", responses = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved comment"),
         @ApiResponse(responseCode = "404", description = "Comment not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<CommonApiResponse<CommentDto>> getCommentById(@PathVariable Long id) {
+    public CommonApiResponse<CommentDto> getCommentById(@PathVariable Long id) {
         int totalCount = commentService.getTotalCommentCount(); // 전체 댓글 수 조회
         CommentDto commentDto = commentService.getCommentDTOById(id, totalCount);
-        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, commentDto));
+        return CommonApiResponse.successResponse(HttpStatus.OK, commentDto);
     }
 
     // 댓글 생성
@@ -59,34 +58,32 @@ public class CommentController {
         @ApiResponse(responseCode = "400", description = "Invalid request body"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<CommonApiResponse<Comment>> createComment(@RequestBody Comment comment) {
+    public CommonApiResponse<Comment> createComment(@RequestBody Comment comment) {
         Comment createdComment = commentService.createComment(comment);
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(CommonApiResponse.successResponse(HttpStatus.CREATED, createdComment));
+        return CommonApiResponse.successResponse(HttpStatus.CREATED, createdComment);
     }
 
     // 댓글 업데이트
-    @PutMapping("/{id}")
+    @PutMapping("/sections/{sectionId}/comments")
     @Operation(summary = "Update an existing comment", responses = {
         @ApiResponse(responseCode = "200", description = "Comment updated successfully"),
         @ApiResponse(responseCode = "404", description = "Comment not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<CommonApiResponse<Comment>> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
+    public CommonApiResponse<Comment> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
         Comment updated = commentService.updateComment(id, updatedComment);
-        return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, updated));
+        return CommonApiResponse.successResponse(HttpStatus.OK, updated);
     }
 
     // 댓글 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/sections/{sectionId}/comments")
     @Operation(summary = "Delete a comment by ID", responses = {
         @ApiResponse(responseCode = "204", description = "Comment deleted successfully"),
         @ApiResponse(responseCode = "404", description = "Comment not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<CommonApiResponse<Void>> deleteComment(@PathVariable Long id) {
+    public CommonApiResponse<Void> deleteComment(@PathVariable Long id) {
         commentService.deleteComment(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-            .body(CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null));
+        return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 }
