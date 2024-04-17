@@ -1,17 +1,33 @@
 package aws.retrospective.dto;
 
+import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+
 
 @Getter
 @Builder
 public class SurveyDto {
+    private Long surveyId;
 
-    private final Long id;
-    private final String age;
-    private final String gender;
-    private final String occupation;
-    private final String region;
-    private final String source;
-    private final String purpose;
+    @NotNull
+    private Integer age;
+
+    @NotEmpty
+    private String gender;
+
+    @NotEmpty
+    private String occupation;
+
+    @NotEmpty
+    private String region;
+
+    @NotEmpty
+    private String source;
+
+    private String purpose;
 }
