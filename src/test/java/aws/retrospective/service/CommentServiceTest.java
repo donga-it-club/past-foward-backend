@@ -39,7 +39,7 @@ class CommentServiceTest {
         when(commentRepository.findAll()).thenReturn(comments);
 
         // Act
-        List<CommentDto> commentDtos = commentService.getAllComments(comments.size());
+        List<CommentDto> commentDtos = commentService.getAllComments();
 
         // Assert
         assertEquals(comments.size(), commentDtos.size());
@@ -55,12 +55,12 @@ class CommentServiceTest {
         when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
 
         // Act
-        CommentDto commentDto = commentService.getCommentDTOById(id, 10); // Total count doesn't matter for this test
+        CommentDto commentDto = commentService.getCommentDTOById(id);
 
         // Assert
         assertNotNull(commentDto);
-        assertEquals(id, commentDto.id());
-        assertEquals(content, commentDto.content());
+        assertEquals(id, commentDto.getId());
+        assertEquals(content, commentDto.getContent());
         verify(commentRepository, times(1)).findById(id);
     }
 
@@ -71,7 +71,7 @@ class CommentServiceTest {
         when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> commentService.getCommentDTOById(id, 10)); // Total count doesn't matter for this test
+        assertThrows(EntityNotFoundException.class, () -> commentService.getCommentDTOById(id));
         verify(commentRepository, times(1)).findById(id);
     }
 
