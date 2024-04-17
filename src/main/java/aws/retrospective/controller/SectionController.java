@@ -7,8 +7,6 @@ import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.FindSectionCountRequestDto;
-import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
@@ -95,20 +93,6 @@ public class SectionController {
     @GetMapping
     public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
-        return CommonApiResponse.successResponse(HttpStatus.OK, response);
-    }
-
-    /**
-     * 회고 카드 개수 조회
-     * ex. Keep 섹션이 등록된 회고 카드 개수 조회
-     */
-    @Operation(summary = "섹션에 등록된 회고 카드 개수 조회", description = "섹션에 등록된 카드 개수를 조회하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200")
-    })
-    @GetMapping("/counts")
-    public CommonApiResponse<FindSectionCountResponseDto> getSectionCounts(@RequestBody @Valid FindSectionCountRequestDto request) {
-        FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
