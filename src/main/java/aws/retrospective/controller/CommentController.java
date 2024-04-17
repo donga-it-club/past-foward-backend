@@ -32,8 +32,7 @@ public class CommentController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public CommonApiResponse<List<CommentDto>> getAllComments() {
-        int totalCount = commentService.getTotalCommentCount(); // 전체 댓글 수 조회
-        List<CommentDto> commentDtoList = commentService.getAllComments(totalCount);
+        List<CommentDto> commentDtoList = commentService.getAllComments();
         return CommonApiResponse.successResponse(HttpStatus.OK, commentDtoList);
     }
 
@@ -46,8 +45,7 @@ public class CommentController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public CommonApiResponse<CommentDto> getCommentById(@PathVariable Long id) {
-        int totalCount = commentService.getTotalCommentCount(); // 전체 댓글 수 조회
-        CommentDto commentDto = commentService.getCommentDTOById(id, totalCount);
+        CommentDto commentDto = commentService.getCommentDTOById(id);
         return CommonApiResponse.successResponse(HttpStatus.OK, commentDto);
     }
 
