@@ -49,7 +49,6 @@ public class BookmarkServiceTest {
         ReflectionTestUtils.setField(retrospective, "id", 1L);
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(retrospectiveRepository.findById(retrospective.getId())).thenReturn(
             Optional.of(retrospective));
 
@@ -77,7 +76,6 @@ public class BookmarkServiceTest {
         ReflectionTestUtils.setField(retrospective, "id", 1L);
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(retrospectiveRepository.findById(retrospective.getId())).thenReturn(
             Optional.of(retrospective));
         when(bookmarkRepository.findByUserIdAndRetrospectiveId(user.getId(),
