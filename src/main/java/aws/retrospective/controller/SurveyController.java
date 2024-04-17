@@ -29,13 +29,8 @@ public class SurveyController {
             @ApiResponse(responseCode = "200", description = "설문조사가 성공적으로 저장됨")
     })
     public CommonApiResponse<String> addSurvey(@Valid @RequestBody SurveyDto surveyDto) {
-        try {
-            surveyService.addSurvey(surveyDto);
-            return (CommonApiResponse.successResponse(HttpStatus.OK, "Survey added succesfully"));
-        } catch (Exception e) {
-            return (CommonApiResponse.errorResponse(HttpStatus.BAD_REQUEST,
-                "Failed to add survey"));
-        }
+        surveyService.addSurvey(surveyDto);
+        return (CommonApiResponse.successResponse(HttpStatus.OK, "Survey added succesfully"));
     }
 
     @Operation(summary = "설문조사 조회", description = "설문조사 데이터를 조회하는 API")
