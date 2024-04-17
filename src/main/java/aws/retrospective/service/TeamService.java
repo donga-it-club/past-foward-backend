@@ -1,6 +1,5 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.GetTeamUsersRequestDto;
 import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Team;
@@ -25,9 +24,9 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public List<GetTeamUsersResponseDto> getTeamMembers(Long teamId,
-        GetTeamUsersRequestDto request) {
+        Long retrospectiveId) {
         Team findTeam = getTeam(teamId);
-        Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
+        Retrospective findRetrospective = getRetrospective(retrospectiveId);
 
         // 다른 팀의 회고보드에 대한 조회는 불가능하다.
         if (findRetrospective.getTeam().getId() != findTeam.getId()) {
