@@ -36,38 +36,29 @@ class CommentControllerTest {
     void getAllComments() {
         // Arrange
         List<CommentDto> commentDtoList = new ArrayList<>();
-        int totalCount = 10;
-        when(commentService.getTotalCommentCount()).thenReturn(totalCount);
-        when(commentService.getAllComments(totalCount)).thenReturn(commentDtoList);
 
         // Act
         CommonApiResponse<List<CommentDto>> response = commentController.getAllComments();
 
         // Assert
-        assertEquals(HttpStatus.OK.value(), response.getCode());
-        assertNotNull(response.getData());
+        assertEquals(HttpStatus.OK, response.getCode());
         assertEquals(commentDtoList, response.getData());
-        verify(commentService, times(1)).getTotalCommentCount();
+        verify(commentService, times(1)).getAllComments();
     }
 
     @Test
     void getCommentById() {
         // Arrange
         Long commentId = 1L;
-        CommentDto commentDto = new CommentDto(1L, "Sample content", 10);
-        int totalCount = 10;
-        when(commentService.getTotalCommentCount()).thenReturn(totalCount);
-        when(commentService.getCommentDTOById(commentId, totalCount)).thenReturn(commentDto);
+        CommentDto commentDto = new CommentDto(1L, "Sample content");
 
         // Act
         CommonApiResponse<CommentDto> response = commentController.getCommentById(commentId);
 
         // Assert
-        assertEquals(HttpStatus.OK.value(), response.getCode());
-        assertNotNull(response.getData());
+        assertEquals(HttpStatus.OK, response.getCode());
         assertEquals(commentDto, response.getData());
-        verify(commentService, times(1)).getTotalCommentCount();
-        verify(commentService, times(1)).getCommentDTOById(commentId, totalCount);
+        verify(commentService, times(1)).getCommentDTOById(commentId);
     }
 
     @Test
