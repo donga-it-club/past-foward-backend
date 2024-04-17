@@ -23,7 +23,7 @@ public class Survey extends BaseEntity{
     private Long id; // 설문 아이디 - PK
 
     // 설문조사 관련 필드 추가
-    private String age;
+    private Integer age;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -44,7 +44,7 @@ public class Survey extends BaseEntity{
     @Builder
     public Survey(Integer age, String gender, String occupation, String region,
         String source, String purpose) {
-        this.age = String.valueOf(age);
+        this.age = age;
         this.gender = Gender.valueOf(gender);
         this.occupation = occupation;
         this.region = region;
