@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,7 @@ class CommentControllerTest {
         when(commentService.getAllComments(totalCount)).thenReturn(commentDtoList);
 
         // Act
-        ResponseEntity<CommonApiResponse<List<CommentDto>>> responseEntity = commentController.getAllComments();
+        CommonApiResponse<List<CommentDto>> responseEntity = commentController.getAllComments();
 
         // Assert
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -61,7 +60,7 @@ class CommentControllerTest {
         when(commentService.getCommentDTOById(commentId, totalCount)).thenReturn(commentDto);
 
         // Act
-        ResponseEntity<CommonApiResponse<CommentDto>> responseEntity = commentController.getCommentById(commentId);
+        CommonApiResponse<CommentDto> responseEntity = commentController.getCommentById(commentId);
 
         // Assert
         assertNotNull(responseEntity.getBody());
@@ -77,7 +76,7 @@ class CommentControllerTest {
         when(commentService.createComment(comment)).thenReturn(comment);
 
         // Act
-        ResponseEntity<CommonApiResponse<Comment>> responseEntity = commentController.createComment(comment);
+        CommonApiResponse<Comment> responseEntity = commentController.createComment(comment);
 
         // Assert
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
@@ -94,7 +93,7 @@ class CommentControllerTest {
         when(commentService.updateComment(commentId, updatedComment)).thenReturn(updatedComment);
 
         // Act
-        ResponseEntity<CommonApiResponse<Comment>> responseEntity = commentController.updateComment(commentId, updatedComment);
+        CommonApiResponse<Comment> responseEntity = commentController.updateComment(commentId, updatedComment);
 
         // Assert
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -109,7 +108,7 @@ class CommentControllerTest {
         Long commentId = 1L;
 
         // Act
-        ResponseEntity<CommonApiResponse<Void>> responseEntity = commentController.deleteComment(commentId);
+        CommonApiResponse<Void> responseEntity = commentController.deleteComment(commentId);
 
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
