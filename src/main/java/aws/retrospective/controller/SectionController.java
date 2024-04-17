@@ -90,7 +90,7 @@ public class SectionController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @GetMapping
     public CommonApiResponse<List<GetSectionsResponseDto>> getSections(
-        @RequestBody @Valid GetSectionsRequestDto request) {
+        @Valid GetSectionsRequestDto request) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }

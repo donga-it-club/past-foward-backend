@@ -82,7 +82,7 @@ public class SectionService {
         Section findSection = getSection(sectionId);
 
         // 회고 카드 수정은 작성자만 가능하다.
-        if (!findSection.getUser().equals(user)) {
+        if (!findSection.getUser().getId().equals(user.getId())) {
             throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
         }
 
@@ -152,7 +152,7 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
 
         // 작성자만 회고 카드를 삭제할 수 있다.
-        if (!findSection.getUser().equals(user)) {
+        if (!findSection.getUser().getId().equals(user.getId())) {
             throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
         }
 
