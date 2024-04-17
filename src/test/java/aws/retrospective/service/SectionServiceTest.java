@@ -113,6 +113,7 @@ class SectionServiceTest {
     void deleteSectionSuccessTest() {
         //given
         User user = createUser();
+        ReflectionTestUtils.setField(user, "id", 1L);
         Team team = createTeam();
         RetrospectiveTemplate kptTemplate = createTemplate();
         TemplateSection templateSection = createTemplateSection(kptTemplate);
