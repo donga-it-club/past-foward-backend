@@ -167,8 +167,8 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(request, "userId", userId);
 
         //when
-        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
-            sectionId, user);
+        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(sectionId,
+            user);
 
         //then
         assertThat(response.getSectionId()).isEqualTo(sectionId);
@@ -196,8 +196,8 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(request, "userId", userId);
 
         //when
-        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
-            sectionId, user);
+        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(sectionId,
+            user);
 
         //then
         assertThat(response.getSectionId()).isEqualTo(sectionId);
@@ -235,28 +235,17 @@ class SectionServiceTest {
     }
 
     private static Likes createLikes(Section section, User user) {
-        return Likes.builder()
-            .section(section)
-            .user(user)
-            .build();
+        return Likes.builder().section(section).user(user).build();
     }
 
     private static Section createSection(User user, TemplateSection templateSection,
         Retrospective retrospective) {
-        return Section.builder()
-            .user(user)
-            .content("test")
-            .templateSection(templateSection)
-            .likeCnt(0)
-            .retrospective(retrospective)
-            .build();
+        return Section.builder().user(user).content("test").templateSection(templateSection)
+            .likeCnt(0).retrospective(retrospective).build();
     }
 
     private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
-        return TemplateSection.builder()
-            .sectionName("Keep")
-            .sequence(0)
-            .template(kptTemplate)
+        return TemplateSection.builder().sectionName("Keep").sequence(0).template(kptTemplate)
             .build();
     }
 
@@ -276,8 +265,7 @@ class SectionServiceTest {
         //when
         EditSectionRequestDto request = new EditSectionRequestDto();
         ReflectionTestUtils.setField(request, "sectionContent", request.getSectionContent());
-        EditSectionResponseDto response = sectionService.updateSectionContent(
-            loginedUser,
+        EditSectionResponseDto response = sectionService.updateSectionContent(loginedUser,
             sectionId, request);
 
         //then
@@ -312,18 +300,12 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(createdSection, "id", sectionId);
 
         Long commentId1 = 1L;
-        Comment comment1 = Comment.builder()
-            .section(createdSection)
-            .content("content1")
-            .user(createdUser)
-            .build();
+        Comment comment1 = Comment.builder().section(createdSection).content("content1")
+            .user(createdUser).build();
         ReflectionTestUtils.setField(comment1, "id", commentId1);
         Long commentId2 = 2L;
-        Comment comment2 = Comment.builder()
-            .section(createdSection)
-            .content("content2")
-            .user(createdUser)
-            .build();
+        Comment comment2 = Comment.builder().section(createdSection).content("content2")
+            .user(createdUser).build();
         ReflectionTestUtils.setField(comment2, "id", commentId2);
         createdSection.getComments().add(comment1);
         createdSection.getComments().add(comment2);
@@ -411,16 +393,12 @@ class SectionServiceTest {
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
 
-        TemplateSection actionItemsTemplate = TemplateSection.builder()
-            .sectionName("Action Items")
-            .sequence(4)
-            .build();
+        TemplateSection actionItemsTemplate = TemplateSection.builder().sectionName("Action Items")
+            .sequence(4).build();
 
         Long sectionId = 1L;
-        Section section = Section.builder()
-            .retrospective(retrospective)
-            .templateSection(actionItemsTemplate)
-            .build();
+        Section section = Section.builder().retrospective(retrospective)
+            .templateSection(actionItemsTemplate).build();
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
@@ -463,16 +441,12 @@ class SectionServiceTest {
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
 
-        TemplateSection actionItemsTemplate = TemplateSection.builder()
-            .sectionName("Keep")
-            .sequence(4)
-            .build();
+        TemplateSection actionItemsTemplate = TemplateSection.builder().sectionName("Keep")
+            .sequence(4).build();
 
         Long sectionId = 1L;
-        Section section = Section.builder()
-            .retrospective(retrospective)
-            .templateSection(actionItemsTemplate)
-            .build();
+        Section section = Section.builder().retrospective(retrospective)
+            .templateSection(actionItemsTemplate).build();
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
@@ -487,49 +461,29 @@ class SectionServiceTest {
     }
 
     private static Section createSection(User loginedUser) {
-        return Section.builder()
-            .user(loginedUser)
-            .content("test")
-            .likeCnt(0)
-            .build();
+        return Section.builder().user(loginedUser).content("test").likeCnt(0).build();
     }
 
     private static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,
-        User user,
-        Team team) {
-        return Retrospective.builder()
-            .template(retrospectiveTemplate)
-            .status(ProjectStatus.IN_PROGRESS)
-            .title("test")
-            .team(team)
-            .user(user)
-            .build();
+        User user, Team team) {
+        return Retrospective.builder().template(retrospectiveTemplate)
+            .status(ProjectStatus.IN_PROGRESS).title("test").team(team).user(user).build();
     }
 
     private static RetrospectiveTemplate createTemplate() {
-        return RetrospectiveTemplate.builder()
-            .name("KPT")
-            .build();
+        return RetrospectiveTemplate.builder().name("KPT").build();
     }
 
     private static Team createTeam() {
-        return Team.builder()
-            .name("name")
-            .build();
+        return Team.builder().name("name").build();
     }
 
     private static User createUser() {
-        return User.builder()
-            .username("test")
-            .phone("010-1234-1234")
-            .email("test@naver.com")
+        return User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
             .build();
     }
 
     private static UserTeam createUserTeam(User createdUser, Team createdTeam) {
-        return UserTeam.builder()
-            .user(createdUser)
-            .team(createdTeam)
-            .build();
+        return UserTeam.builder().user(createdUser).team(createdTeam).build();
     }
 }

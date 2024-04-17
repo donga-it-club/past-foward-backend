@@ -71,9 +71,8 @@ public class SectionService {
             findRetrospective, user);
         sectionRepository.save(createSection);
 
-        return new CreateSectionResponseDto(createSection.getId(),
-            createSection.getUser().getId(), request.getRetrospectiveId(),
-            request.getSectionContent());
+        return new CreateSectionResponseDto(createSection.getId(), createSection.getUser().getId(),
+            request.getRetrospectiveId(), request.getSectionContent());
     }
 
     // 회고 카드 수정
@@ -95,20 +94,15 @@ public class SectionService {
 
     // 회고 카드 좋아요 API
     @Transactional
-    public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId,
-        User user) {
+    public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId, User user) {
         // 회고 카드 조회
         Section findSection = getSection(sectionId);
 
         // 사용자가 해당 회고 카드에 좋아요를 눌렀는지 확인한다.
-        Optional<Likes> findLikes = likesRepository.findByUserAndSection(user,
-            findSection);
+        Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, findSection);
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
         if (findLikes.isEmpty()) {
-            Likes createLikes = Likes.builder()
-                .section(findSection)
-                .user(user)
-                .build();
+            Likes createLikes = Likes.builder().section(findSection).user(user).build();
             likesRepository.save(createLikes);
             findSection.increaseSectionLikes();
         } else {
@@ -168,12 +162,8 @@ public class SectionService {
     // 회고 카드 등록
     private Section createSection(String sectionContent, TemplateSection findTemplateSection,
         Retrospective findRetrospective, User findUser) {
-        return Section.builder()
-            .templateSection(findTemplateSection)
-            .retrospective(findRetrospective)
-            .user(findUser)
-            .likeCnt(0)
-            .content(sectionContent)
+        return Section.builder().templateSection(findTemplateSection)
+            .retrospective(findRetrospective).user(findUser).likeCnt(0).content(sectionContent)
             .build();
     }
 
@@ -205,20 +195,19 @@ public class SectionService {
             response.add(
                 new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
                     section.getContent(), section.getLikeCnt(),
-                    section.getTemplateSection().getSectionName(),
-                    section.getCreatedDate(), collect));
+                    section.getTemplateSection().getSectionName(), section.getCreatedDate(),
+                    collect));
         }
     }
 
     private Team getTeam(Long teamId) {
         return teamRepository.findById(teamId)
-            .orElseThrow(
-                () -> new NoSuchElementException("Not Found Team id : " + teamId));
+            .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
     }
 
     private Retrospective getRetrospective(GetSectionsRequestDto request) {
-        return retrospectiveRepository.findById(request.getRetrospectiveId())
-            .orElseThrow(() -> new NoSuchElementException(
+        return retrospectiveRepository.findById(request.getRetrospectiveId()).orElseThrow(
+            () -> new NoSuchElementException(
                 "Not Found Retrospective id : " + request.getRetrospectiveId()));
     }
 
@@ -238,11 +227,7 @@ public class SectionService {
 
     private static ActionItem createActionItem(User findUser, Team findTeam, Section section,
         Retrospective retrospective) {
-        return ActionItem.builder()
-            .user(findUser)
-            .team(findTeam)
-            .section(section)
-            .retrospective(retrospective)
-            .build();
+        return ActionItem.builder().user(findUser).team(findTeam).section(section)
+            .retrospective(retrospective).build();
     }
 }
