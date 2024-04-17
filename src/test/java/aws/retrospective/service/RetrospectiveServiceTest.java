@@ -31,10 +31,10 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.util.TestUtil;
-import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -106,6 +106,7 @@ public class RetrospectiveServiceTest {
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
+            new User("user1", "test", "test", "test"),
             dto);
 
         // then
@@ -148,7 +149,6 @@ public class RetrospectiveServiceTest {
         CreateRetrospectiveDto dto = new CreateRetrospectiveDto();
         ReflectionTestUtils.setField(dto, "title", "New Retro");
         ReflectionTestUtils.setField(dto, "type", RetrospectiveType.TEAM);
-        ReflectionTestUtils.setField(dto, "userId", 1L);
         ReflectionTestUtils.setField(dto, "templateId", 1L);
         ReflectionTestUtils.setField(dto, "status", ProjectStatus.IN_PROGRESS);
         ReflectionTestUtils.setField(dto, "thumbnail", UUID.randomUUID());
@@ -156,7 +156,8 @@ public class RetrospectiveServiceTest {
         ReflectionTestUtils.setField(dto, "startDate", LocalDateTime.now());
 
         // when
-        CreateRetrospectiveResponseDto response = retrospectiveService.createRetrospective(dto);
+        CreateRetrospectiveResponseDto response = retrospectiveService.createRetrospective(user,
+            dto);
 
         // then
         assertThat(response).isNotNull();
@@ -184,7 +185,7 @@ public class RetrospectiveServiceTest {
         doNothing().when(retrospectiveRepository).deleteById(1L);
 
         // Act
-        retrospectiveService.deleteRetrospective(1L, 1L);
+        retrospectiveService.deleteRetrospective(1L, user);
 
         // Assert
         verify(retrospectiveRepository, times(1)).deleteById(1L);
@@ -193,23 +194,26 @@ public class RetrospectiveServiceTest {
     @Test
     void deleteRetrospective_Failure_UserNotAuthorized() {
         // Arrange
-        User unauthorizedUser = TestUtil.createUser();
+        User authorizedUser = TestUtil.createUser();
         Team team = TestUtil.createTeam();
         RetrospectiveTemplate retrospectiveTemplate = TestUtil.createTemplate();
-        ReflectionTestUtils.setField(unauthorizedUser, "id", 2L);
+        ReflectionTestUtils.setField(authorizedUser, "id", 1L);
+
+        User unauthorizedUser = TestUtil.createUser();
+        ReflectionTestUtils.setField(unauthorizedUser, "id", 123L);
 
         Retrospective unauthorizedRetrospective = TestUtil.createRetrospective(
             retrospectiveTemplate, unauthorizedUser,
             team);
         ReflectionTestUtils.setField(unauthorizedRetrospective, "id", 1L);
-        ReflectionTestUtils.setField(unauthorizedRetrospective, "user", unauthorizedUser);
+        ReflectionTestUtils.setField(unauthorizedRetrospective, "user", authorizedUser);
 
         when(retrospectiveRepository.findById(1L)).thenReturn(
             Optional.of(unauthorizedRetrospective));
 
         // Act & Assert
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            retrospectiveService.deleteRetrospective(1L, 1L);
+            retrospectiveService.deleteRetrospective(1L, unauthorizedUser);
         });
 
         assertTrue(thrown.getMessage().contains("Not allowed to delete retrospective"));
@@ -218,11 +222,13 @@ public class RetrospectiveServiceTest {
     @Test
     void deleteRetrospective_Failure_RetrospectiveNotFound() {
         // Arrange
+        User user = TestUtil.createUser();
+
         when(retrospectiveRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // Act & Assert
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
-            retrospectiveService.deleteRetrospective(1L, 1L);
+        NoSuchElementException thrown = assertThrows(NoSuchElementException.class, () -> {
+            retrospectiveService.deleteRetrospective(1L, user);
         });
 
         assertTrue(thrown.getMessage().contains("Not found retrospective"));
@@ -244,7 +250,6 @@ public class RetrospectiveServiceTest {
         UpdateRetrospectiveDto dto = new UpdateRetrospectiveDto();
         ReflectionTestUtils.setField(dto, "title", "New Retro");
         ReflectionTestUtils.setField(dto, "teamId", 1L);
-        ReflectionTestUtils.setField(dto, "userId", 1L);
         ReflectionTestUtils.setField(dto, "status", ProjectStatus.IN_PROGRESS);
         ReflectionTestUtils.setField(dto, "thumbnail", UUID.randomUUID());
         ReflectionTestUtils.setField(dto, "description", "New Description");
@@ -252,7 +257,8 @@ public class RetrospectiveServiceTest {
         when(retrospectiveRepository.findById(1L)).thenReturn(Optional.of(retrospective));
 
         // Act
-        RetrospectiveResponseDto response = retrospectiveService.updateRetrospective(1L,
+        RetrospectiveResponseDto response = retrospectiveService.updateRetrospective(user,
+            1L,
             dto);
 
         // Assert
@@ -264,11 +270,12 @@ public class RetrospectiveServiceTest {
     @Test
     void updateRetrospective_Failure_RetrospectiveNotFound() {
         // Arrange
+        User user = TestUtil.createUser();
         when(retrospectiveRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // Act & Assert
-        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
-            retrospectiveService.updateRetrospective(1L, new UpdateRetrospectiveDto());
+        NoSuchElementException thrown = assertThrows(NoSuchElementException.class, () -> {
+            retrospectiveService.updateRetrospective(user, 1L, new UpdateRetrospectiveDto());
         });
 
         assertTrue(thrown.getMessage().contains("Not found retrospective"));
@@ -299,6 +306,7 @@ public class RetrospectiveServiceTest {
 
         // when
         GetRetrospectiveResponseDto findRetrospective = retrospectiveService.getRetrospective(
+            user,
             retrospectiveId);
 
         // then

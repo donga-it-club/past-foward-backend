@@ -14,15 +14,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> validMissingParameterException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> validMissingParameterException(
+        MethodArgumentNotValidException ex) {
         log.error("유효성 검사 실패", ex);
         String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
-        ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER, errorMessage);
+        ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER,
+            errorMessage);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+        IllegalArgumentException ex) {
         log.error("잘못된 인자 전달", ex);
         ErrorResponse response = new ErrorResponse(ErrorCode.BAD_REQUEST, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -32,11 +35,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
         log.error("엔티티 조회 실패", ex);
         ErrorResponse response = new ErrorResponse(ErrorCode.EMPTY_DATA_ACCESS, ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ForbiddenAccessException.class)
-    public ResponseEntity<ErrorResponse> handleForbiddenAccessException(ForbiddenAccessException ex) {
+    public ResponseEntity<ErrorResponse> handleForbiddenAccessException(
+        ForbiddenAccessException ex) {
         log.error("ForbiddenAccessException occurred", ex);
         ErrorResponse response = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);

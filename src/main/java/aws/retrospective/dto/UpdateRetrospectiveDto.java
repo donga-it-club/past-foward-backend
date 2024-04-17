@@ -16,9 +16,6 @@ public class UpdateRetrospectiveDto {
 
     private Long teamId;
 
-    @NotNull(message = "User id is required")
-    private Long userId;
-
     @NotEmpty(message = "Retrospective description is required")
     private String description;
 

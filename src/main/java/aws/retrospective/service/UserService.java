@@ -17,20 +17,16 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public UpdateUserProfileResponseDto updateProfile(Long userId,
+    public UpdateUserProfileResponseDto updateProfile(User user,
         UpdateUserProfileRequestDto request) {
-        User findUser = getUser(userId);
-        findUser.updateProfileImage(request.getThumbnail());
-        return new UpdateUserProfileResponseDto(findUser.getId(), findUser.getEmail(),
-            findUser.getThumbnail());
+        user.updateProfileImage(request.getThumbnail());
+        return new UpdateUserProfileResponseDto(user.getId(), user.getEmail(), user.getThumbnail());
     }
 
     @Transactional(readOnly = true)
-    public GetUserInfoDto getUserInfo(Long userId) {
-        User findUser = getUser(userId);
-        return new GetUserInfoDto(findUser.getId(), findUser.getEmail(), findUser.getThumbnail(),
-            findUser.getUsername(), findUser.getPhone(), findUser.getCreatedDate(),
-            findUser.getUpdatedDate());
+    public GetUserInfoDto getUserInfo(User user) {
+        return new GetUserInfoDto(user.getId(), user.getUsername(), user.getEmail(),
+            user.getThumbnail(), user.getPhone(), user.getCreatedDate(), user.getUpdatedDate());
     }
 
 
