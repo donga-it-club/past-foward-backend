@@ -59,7 +59,7 @@ public class BookmarkServiceTest {
         when(bookmarkRepository.save(any())).thenReturn(null);
 
         // Act
-        boolean result = bookmarkService.toggleBookmark(user.getId(), retrospective.getId());
+        boolean result = bookmarkService.toggleBookmark(user, retrospective.getId());
 
         // Assert
         assertTrue(result);
@@ -84,7 +84,7 @@ public class BookmarkServiceTest {
             retrospective.getId())).thenReturn(Optional.of(bookmark));
 
         // Act
-        boolean result = bookmarkService.toggleBookmark(user.getId(), retrospective.getId());
+        boolean result = bookmarkService.toggleBookmark(user, retrospective.getId());
 
         // Assert
         assertThat(result).isFalse();
