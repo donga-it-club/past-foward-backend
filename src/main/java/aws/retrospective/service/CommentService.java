@@ -18,18 +18,18 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     @Transactional(readOnly = true)
-    public List<CommentDto> getAllComments(int totalCount) {
+    public List<CommentDto> getAllComments() {
         List<Comment> comments = commentRepository.findAll();
         return comments.stream()
-            .map(comment -> convertToDTO(comment, totalCount))
+            .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public CommentDto getCommentDTOById(Long id, int totalCount) {
+    public CommentDto getCommentDTOById(Long id) {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
-        return convertToDTO(comment, totalCount);
+        return convertToDTO(comment);
     }
 
     @Transactional
@@ -58,13 +58,9 @@ public class CommentService {
     }
 
 
-    private CommentDto convertToDTO(Comment comment, int totalCount) {
-        return new CommentDto(comment.getId(), comment.getContent(), totalCount);
+    private CommentDto convertToDTO(Comment comment) {
+        return new CommentDto(comment.getId(), comment.getContent());
         // 필요한 다른 필드들도 엔티티에서 DTO로 복사합니다.
-    }
-
-    public int getTotalCommentCount() {
-        return (int) commentRepository.count(); // 모든 댓글 수 조회
     }
 
 }
