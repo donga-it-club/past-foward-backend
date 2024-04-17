@@ -10,7 +10,6 @@ import lombok.Setter;
 
 
 @Getter
-@Setter
 @Builder
 public class SurveyDto {
     private Long surveyId;
