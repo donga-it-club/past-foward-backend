@@ -25,11 +25,15 @@ public class UpdateCommentDto {
     @Schema(description = "댓글 내용", example = "수정된 댓글입니다.")
     private String updatedContent; // 수정된 댓글 내용
 
-
-    public UpdateCommentDto(Long commentId, Long userId, Long commentSectionId, String updatedContent) {
+    public UpdateCommentDto(Long commentId, Long userId, String updatedContent) {
         this.commentId = commentId;
         this.userId = userId;
-        this.commentSectionId = commentSectionId;
+        this.commentSectionId = getCommentSectionId();
+        this.updatedContent = updatedContent;
+    }
+
+    public UpdateCommentDto(Long commentId, String updatedContent) {
+        this.commentId = commentId;
         this.updatedContent = updatedContent;
     }
 }
