@@ -12,6 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,6 +23,7 @@ public class Survey extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_id")
     private Long id; // 설문 아이디 - PK
+
 
     // 설문조사 관련 필드 추가
     private Integer age;
@@ -34,7 +37,11 @@ public class Survey extends BaseEntity{
 
     private String source;
 
-    private String purpose;
+    @ElementCollection
+    @Column(name = "purpose")
+    private List<String> purpose; // 복수 선택 가능한 항목을 리스트로 저장
+
+    private String otherPurpose; // '기타' 부분 입력값
 
     public enum Gender {
         MALE,
@@ -43,13 +50,14 @@ public class Survey extends BaseEntity{
 
     @Builder
     public Survey(Integer age, String gender, String occupation, String region,
-        String source, String purpose) {
+        String source, List<String> purpose, String otherPurpose) {
         this.age = age;
         this.gender = Gender.valueOf(gender);
         this.occupation = occupation;
         this.region = region;
         this.source = source;
         this.purpose = purpose;
+        this.otherPurpose = otherPurpose;
     }
 }
 
