@@ -30,4 +30,7 @@ public class SurveyDto {
     private String source;
 
     private String purpose;
+
+    public void setSurveyId(String surveyId) {
+    }
 }
