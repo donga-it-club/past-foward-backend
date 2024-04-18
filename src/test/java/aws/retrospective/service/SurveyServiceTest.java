@@ -7,6 +7,7 @@ import aws.retrospective.entity.Survey;
 import aws.retrospective.entity.Survey.Gender;
 import aws.retrospective.repository.SurveyRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +44,8 @@ public class SurveyServiceTest {
             .occupation("student")
             .region("Korea")
             .source("internet")
-            .purpose("research")
+            .purpose(Arrays.asList("Purpose1", "Purpose2"))
+            .otherpurpose("Other purpose") // 기타 입력값
             .build();
 
         // When
@@ -57,7 +59,8 @@ public class SurveyServiceTest {
         assertEquals("student", surveyDto.getOccupation());
         assertEquals("Korea", surveyDto.getRegion());
         assertEquals("internet", surveyDto.getSource());
-        assertEquals("research", surveyDto.getPurpose());
+        assertEquals(Arrays.asList("Purpose1", "Purpose2"), surveyDto.getPurpose());
+        assertEquals("Other purpose", surveyDto.getOtherpurpose());
     }
 
     @Test
@@ -70,7 +73,8 @@ public class SurveyServiceTest {
             .occupation("Engineer")
             .region("Seoul")
             .source("Internet")
-            .purpose("research")
+            .purpose(Arrays.asList("Purpose1", "Purpose2"))
+            .otherPurpose("Other purpose") // 기타 입력값
             .build());
         // Mock 객체 설정
         when(surveyRepository.findAll()).thenReturn(surveys);
