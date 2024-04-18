@@ -11,7 +11,7 @@ public interface RetrospectiveRepository extends JpaRepository<Retrospective, Lo
     JpaSpecificationExecutor<Retrospective> {
 
     @Query("select r from Retrospective r"
-        + " join fetch r.team t"
+        + " left join fetch r.team t"
         + " join fetch r.user u"
         + " join fetch r.template rt"
         + " where r.id = :retrospectiveId")
