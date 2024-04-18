@@ -1,35 +1,41 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.CommentDto;
+import static org.assertj.core.api.Assertions.assertThat;
+import static aws.retrospective.util.TestUtil.createSection;
+import static aws.retrospective.util.TestUtil.createUser;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import aws.retrospective.dto.CreateCommentDto;
-import aws.retrospective.dto.UpdateCommentDto;
+import aws.retrospective.dto.CreateCommentResponseDto;
+import aws.retrospective.dto.DeleteCommentRequestDto;
+import aws.retrospective.dto.UpdateCommentRequestDto;
+import aws.retrospective.dto.UpdateCommentResponseDto;
 import aws.retrospective.entity.Comment;
+import aws.retrospective.entity.Retrospective;
+import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
+import aws.retrospective.entity.SectionComment;
+import aws.retrospective.entity.Team;
+import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
+import aws.retrospective.repository.SectionCommentRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.annotation.Transactional;
 
-import static aws.retrospective.util.TestUtil.createSection;
-import static aws.retrospective.util.TestUtil.createUser;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-@Transactional
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
@@ -39,209 +45,143 @@ class CommentServiceTest {
     private UserRepository userRepository;
     @Mock
     private SectionRepository sectionRepository;
-
+    @Mock
+    private SectionCommentRepository sectionCommentRepository;
     @InjectMocks
     private CommentService commentService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    // 모든 댓글 조회
     @Test
-    void getAllComments() {
-        // Arrange
-        List<Comment> comments = new ArrayList<>();
-        comments.add(Comment.builder().content("Comment 1").build());
-        comments.add(Comment.builder().content("Comment 2").build());
-        when(commentRepository.findAll()).thenReturn(comments);
+    @DisplayName("댓글 등록 API")
+    void createCommentTest() {
+        //given
+        Long userId = 1L;
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", userId);
 
-        // Act
-        List<CommentDto> commentDtos = commentService.getAllComments();
+        Long sectionId = 1L;
+        Section section = createSection(user);
+        ReflectionTestUtils.setField(section, "id", sectionId);
 
-        // Assert
-        assertEquals(comments.size(), commentDtos.size());
-        assertEquals("Comment 1", commentDtos.get(0).getContent()); // 확인을 위해 첫 번째 댓글 내용 확인
-        assertEquals("Comment 2", commentDtos.get(1).getContent()); // 확인을 위해 두 번째 댓글 내용 확인
-        verify(commentRepository, times(1)).findAll();
-    }
+        CreateCommentDto request = new CreateCommentDto();
+        ReflectionTestUtils.setField(request, "sectionId", sectionId);
+        ReflectionTestUtils.setField(request, "commentContent", "test");
 
-    // 특정 댓글 조회
-    @Test
-    void getCommentDTOById() {
-        // Arrange
-        Long id = 1L;
-        String content = "Sample comment";
-        Comment comment = Comment.builder().id(id).content(content).build();
-        when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
+        //when
+        CreateCommentResponseDto response = commentService.createComment(user, request);
 
-        // Act
-        CommentDto commentDto = commentService.getCommentDTOById(id);
-
-        // Assert
-        assertNotNull(commentDto);
-        assertEquals(id, commentDto.getId());
-        assertEquals(content, commentDto.getContent());
-        verify(commentRepository, times(1)).findById(id);
+        //then
+        assertThat(response.getCommentContent()).isEqualTo("test");
+        assertThat(response.getUserId()).isEqualTo(userId);
     }
 
     @Test
-    void getCommentDTOById_NotFound() {
-        // Arrange
-        Long id = 1L;
-        when(commentRepository.findById(id)).thenReturn(Optional.empty());
+    @DisplayName("댓글 삭제 성공 API")
+    void deleteCommentSuccessTest() {
+        //given
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Section section = createSection(user);
 
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> commentService.getCommentDTOById(id));
-        verify(commentRepository, times(1)).findById(id);
-    }
+        Long commentId = 1L;
+        Comment comment = createComment(user, section);
+        ReflectionTestUtils.setField(comment, "id", commentId);
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-    // 댓글 생성
-    @Test
-    void createComment() {
-        // Arrange
-        // CreateCommentDto에 사용자 ID와 섹션 ID 설정
-        CreateCommentDto createCommentDto = new CreateCommentDto(1L, 2L, "New comment"); // 사용자 ID, 섹션 ID, 댓글 내용 설정
+        //when
+        commentService.deleteComment(commentId, user);
 
-        // 댓글 생성
-        Comment comment = Comment.builder()
-            .id(1L)
-            .content("New comment")
-            .build();
-
-        // UserRepository에서 사용자 조회시 가짜 사용자 반환
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(User.builder().build()));
-        // SectionRepository에서 섹션 조회시 가짜 섹션 반환
-        when(sectionRepository.findById(anyLong())).thenReturn(Optional.of(Section.builder().build()));
-        // CommentRepository에서 댓글 저장시 생성된 댓글 반환
-        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-
-        // Act
-        Comment createdComment = commentService.createComment(createCommentDto);
-
-        // Assert
-        assertNotNull(createdComment);
-        assertNotNull(createdComment.getId());
-        assertEquals("New comment", createdComment.getContent());
+        //then
+        verify(commentRepository).delete(comment);
     }
 
     @Test
-    void createComment_Failure() {
-        // Arrange
-        // CreateCommentDto에 사용자 ID와 섹션 ID 설정
-        CreateCommentDto createCommentDto = new CreateCommentDto(1L, 2L, "New comment"); // 사용자 ID, 섹션 ID, 댓글 내용 설정
+    @DisplayName("존재하지 않는 댓글 삭제 시 예외 발생")
+    void deleteCommentFailTest() {
 
-        // UserRepository에서 사용자 조회시 사용자가 존재하지 않음을 반환
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        // SectionRepository에서 섹션 조회시 섹션이 존재하지 않음을 반환
-        when(sectionRepository.findById(2L)).thenReturn(Optional.empty());
+        //given
+        Long notExistCommentId = 1L;
+        User user = createUser();
 
-        // Act & Assert
-        // 사용자나 섹션이 존재하지 않는 경우 IllegalArgumentException이 발생해야 함
-        assertThrows(IllegalArgumentException.class, () -> commentService.createComment(createCommentDto));
+        DeleteCommentRequestDto request = new DeleteCommentRequestDto();
+        ReflectionTestUtils.setField(request, "userId", 1L);
+
+        //when
+        when(commentRepository.findById(notExistCommentId)).thenThrow(NoSuchElementException.class);
+
+        //then
+        assertThrows(NoSuchElementException.class,
+            () -> commentService.deleteComment(notExistCommentId, user));
     }
 
+    private static Comment createComment(User user,
+        Section section) {
+        return Comment.builder().user(user).content("test")
+            .section(section).build();
+    }
 
-    // 댓글 수정
     @Test
-    void updateComment() {
+    @DisplayName("특정 댓글 내용 수정")
+    void updateCommentContentTest() {
+
+        //given
+        Long userId = 1L;
+        User longinedUser = createUser();
+        ReflectionTestUtils.setField(longinedUser, "id", userId);
+
+        Long commentId = 1L;
+        Comment comment = createComment(longinedUser);
+        ReflectionTestUtils.setField(comment, "id", commentId);
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        //when
+        UpdateCommentRequestDto request = new UpdateCommentRequestDto();
+        ReflectionTestUtils.setField(request, "commentContent", request.getCommentContent());
+        UpdateCommentResponseDto response = commentService.updateCommentContent(longinedUser,
+            commentId, request);
+
+        //then
+        assertThat(response.getCommentId()).isEqualTo(commentId);
+        assertThat(response.getContent()).isEqualTo(request.getCommentContent());
+    }
+
+    @Test
+    @DisplayName("모든 댓글 조회")
+    void getCommentTest() {
         //given
         Long userId = 1L;
         User loginedUser = createUser();
         ReflectionTestUtils.setField(loginedUser, "id", userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(loginedUser));
 
         Long sectionId = 1L;
         Section section = createSection(loginedUser);
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
-        Long commentId = 1L;
-        UpdateCommentDto updateCommentDto = new UpdateCommentDto(commentId, "Updated content"); // Proper data should be provided
-        Comment updatedComment = new Comment(1L, "Updated content", null, null); // Proper user and section should be passed
-        when(commentService.updateComment(updateCommentDto)).thenReturn(updatedComment);
+        List<Comment> comments = new ArrayList<>();
+        comments.add(createComment(loginedUser, "Test comment 1"));
+        comments.add(createComment(loginedUser, "Test comment 2"));
 
-        // 사용자와 섹션 생성 및 설정
-        User existingUser = createUser();
-        Section existingSection = createSection(existingUser);
 
-        // 기존 댓글 객체 생성
-        Comment existingComment = Comment.builder()
-            .id(commentId)
-            .content(existingContent)
-            .user(existingUser)
-            .section(existingSection)
+
+        //when
+        
+
+        //then
+
+    }
+
+
+
+    private static Comment createComment(User loginedUser, String content) {
+        return Comment.builder()
+            .user(loginedUser)
+            .content(content)
             .build();
-
-        // UserRepository에서 사용자 조회시 가짜 사용자 반환
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(existingUser));
-        // SectionRepository에서 섹션 조회시 가짜 섹션 반환
-        when(sectionRepository.findById(anyLong())).thenReturn(Optional.of(existingSection));
-        // commentRepository에서 기존 댓글 조회시 해당 댓글 반환
-        when(commentRepository.findById(eq(commentId))).thenReturn(Optional.of(existingComment));
-        // commentRepository에서 업데이트된 댓글 반환
-        when(commentRepository.save(existingComment)).thenReturn(existingComment);
-
-        // UpdateCommentDto 객체 생성
-        UpdateCommentDto updateCommentDto = new UpdateCommentDto(commentId, existingUser.getId(), existingSection.getId(), updatedContent);
-
-        // Act
-        commentService.updateComment(updateCommentDto);
-
-        // Assert
-        assertEquals(updatedContent, existingComment.getContent());
     }
 
 
-
-    @Test
-    void updateComment_Failure() {
-        // Arrange
-        Long id = 1L;
-        String existingContent = "Existing comment";
-        String updatedContent = "Updated comment";
-        Comment existingComment = Comment.builder().id(id).content(existingContent).build();
-        UpdateCommentDto updateCommentDto = new UpdateCommentDto(); // 적절한 데이터를 제공해야 함
-
-        // UserRepository에서 사용자 조회시 사용자가 존재하지 않음을 반환
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
-        // SectionRepository에서 섹션 조회시 섹션이 존재하지 않음을 반환
-        when(sectionRepository.findById(anyLong())).thenReturn(Optional.empty());
-        // commentRepository에서 기존 댓글 조회시 해당 댓글 반환
-        when(commentRepository.findById(id)).thenReturn(Optional.of(existingComment));
-
-        // Act & Assert
-        // 사용자나 섹션이 존재하지 않는 경우 IllegalArgumentException이 발생해야 함
-        assertThrows(IllegalArgumentException.class, () -> commentService.updateComment(updateCommentDto));
+    private static User createUser() {
+        return User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
+            .build();
     }
-
-    // 댓글 삭제
-    @Test
-    void deleteComment() {
-        // Arrange
-        Long id = 1L;
-        Comment commentToDelete = Comment.builder().id(id).content("Comment to delete").build();
-        when(commentRepository.findById(id)).thenReturn(Optional.of(commentToDelete));
-
-        // Act
-        commentService.deleteComment(id);
-
-        // Assert
-        verify(commentRepository, times(1)).findById(id);
-        verify(commentRepository, times(1)).delete(commentToDelete);
-    }
-
-    @Test
-    void deleteComment_NotFound() {
-        // Arrange
-        Long id = 1L;
-        when(commentRepository.findById(id)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> commentService.deleteComment(id));
-        verify(commentRepository, times(1)).findById(id);
-        verify(commentRepository, never()).delete((Comment) any());
-    }
-
 }
