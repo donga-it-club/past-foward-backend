@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Builder
 public class SurveyDto {
-    private Long surveyId;
+    
 
     @NotNull
     private Integer age;
