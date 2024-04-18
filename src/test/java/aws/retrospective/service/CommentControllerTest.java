@@ -3,6 +3,8 @@ package aws.retrospective.service;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.controller.CommentController;
 import aws.retrospective.dto.CommentDto;
+import aws.retrospective.dto.CreateCommentDto;
+import aws.retrospective.dto.UpdateCommentDto;
 import aws.retrospective.entity.Comment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,39 +65,40 @@ class CommentControllerTest {
         verify(commentService, times(1)).getCommentDTOById(commentId);
     }
 
-
-
     @Test
     void createComment() {
         // Arrange
-        Comment comment = new Comment(1L, "Sample content", null, null); // Proper user and section should be passed
-        when(commentService.createComment(comment)).thenReturn(comment);
+        CreateCommentDto createCommentDto = new CreateCommentDto(1L, 2L, "New comment");
+        Comment createdComment = new Comment(1L, createCommentDto.getCommentContent(), null, null, null, null);
+        when(commentService.createComment(createCommentDto)).thenReturn(createdComment);
 
         // Act
-        CommonApiResponse<Comment> response = commentController.createComment(comment);
+        CommonApiResponse<CreateCommentDto> response = commentController.createComment(createCommentDto);
 
         // Assert
         assertEquals(HttpStatus.CREATED.value(), response.getCode());
         assertNotNull(response.getData());
-        assertEquals(comment, response.getData());
-        verify(commentService, times(1)).createComment(comment);
+        assertEquals(createdComment.getId(), response.getData().getCommentSectionId()); // 이 부분은 생성된 댓글의 ID를 확인하도록 수정해야 함
+        verify(commentService, times(1)).createComment(createCommentDto);
     }
+
 
     @Test
     void updateComment() {
         // Arrange
         Long commentId = 1L;
-        Comment updatedComment = new Comment(1L, "Updated content", null, null); // Proper user and section should be passed
-        when(commentService.updateComment(commentId, updatedComment)).thenReturn(updatedComment);
+        UpdateCommentDto updateCommentDto = new UpdateCommentDto(); // Proper data should be provided
+        Comment updatedComment = new Comment(1L, "Updated content", null, null, null, null); // Proper user and section should be passed
+        when(commentService.updateComment(updateCommentDto)).thenReturn(updatedComment);
 
         // Act
-        CommonApiResponse<Comment> response = commentController.updateComment(commentId, updatedComment);
+        CommonApiResponse<UpdateCommentDto> response = commentController.updateComment(updateCommentDto);
 
         // Assert
         assertEquals(HttpStatus.OK.value(), response.getCode());
         assertNotNull(response.getData());
-        assertEquals(updatedComment, response.getData());
-        verify(commentService, times(1)).updateComment(commentId, updatedComment);
+        assertEquals(updateCommentDto, response.getData());
+        verify(commentService, times(1)).updateComment(updateCommentDto);
     }
 
     @Test
