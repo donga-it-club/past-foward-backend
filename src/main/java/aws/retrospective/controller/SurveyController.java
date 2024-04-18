@@ -23,7 +23,7 @@ public class SurveyController {
 
     private final SurveyService surveyService;
 
-    @PostMapping("/{surveyId}/response")
+    @PostMapping("/response")
     @Operation(summary = "설문조사 저장", description = "설문조사 결과를 DB에 저장하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "설문조사가 성공적으로 저장됨")
