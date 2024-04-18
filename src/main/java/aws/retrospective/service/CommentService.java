@@ -3,21 +3,25 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.dto.CreateCommentDto;
-import aws.retrospective.dto.UpdateCommentDto;
+import aws.retrospective.dto.CreateCommentResponseDto;
+import aws.retrospective.dto.GetCommentsRequestDto;
+import aws.retrospective.dto.GetCommentsResponseDto;
+import aws.retrospective.dto.UpdateCommentRequestDto;
+import aws.retrospective.dto.UpdateCommentResponseDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
+import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
-import java.time.LocalDateTime;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -27,87 +31,104 @@ public class CommentService {
     private final SectionRepository sectionRepository;
 
 
-    // 모든 댓글 조회
-    @Transactional(readOnly = true)
-    public List<CommentDto> getAllComments() {
-        List<Comment> comments = commentRepository.findAll();
-        return comments.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-    }
-
-    // 특정 댓글 조회
-    @Transactional(readOnly = true)
-    public CommentDto getCommentDTOById(Long id) {
-        Comment comment = commentRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
-        return convertToDTO(comment);
-    }
-
     // 댓글 생성
     @Transactional
-    public Comment createComment(CreateCommentDto createCommentDto) {
-        // 댓글의 작성자 정보 가져오기
-        User user = userRepository.findById(createCommentDto.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + createCommentDto.getUserId()));
+    public CreateCommentResponseDto createComment(User user, CreateCommentDto request) {
 
         // 댓글이 속한 섹션 정보 가져오기
-        Section section = sectionRepository.findById(createCommentDto.getCommentSectionId())
-            .orElseThrow(() -> new IllegalArgumentException("Section not found with ID: " + createCommentDto.getCommentSectionId()));
+        Section findSection = sectionRepository.findById(request.getSectionId())
+            .orElseThrow(() -> new NoSuchElementException("Section not found with ID"));
 
         // 새 댓글 생성
-        Comment comment = Comment.builder()
-            .content(createCommentDto.getCommentContent())
-            .user(user)
-            .section(section)
-            .createDate(createCommentDto.getCreateDate())
-            .build();
+        Comment createComment = createComment(request.getCommentContent(), findSection, user);
+        commentRepository.save(createComment);
 
-        return commentRepository.save(comment);
+        return new CreateCommentResponseDto(createComment.getId(), user.getId(),
+            request.getSectionId(), request.getCommentContent());
+    }
+
+    private Comment createComment(String commentContent, Section findSection, User user) {
+        return Comment.builder()
+            .content(commentContent)
+            .section(findSection)
+            .user(user)
+            .build();
     }
 
 
     // 댓글 수정
     @Transactional
-    public Comment updateComment(UpdateCommentDto updateCommentDto) {
-        // 수정할 댓글 정보 가져오기
-        Comment commentToUpdate = commentRepository.findById(updateCommentDto.getCommentId())
-            .orElseThrow(() -> new IllegalArgumentException("Comment not found with ID: " + updateCommentDto.getCommentId()));
+    public UpdateCommentResponseDto updateCommentContent(User user, Long sectionId, UpdateCommentRequestDto request) {
+        Comment findComment = getComment(commentId);
 
-        // 댓글을 수정한 사용자 정보 가져오기
-        User user = userRepository.findById(updateCommentDto.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + updateCommentDto.getUserId()));
-
-        // 수정을 시도한 섹션 정보 가져오기
-        Section section = sectionRepository.findById(updateCommentDto.getCommentSectionId())
-            .orElseThrow(() -> new IllegalArgumentException("Section not found with ID: " + updateCommentDto.getCommentSectionId()));
-
-        // 댓글을 작성한 사용자와 수정을 시도한 사용자가 동일한지 확인
-        if (!commentToUpdate.getUser().getId().equals(updateCommentDto.getUserId())) {
-            throw new IllegalArgumentException("User does not have permission to update this comment.");
+        // 댓글 내용 수정은 작성자만 가능하다.
+        if (!findComment.getUser().getId().equals(user.getId())) {
+            throw new ForbiddenAccessException("댓글을 수정할 권한이 없습니다.");
         }
 
-        // 댓글 내용 수정
-        commentToUpdate.updateContent(updateCommentDto.getUpdatedContent());
+        // 댓글 수정
+        findComment.updateComment(request.getCommentContent());
 
-        return commentRepository.save(commentToUpdate);
+        return new UpdateCommentResponseDto(sectionId, request.getCommentContent());
     }
-
-
-
 
     // 댓글 삭제
     @Transactional
-    public void deleteComment(Long id) {
-        Comment commentToDelete = findCommentById(id);
-        commentRepository.delete(commentToDelete);
+    public void deleteComment(Long commentId, User user) {
+        Comment findComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException("Comment not found"));
+
+        // 작성자만 댓글을 삭제할 수 있다.
+        if (!findComment.getUser().getId().equals(user.getId())) {
+            throw new ForbiddenAccessException("작성자만 댓글을 삭제할 수 있습니다.");
+        }
+
+        commentRepository.delete(findComment);
+
     }
 
-    private Comment findCommentById(Long id) {
-        return commentRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+    // 모든 댓글 조회
+    @Transactional(readOnly = true)
+    public List<GetCommentsResponseDto> getComments(GetCommentsRequestDto request) {
+
+        List<GetCommentsResponseDto> response = new ArrayList<>();
+        List<Comment> comments = commentRepository.getCommentsWithSections(request.getSectionId());
+
+        revertDto(comments, response);
+
+        return response;
     }
 
+    private void revertDto(List<Comment> comments, List<GetCommentsResponseDto> response) {
+        for (Comment comment : comments) {
+            response.add(
+                new GetCommentsResponseDto(
+                    comment.getId(),
+                    comment.getUser().getUsername(),
+                    comment.getContent(),
+                    comment.getCreatedDate()
+                ));
+        }
+    }
+    private Section getSection(Long sectionId) {
+        return sectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("Section not found with ID: " + sectionId));
+    }
+
+    private Section getSection(GetCommentsRequestDto request) {
+        return sectionRepository.findById(request.getSectionId()).orElseThrow(
+            () -> new NoSuchElementException("Not Found Section id: " + request.getSectionId()));
+    }
+
+    private Comment GetComment(Long commentId) {
+        return commentRepository.findById(commentId)
+            .orElseThrow(() ->new NoSuchElementException("Comment not found with ID: " + commentId));
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
+    }
 
     private CommentDto convertToDTO(Comment comment) {
         return new CommentDto(comment.getId(), comment.getContent());
