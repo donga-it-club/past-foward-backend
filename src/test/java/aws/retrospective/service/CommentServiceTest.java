@@ -1,8 +1,7 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static aws.retrospective.util.TestUtil.createSection;
-import static aws.retrospective.util.TestUtil.createUser;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,15 +9,12 @@ import static org.mockito.Mockito.when;
 import aws.retrospective.dto.CreateCommentDto;
 import aws.retrospective.dto.CreateCommentResponseDto;
 import aws.retrospective.dto.DeleteCommentRequestDto;
+import aws.retrospective.dto.GetCommentsRequestDto;
+import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.UpdateCommentRequestDto;
 import aws.retrospective.dto.UpdateCommentResponseDto;
 import aws.retrospective.entity.Comment;
-import aws.retrospective.entity.Retrospective;
-import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
-import aws.retrospective.entity.SectionComment;
-import aws.retrospective.entity.Team;
-import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.SectionCommentRepository;
@@ -59,7 +55,7 @@ class CommentServiceTest {
         ReflectionTestUtils.setField(user, "id", userId);
 
         Long sectionId = 1L;
-        Section section = createSection(user);
+        Section section = createSection();
         ReflectionTestUtils.setField(section, "id", sectionId);
 
         CreateCommentDto request = new CreateCommentDto();
@@ -80,7 +76,7 @@ class CommentServiceTest {
         //given
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", 1L);
-        Section section = createSection(user);
+        Section section = createSection();
 
         Long commentId = 1L;
         Comment comment = createComment(user, section);
@@ -129,7 +125,7 @@ class CommentServiceTest {
         ReflectionTestUtils.setField(longinedUser, "id", userId);
 
         Long commentId = 1L;
-        Comment comment = createComment(longinedUser);
+        Comment comment = createComment();
         ReflectionTestUtils.setField(comment, "id", commentId);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -145,34 +141,48 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("모든 댓글 조회")
-    void getCommentTest() {
-        //given
-        Long userId = 1L;
-        User loginedUser = createUser();
-        ReflectionTestUtils.setField(loginedUser, "id", userId);
+    @DisplayName("모든 댓글 조회 테스트")
+    public void testGetComments() {
+        // Given
+        GetCommentsRequestDto requestDto = new GetCommentsRequestDto();
+        requestDto.setSectionId(1L);
 
-        Long sectionId = 1L;
-        Section section = createSection(loginedUser);
-        ReflectionTestUtils.setField(section, "id", sectionId);
-        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+        List<Comment> mockedComments = new ArrayList<>();
+        // 가짜 댓글 목록 생성
+        for (int i = 1; i <= 3; i++) {
+            Comment comment = createComment();
+            mockedComments.add(comment);
+        }
 
-        List<Comment> comments = new ArrayList<>();
-        comments.add(createComment(loginedUser, "Test comment 1"));
-        comments.add(createComment(loginedUser, "Test comment 2"));
+        when(commentRepository.getCommentsWithSections(requestDto.getSectionId())).thenReturn(mockedComments);
 
+        // When
+        List<GetCommentsResponseDto> responseDtoList = commentService.getComments(requestDto);
 
+        // Then
+        assertEquals(mockedComments.size(), responseDtoList.size());
+        for (int i = 0; i < mockedComments.size(); i++) {
+            Comment mockedComment = mockedComments.get(i);
+            GetCommentsResponseDto responseDto = responseDtoList.get(i);
+            // 댓글 ID와 내용이 일치하는지 확인
+            assertEquals(mockedComment.getId(), responseDto.getCommentId());
+            assertEquals(mockedComment.getContent(), responseDto.getContent());
 
-        //when
-        
+        }
+    }
 
-        //then
+    private Comment createComment() {
+        return Comment.builder().content("test").build();
+    }
 
+    private Section createSection() {
+        return Section.builder().content("test").build();
     }
 
 
 
-    private static Comment createComment(User loginedUser, String content) {
+
+    private static Comment createComment(String content, User loginedUser) {
         return Comment.builder()
             .user(loginedUser)
             .content(content)
@@ -184,4 +194,5 @@ class CommentServiceTest {
         return User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
             .build();
     }
+
 }
