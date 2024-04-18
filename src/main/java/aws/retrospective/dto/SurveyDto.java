@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 
 @Getter
 @Builder
@@ -26,5 +28,11 @@ public class SurveyDto {
     @NotEmpty
     private String source;
 
-    private String purpose;
+    // 복수 선택이 가능한 purpose를 배열로 받음
+    @NotEmpty
+    private List<String> purpose;
+
+    // 기타 입력값을 받음
+    private String otherpurpose;
+
 }
