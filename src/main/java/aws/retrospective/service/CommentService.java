@@ -58,7 +58,7 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    public UpdateCommentResponseDto updateCommentContent(User user, Long sectionId, UpdateCommentRequestDto request) {
+    public UpdateCommentResponseDto updateCommentContent(User user, Long sectionId, Long commentId, UpdateCommentRequestDto request) {
         Comment findComment = getComment(commentId);
 
         // 댓글 내용 수정은 작성자만 가능하다.
@@ -71,6 +71,7 @@ public class CommentService {
 
         return new UpdateCommentResponseDto(sectionId, request.getCommentContent());
     }
+
 
     // 댓글 삭제
     @Transactional
@@ -120,9 +121,9 @@ public class CommentService {
             () -> new NoSuchElementException("Not Found Section id: " + request.getSectionId()));
     }
 
-    private Comment GetComment(Long commentId) {
+    private Comment getComment(Long commentId) {
         return commentRepository.findById(commentId)
-            .orElseThrow(() ->new NoSuchElementException("Comment not found with ID: " + commentId));
+            .orElseThrow(() -> new NoSuchElementException("Comment not found with ID: " + commentId));
     }
 
     private User getUser(Long userId) {
