@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Builder
 public class SurveyDto {
-    private Long surveyId;
+    
 
     @NotNull
     private Integer age;
@@ -30,4 +30,7 @@ public class SurveyDto {
     private String source;
 
     private String purpose;
+
+    public void setSurveyId(String surveyId) {
+    }
 }
