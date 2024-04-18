@@ -40,3 +40,7 @@ cors:
 
 server:
   url: "http://localhost:8080"
+
+
+domain:
+  url: "http://localhost:3000"
