@@ -315,6 +315,7 @@ public class RetrospectiveServiceTest {
         assertThat(findRetrospective.getTemplateId()).isEqualTo(templateId);
         assertThat(findRetrospective.getType()).isEqualTo(RetrospectiveType.TEAM);
         assertThat(findRetrospective.getUserId()).isEqualTo(userId);
+        assertThat(findRetrospective.getLeaderName()).isEqualTo("test");
         assertThat(findRetrospective.getDescription()).isEqualTo("test");
         assertThat(findRetrospective.getStatus()).isEqualTo("IN_PROGRESS");
         assertThat(findRetrospective.getThumbnail()).isEqualTo(retrospective.getThumbnail());
