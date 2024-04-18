@@ -6,6 +6,7 @@ import aws.retrospective.dto.GetTemplateSectionsDto;
 import aws.retrospective.dto.RetrospectiveTemplateResponseDto;
 import aws.retrospective.service.RetrospectiveTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/retrospective-templates")
+@SecurityRequirement(name = "JWT")
 @Tag(name = "retrospective-templates")
 public class RetrospectiveTemplateController {
 

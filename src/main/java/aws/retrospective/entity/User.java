@@ -1,5 +1,6 @@
 package aws.retrospective.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,9 +27,13 @@ public class User extends BaseEntity {
     private Long id;
 
     private String email; // 사용자 이메일
-    private String password; // 사용자 비밀번호
+
     private String username; // 사용자 이름
+
     private String phone; // 전화번호
+
+    @JsonIgnore
+    private String tenantId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<UserTeam> teams = new ArrayList<>();
@@ -42,11 +47,11 @@ public class User extends BaseEntity {
     private String thumbnail; // 프로필 이미지
 
     @Builder
-    public User(String email, String password, String username, String phone) {
+    public User(String email, String username, String phone, String tenantId) {
         this.email = email;
-        this.password = password;
         this.username = username;
         this.phone = phone;
+        this.tenantId = tenantId;
     }
 
     // 프로필 이미지 등록

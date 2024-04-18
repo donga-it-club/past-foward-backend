@@ -19,9 +19,6 @@ public class CreateRetrospectiveDto {
     @NotNull(message = "Retrospective type is required.")
     private RetrospectiveType type;
 
-    //TODO: 추후 Cognito 이용해서 request body에서 받지 않고 perssitence layer에서 받아오도록 수정
-    private Long userId;
-
     @NotNull(message = "Template id is required.")
     private Long templateId;
 

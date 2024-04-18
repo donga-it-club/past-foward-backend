@@ -5,6 +5,7 @@ package aws.retrospective.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +23,15 @@ public class SwaggerConfig {
         Server server = new Server();
         server.setUrl(domainUrl);
 
+        Components components = new Components().addSecuritySchemes("JWT", new SecurityScheme()
+            .name("JWT")
+            .type(SecurityScheme.Type.HTTP)
+            .scheme("bearer")
+            .bearerFormat("JWT")
+        );
+
         return new OpenAPI()
-            .components(new Components())
+            .components(components)
             .info(apiInfo())
             .servers(List.of(server));
     }

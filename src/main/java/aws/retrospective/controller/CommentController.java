@@ -4,16 +4,24 @@ import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.dto.CommentDto;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.service.CommentService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/comments")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class CommentController {
 
     private final CommentService commentService;
@@ -38,7 +46,8 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CommonApiResponse<Comment>> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
+    public ResponseEntity<CommonApiResponse<Comment>> updateComment(@PathVariable Long id,
+        @RequestBody Comment updatedComment) {
         Comment updated = commentService.updateComment(id, updatedComment);
         return ResponseEntity.ok(CommonApiResponse.successResponse(HttpStatus.OK, updated));
     }

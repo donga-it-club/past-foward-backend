@@ -24,12 +24,13 @@ public class TeamService {
 
 
     @Transactional(readOnly = true)
-    public List<GetTeamUsersResponseDto> getTeamMembers(Long teamId, GetTeamUsersRequestDto request) {
+    public List<GetTeamUsersResponseDto> getTeamMembers(Long teamId,
+        GetTeamUsersRequestDto request) {
         Team findTeam = getTeam(teamId);
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
 
         // 다른 팀의 회고보드에 대한 조회는 불가능하다.
-        if(findRetrospective.getTeam().getId() != findTeam.getId()) {
+        if (findRetrospective.getTeam().getId() != findTeam.getId()) {
             throw new ForbiddenAccessException("해당 팀의 회고보드만 조회할 수 있습니다.");
         }
 
@@ -38,13 +39,11 @@ public class TeamService {
 
     private Team getTeam(Long teamId) {
         return teamRepository.findById(teamId)
-            .orElseThrow(
-                () -> new NoSuchElementException("Not Found Team id : " + teamId));
+            .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
     }
 
     private Retrospective getRetrospective(Long retrospectiveId) {
-        return retrospectiveRepository.findById(retrospectiveId)
-            .orElseThrow(() -> new NoSuchElementException(
-                "Not Found Retrospective id : " + retrospectiveId));
+        return retrospectiveRepository.findById(retrospectiveId).orElseThrow(
+            () -> new NoSuchElementException("Not Found Retrospective id : " + retrospectiveId));
     }
 }

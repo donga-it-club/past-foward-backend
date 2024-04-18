@@ -22,6 +22,7 @@ import aws.retrospective.repository.UserRepository;
 import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.specification.RetrospectiveSpecification;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,53 +45,54 @@ public class RetrospectiveService {
     private final UserTeamRepository userTeamRepository;
 
     @Transactional(readOnly = true)
-    public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(
+    public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(User user,
         GetRetrospectivesDto dto) {
         Sort sort = getSort(dto.getOrder());
         PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), sort);
 
+        Long userId = user.getId();
+
         Specification<Retrospective> spec = Specification.where(
                 RetrospectiveSpecification.withKeyword(dto.getKeyword()))
-            .and(RetrospectiveSpecification.withUserId(dto.getUserId()))
-            .and(RetrospectiveSpecification.withBookmark(dto.getIsBookmarked(), dto.getUserId()));
+            .and(RetrospectiveSpecification.withUserId(userId))
+            .and(RetrospectiveSpecification.withBookmark(dto.getIsBookmarked(), userId));
 
         Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
 
         boolean hasBookmarksByUser = page.stream()
-            .anyMatch(retrospective -> hasBookmarksByUser(retrospective, dto.getUserId()));
+            .anyMatch(retrospective -> hasBookmarksByUser(retrospective, userId));
 
         return PaginationResponseDto.fromPage(page,
             retrospective -> RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser));
     }
 
     @Transactional(readOnly = true)
-    public GetRetrospectiveResponseDto getRetrospective(Long retrospectiveId){
-        Retrospective findRetrospective = retrospectiveRepository.findRetrospectiveById(retrospectiveId)
-            .orElseThrow(() -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+    public GetRetrospectiveResponseDto getRetrospective(User user, Long retrospectiveId) {
+        Retrospective findRetrospective = retrospectiveRepository.findRetrospectiveById(
+            retrospectiveId).orElseThrow(
+            () -> new NoSuchElementException("Not found retrospective: " + retrospectiveId));
 
         return toResponse(findRetrospective);
     }
 
     private GetRetrospectiveResponseDto toResponse(Retrospective findRetrospective) {
-        return new GetRetrospectiveResponseDto(
-            findRetrospective.getId(),
+        return new GetRetrospectiveResponseDto(findRetrospective.getId(),
             findRetrospective.getTitle(), findRetrospective.getTemplate().getId(),
-            findRetrospective.getTeam().getId(),
-            findRetrospective.getUser().getId(), findRetrospective.getDescription(),
-            findRetrospective.getStatus().name(),
+            findRetrospective.getTeam().getId(), findRetrospective.getUser().getId(),
+            findRetrospective.getDescription(), findRetrospective.getStatus().name(),
             findRetrospective.getThumbnail());
     }
 
     @Transactional
-    public RetrospectiveResponseDto updateRetrospective(Long retrospectiveId,
+    public RetrospectiveResponseDto updateRetrospective(User user, Long retrospectiveId,
         UpdateRetrospectiveDto dto) {
         Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId).orElseThrow(
-            () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+            () -> new NoSuchElementException("Not found retrospective: " + retrospectiveId));
 
         retrospective.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail(),
             dto.getDescription());
 
-        boolean hasBookmarksByUser = hasBookmarksByUser(retrospective, dto.getUserId());
+        boolean hasBookmarksByUser = hasBookmarksByUser(retrospective, user.getId());
 
         return RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser);
     }
@@ -110,14 +112,14 @@ public class RetrospectiveService {
     }
 
     @Transactional
-    public CreateRetrospectiveResponseDto createRetrospective(CreateRetrospectiveDto dto) {
-        User user = findUserById(dto.getUserId());
+    public CreateRetrospectiveResponseDto createRetrospective(User user,
+        CreateRetrospectiveDto dto) {
         RetrospectiveTemplate template = findTemplateById(dto.getTemplateId());
 
         RetrospectiveType retrospectiveType = dto.getType();
         Team team = null;
         if (retrospectiveType == RetrospectiveType.TEAM) {
-            team = createTeamWithUserId(dto.getUserId());
+            team = createTeamWithUserId(user.getId());
         }
 
         Retrospective retrospective = Retrospective.builder().title(dto.getTitle())
@@ -131,11 +133,11 @@ public class RetrospectiveService {
     }
 
     @Transactional
-    public void deleteRetrospective(Long retrospectiveId, Long userId) {
+    public void deleteRetrospective(Long retrospectiveId, User user) {
         Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId).orElseThrow(
-            () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
+            () -> new NoSuchElementException("Not found retrospective: " + retrospectiveId));
 
-        if (!retrospective.isOwnedByUser(userId)) {
+        if (!retrospective.isOwnedByUser(user.getId())) {
             throw new IllegalArgumentException(
                 "Not allowed to delete retrospective: " + retrospectiveId);
         }
@@ -143,8 +145,8 @@ public class RetrospectiveService {
         retrospectiveRepository.deleteById(retrospectiveId);
     }
 
-    public boolean toggleBookmark(Long retrospectiveId, Long userId) {
-        return bookmarkService.toggleBookmark(userId, retrospectiveId);
+    public boolean toggleBookmark(Long retrospectiveId, User user) {
+        return bookmarkService.toggleBookmark(user, retrospectiveId);
     }
 
 
@@ -166,10 +168,7 @@ public class RetrospectiveService {
         Team team = teamRepository.save(Team.builder().build());
         User user = findUserById(userId);
 
-        userTeamRepository.save(UserTeam.builder()
-            .team(team)
-            .user(user)
-            .build());
+        userTeamRepository.save(UserTeam.builder().team(team).user(user).build());
 
         return team;
     }

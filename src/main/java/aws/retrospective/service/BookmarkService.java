@@ -22,14 +22,13 @@ public class BookmarkService {
 
 
     @Transactional
-    public boolean toggleBookmark(Long userId, Long retrospectiveId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Not found user: " + userId));
+    public boolean toggleBookmark(User user, Long retrospectiveId) {
         Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
             .orElseThrow(
                 () -> new EntityNotFoundException("Not found retrospective: " + retrospectiveId));
 
-        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndRetrospectiveId(userId,
+        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndRetrospectiveId(
+            user.getId(),
             retrospectiveId);
 
         if (bookmark.isEmpty()) {
