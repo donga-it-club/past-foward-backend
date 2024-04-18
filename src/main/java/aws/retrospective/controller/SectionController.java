@@ -1,20 +1,21 @@
 package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
+import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
-import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.entity.User;
 import aws.retrospective.service.SectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -33,8 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/sections")
 @RequiredArgsConstructor
-@Tag(name = "Section", description = "Section API<br>"
-    + "200 OK : 요청을 정상적으로 처리<br>"
+@SecurityRequirement(name = "JWT")
+@Tag(name = "Section", description = "Section API<br>" + "200 OK : 요청을 정상적으로 처리<br>"
     + "201 Created : 요청을 정상적으로 처리하여 새로운 엔티티를 생성<br>"
     + "204 NoCont : 요청을 정상적으로 처리하였으나, 반환 할 데이터가 없음<br>"
     + "400 Error : Id로 엔티티를 조회 할 수 없을 때 발생하는 에러<br>")
@@ -44,66 +45,63 @@ public class SectionController {
 
     // 회고 카드 등록
     @Operation(summary = "회고 카드 등록", description = "회고 카드 등록하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "201")})
     @PostMapping
-    public CommonApiResponse<CreateSectionResponseDto> createSection(
+    public CommonApiResponse<CreateSectionResponseDto> createSection(@CurrentUser User user,
         @Valid @RequestBody CreateSectionDto request) {
-        CreateSectionResponseDto response = sectionService.createSection(request);
+        CreateSectionResponseDto response = sectionService.createSection(user, request);
         return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
     // 특정 회고 카드 수정
     @Operation(summary = "회고 카드 수정", description = "등록 된 회고 카드의 내용을 수정하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @PatchMapping("/{sectionId}")
-    public CommonApiResponse<EditSectionResponseDto> editSectionContent(@PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
-        EditSectionResponseDto response = sectionService.updateSectionContent(
-            sectionId, request);
+    public CommonApiResponse<EditSectionResponseDto> editSectionContent(@CurrentUser User user,
+        @PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
+        EditSectionResponseDto response = sectionService.updateSectionContent(user, sectionId,
+            request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     // 회고 카드 좋아요
     @Operation(summary = "회고 카드 좋아요", description = "등록된 회고 카드의 좋아요 또는 취소 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @PostMapping("/{sectionId}/likes")
-    public CommonApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(@PathVariable Long sectionId, @Valid @RequestBody IncreaseSectionLikesRequestDto request) {
-        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(
-            sectionId, request);
+    public CommonApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(
+        @CurrentUser User user, @PathVariable Long sectionId) {
+        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(sectionId,
+            user);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     // 특정 회고 카드 삭제
     @Operation(summary = "회고 카드 삭제", description = "등록된 회고 카드를 삭제하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "204")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "204")})
     @DeleteMapping("/{sectionId}")
-    public CommonApiResponse<Void> deleteSection(@PathVariable("sectionId") Long sectionId, @Valid @RequestBody DeleteSectionRequestDto request) {
-        sectionService.deleteSection(sectionId, request);
+    public CommonApiResponse<Void> deleteSection(@CurrentUser User user,
+        @PathVariable("sectionId") Long sectionId) {
+        sectionService.deleteSection(sectionId, user);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 
     // 회고 카드 전체 조회
     @Operation(summary = "회고 카드 전체 조회", description = "회고보드 내의 회고 카드를 전체 조회하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @GetMapping
-    public CommonApiResponse<List<GetSectionsResponseDto>> getSections(@RequestBody @Valid GetSectionsRequestDto request) {
+    public CommonApiResponse<List<GetSectionsResponseDto>> getSections(
+        @Valid GetSectionsRequestDto request) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     // Action Items 사용자 지정
     @Operation(summary = "Action Items 사용자 지정", description = "Action Items에 사용자를 지정하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "204")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "204")})
     @PutMapping("/action-items")
-    public CommonApiResponse<Void> assignUser(@RequestBody @Valid AssignUserRequestDto request) {
-        sectionService.assignUserToActionItem(request);
+    public CommonApiResponse<Void> assignUser(@CurrentUser User user,
+        @RequestBody @Valid AssignUserRequestDto request) {
+        sectionService.assignUserToActionItem(user, request);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 

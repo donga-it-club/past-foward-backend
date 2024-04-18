@@ -1,6 +1,6 @@
 package aws.retrospective.entity;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,15 +15,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Survey extends BaseEntity {
 
+public class Survey extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_id")
-    private Long id;
+    private Long id; // 설문 아이디 - PK
 
     // 설문조사 관련 필드 추가
-    private String age;
+    private Integer age;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -42,13 +42,14 @@ public class Survey extends BaseEntity {
     }
 
     @Builder
-    public Survey(String age, Gender gender, String occupation, String region, String source,
-        String purpose) {
+    public Survey(Integer age, String gender, String occupation, String region,
+        String source, String purpose) {
         this.age = age;
-        this.gender = gender;
+        this.gender = Gender.valueOf(gender);
         this.occupation = occupation;
         this.region = region;
         this.source = source;
         this.purpose = purpose;
     }
 }
+

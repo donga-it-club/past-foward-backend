@@ -3,7 +3,6 @@ package aws.retrospective.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import aws.retrospective.dto.GetTeamUsersRequestDto;
 import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
@@ -67,10 +66,8 @@ class TeamServiceTest {
             Optional.of(createdRetrospective));
 
         //when
-        GetTeamUsersRequestDto request = new GetTeamUsersRequestDto();
-        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         List<GetTeamUsersResponseDto> result = teamService.getTeamMembers(teamId,
-            request);
+            retrospectiveId);
 
         //then
         assertThat(result.size()).isEqualTo(1);
@@ -104,9 +101,7 @@ class TeamServiceTest {
             .build();
 
         // when
-        GetTeamUsersRequestDto request = new GetTeamUsersRequestDto();
-        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
-        List<GetTeamUsersResponseDto> result = teamService.getTeamMembers(teamId, request);
+        List<GetTeamUsersResponseDto> result = teamService.getTeamMembers(teamId, retrospectiveId);
 
         // then
         assertThat(result.size()).isEqualTo(1);
