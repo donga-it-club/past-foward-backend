@@ -60,7 +60,7 @@ public class CommentService {
             .content(createCommentDto.getCommentContent())
             .user(user)
             .section(section)
-            .createDate(LocalDateTime.now())
+            .createDate(createCommentDto.getCreateDate())
             .build();
 
         return commentRepository.save(comment);
