@@ -313,7 +313,7 @@ public class RetrospectiveServiceTest {
         assertThat(findRetrospective.getRetrospectiveId()).isEqualTo(retrospectiveId);
         assertThat(findRetrospective.getTitle()).isEqualTo("test");
         assertThat(findRetrospective.getTemplateId()).isEqualTo(templateId);
-        assertThat(findRetrospective.getTeamId()).isEqualTo(teamId);
+        assertThat(findRetrospective.getType()).isEqualTo(RetrospectiveType.TEAM);
         assertThat(findRetrospective.getUserId()).isEqualTo(userId);
         assertThat(findRetrospective.getDescription()).isEqualTo("test");
         assertThat(findRetrospective.getStatus()).isEqualTo("IN_PROGRESS");
