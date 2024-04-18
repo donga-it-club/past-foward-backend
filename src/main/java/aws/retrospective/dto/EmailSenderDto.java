@@ -6,22 +6,22 @@ import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Getter
 @Component
 public class EmailSenderDto {
-    @Value("${aws.ses.send-mail-to}")
-    private String to;
 
 
-    public SendEmailRequest toSendRequestDto(SendMailRequestDto request) {
+    public SendEmailRequest toSendRequestDto(SendMailRequestDto request, String to) {
+        System.out.println("to: " + to);
         Destination destination = new Destination()
             .withToAddresses(to);
 
         Message message = new Message()
-            .withSubject(createContent(String.format("[PF - %s] - %s", request.getMailStatus().getName(), request.getSubject())))
+            .withSubject(createContent(
+                String.format("[PF - %s] - %s", request.getMailStatus().getName(),
+                    request.getSubject())))
             .withBody(new Body()
                 .withHtml(createContent(createHtmlBody(request))));
 
