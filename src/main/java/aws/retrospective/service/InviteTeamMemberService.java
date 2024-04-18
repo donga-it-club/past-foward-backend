@@ -3,14 +3,17 @@ package aws.retrospective.service;
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TeamInvite;
+import aws.retrospective.entity.User;
+import aws.retrospective.entity.UserTeam;
 import aws.retrospective.repository.TeamInvitationRepository;
 import aws.retrospective.repository.TeamRepository;
+import aws.retrospective.repository.UserTeamRepository;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,16 +22,34 @@ public class InviteTeamMemberService {
     private final TeamRepository teamRepository;
     private final TeamInvitationRepository teamInvitationRepository;
     private final QRCodeService qrCodeService;
+    private final UserTeamRepository userTeamRepository;
     private static final int EXPIRATION_HOURS = 2;
 
     @Value("${domain.url}")
     private String domainUrl;
 
+    @Transactional
+    public void acceptInvitation(String invitationCode, User user) {
+        validateInvitation(invitationCode);
+        TeamInvite teamInvite = teamInvitationRepository.findByInvitationCode(invitationCode)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Invalid invitation code: " + invitationCode));
+
+        Team team = teamInvite.getTeam();
+        UserTeam newUserTeam = UserTeam.builder()
+            .user(user)
+            .team(team)
+            .build();
+
+        userTeamRepository.save(newUserTeam);
+
+    }
+
 
     public InviteTeamMemberDTO generateInvitation(Long teamId) {
         // 팀 조회
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found for id: " + teamId));
+            .orElseThrow(() -> new IllegalArgumentException("Team not found for id: " + teamId));
 
         // 초대 코드 생성
         String invitationCode = UUID.randomUUID().toString();
@@ -37,15 +58,14 @@ public class InviteTeamMemberService {
 
         // 초대 정보를 데이터베이스에 저장
         TeamInvite teamInvite = TeamInvite.builder()
-                .team(team)
-                .invitationCode(invitationCode)
-                .expirationTime(expirationTime)
-                .build();
+            .team(team)
+            .invitationCode(invitationCode)
+            .expirationTime(expirationTime)
+            .build();
         teamInvitationRepository.save(teamInvite);
 
         // 초대 링크 생성
         String invitationUrl = domainUrl + "/invitations/" + invitationCode;
-
 
         // 초대 링크를 QR 코드로 변환
         byte[] qrCodeImage = qrCodeService.generateQRCode(invitationUrl, expirationTime);
@@ -62,8 +82,10 @@ public class InviteTeamMemberService {
 
     // 초대 토큰 유효성을 검증하는 메서드
     void validateInvitation(String invitationCode) {
-        TeamInvite teamInvite = (TeamInvite) teamInvitationRepository.findByInvitationCode(invitationCode)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid invitation code: " + invitationCode));
+        TeamInvite teamInvite = (TeamInvite) teamInvitationRepository.findByInvitationCode(
+                invitationCode)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Invalid invitation code: " + invitationCode));
 
         if (teamInvite.getExpirationTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Invitation code has expired: " + invitationCode);
