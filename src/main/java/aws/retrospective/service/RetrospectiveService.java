@@ -59,11 +59,9 @@ public class RetrospectiveService {
 
         Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
 
-        boolean hasBookmarksByUser = page.stream()
-            .anyMatch(retrospective -> hasBookmarksByUser(retrospective, userId));
-
         return PaginationResponseDto.fromPage(page,
-            retrospective -> RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser));
+            retrospective -> RetrospectiveResponseDto.of(retrospective,
+                hasBookmarksByUser(retrospective, userId)));
     }
 
     @Transactional(readOnly = true)
