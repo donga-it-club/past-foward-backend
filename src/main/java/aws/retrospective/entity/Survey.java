@@ -40,8 +40,7 @@ public class Survey extends BaseEntity{
     private String source;
 
     @ElementCollection
-    @Column(name = "purpose", columnDefinition = "json")
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "purpose")
     private List<String> purpose; // 복수 선택 가능한 항목을 리스트로 저장
 
     private String otherPurpose; // '기타' 부분 입력값
