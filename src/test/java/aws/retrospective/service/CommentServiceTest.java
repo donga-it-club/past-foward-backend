@@ -17,9 +17,6 @@ import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
-import aws.retrospective.repository.SectionCommentRepository;
-import aws.retrospective.repository.SectionRepository;
-import aws.retrospective.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,12 +34,6 @@ class CommentServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private SectionRepository sectionRepository;
-    @Mock
-    private SectionCommentRepository sectionCommentRepository;
     @InjectMocks
     private CommentService commentService;
 
@@ -178,17 +169,6 @@ class CommentServiceTest {
     private Section createSection() {
         return Section.builder().content("test").build();
     }
-
-
-
-
-    private static Comment createComment(String content, User loginedUser) {
-        return Comment.builder()
-            .user(loginedUser)
-            .content(content)
-            .build();
-    }
-
 
     private static User createUser() {
         return User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
