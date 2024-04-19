@@ -171,11 +171,20 @@ public class SectionService {
     @Transactional(readOnly = true)
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective findRetrospective = getRetrospective(request);
-        Team findTeam = getTeam(request.getTeamId());
 
-        // 다른 팀이 작성한 회고보드는 조회할 수 없다.
-        if (findRetrospective.getTeam().getId() != findTeam.getId()) {
-            throw new ForbiddenAccessException("해당 팀의 회고보드만 조회할 수 있습니다.");
+        // 개인 회고 조회 시에 teamId 필요 X
+        if(findRetrospective.getTeam() == null) {
+            if(request.getTeamId() != null) {
+                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
+            }
+        }
+
+        // 다른 팀의 회고 보드를 조회 할 수 없다
+        if(request.getTeamId() != null) {
+            Team findTeam = getTeam(request.getTeamId());
+            if (!findRetrospective.getTeam().getId().equals(findTeam.getId())) {
+                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
+            }
         }
 
         List<GetSectionsResponseDto> response = new ArrayList<>();
