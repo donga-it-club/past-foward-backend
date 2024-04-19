@@ -3,6 +3,7 @@ package aws.retrospective.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import aws.retrospective.repository.SectionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +35,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
+    @Mock
+    private SectionRepository sectionRepository;
     @Mock
     private CommentRepository commentRepository;
     @InjectMocks
@@ -48,6 +53,10 @@ class CommentServiceTest {
         Long sectionId = 1L;
         Section section = createSection();
         ReflectionTestUtils.setField(section, "id", sectionId);
+
+        Comment mockComment = createComment();
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+        when(commentRepository.save(any())).thenReturn(mockComment);
 
         CreateCommentDto request = new CreateCommentDto();
         ReflectionTestUtils.setField(request, "sectionId", sectionId);
@@ -118,6 +127,7 @@ class CommentServiceTest {
         Long commentId = 1L;
         Comment comment = createComment();
         ReflectionTestUtils.setField(comment, "id", commentId);
+        ReflectionTestUtils.setField(comment, "user", longinedUser);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         //when
@@ -138,10 +148,14 @@ class CommentServiceTest {
         GetCommentsRequestDto requestDto = new GetCommentsRequestDto();
         requestDto.setSectionId(1L);
 
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", 1L);
+
         List<Comment> mockedComments = new ArrayList<>();
         // 가짜 댓글 목록 생성
         for (int i = 1; i <= 3; i++) {
             Comment comment = createComment();
+            ReflectionTestUtils.setField(comment, "user", user);
             mockedComments.add(comment);
         }
 
@@ -174,5 +188,4 @@ class CommentServiceTest {
         return User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
             .build();
     }
-
 }
