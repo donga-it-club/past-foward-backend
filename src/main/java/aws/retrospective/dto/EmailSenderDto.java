@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailSenderDto {
 
-
     public SendEmailRequest toSendRequestDto(SendMailRequestDto request, String to) {
-        System.out.println("to: " + to);
         Destination destination = new Destination()
             .withToAddresses(to);
 
@@ -26,7 +24,7 @@ public class EmailSenderDto {
                 .withHtml(createContent(createHtmlBody(request))));
 
         return new SendEmailRequest()
-            .withSource(request.getFrom())
+            .withSource(to)
             .withDestination(destination)
             .withMessage(message);
     }
