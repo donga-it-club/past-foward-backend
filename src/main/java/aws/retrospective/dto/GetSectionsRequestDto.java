@@ -14,6 +14,5 @@ public class GetSectionsRequestDto {
     private Long retrospectiveId; // Long타입
 
     @Schema(description = "팀 id", example = "1")
-    @NotNull(message = "팀 id는 필수 값입니다.")
     private Long teamId;
 }

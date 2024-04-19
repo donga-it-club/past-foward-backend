@@ -349,7 +349,7 @@ class SectionServiceTest {
         User createdUser = createUser();
 
         Team createdTeam2 = createTeam();
-        ReflectionTestUtils.setField(createdTeam1, "id", 2L);
+        ReflectionTestUtils.setField(createdTeam2, "id", 2L);
 
         Long retrospectiveId = 1L;
         Retrospective createdRetrospective = createRetrospective(createdTemplate, createdUser,
