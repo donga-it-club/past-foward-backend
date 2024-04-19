@@ -11,6 +11,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.List;
 
@@ -38,7 +40,8 @@ public class Survey extends BaseEntity{
     private String source;
 
     @ElementCollection
-    @Column(name = "purpose")
+    @Column(name = "purpose", columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<String> purpose; // 복수 선택 가능한 항목을 리스트로 저장
 
     private String otherPurpose; // '기타' 부분 입력값
