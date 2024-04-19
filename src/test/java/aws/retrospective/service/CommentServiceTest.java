@@ -1,157 +1,191 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.CommentDto;
-import aws.retrospective.entity.Comment;
-import aws.retrospective.repository.CommentRepository;
-import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import aws.retrospective.dto.CreateCommentDto;
+import aws.retrospective.dto.CreateCommentResponseDto;
+import aws.retrospective.dto.DeleteCommentRequestDto;
+import aws.retrospective.dto.GetCommentsRequestDto;
+import aws.retrospective.dto.GetCommentsResponseDto;
+import aws.retrospective.dto.UpdateCommentRequestDto;
+import aws.retrospective.dto.UpdateCommentResponseDto;
+import aws.retrospective.entity.Comment;
+import aws.retrospective.entity.Section;
+import aws.retrospective.entity.User;
+import aws.retrospective.repository.CommentRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import aws.retrospective.repository.SectionRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+@ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
     @Mock
+    private SectionRepository sectionRepository;
+    @Mock
     private CommentRepository commentRepository;
-
     @InjectMocks
     private CommentService commentService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    @Test
+    @DisplayName("댓글 등록 API")
+    void createCommentTest() {
+        //given
+        Long userId = 1L;
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", userId);
+
+        Long sectionId = 1L;
+        Section section = createSection();
+        ReflectionTestUtils.setField(section, "id", sectionId);
+
+        Comment mockComment = createComment();
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
+        when(commentRepository.save(any())).thenReturn(mockComment);
+
+        CreateCommentDto request = new CreateCommentDto();
+        ReflectionTestUtils.setField(request, "sectionId", sectionId);
+        ReflectionTestUtils.setField(request, "commentContent", "test");
+
+        //when
+        CreateCommentResponseDto response = commentService.createComment(user, request);
+
+        //then
+        assertThat(response.getCommentContent()).isEqualTo("test");
+        assertThat(response.getUserId()).isEqualTo(userId);
     }
 
     @Test
-    void getAllComments() {
-        // Arrange
-        List<Comment> comments = new ArrayList<>();
-        comments.add(Comment.builder().content("Comment 1").build());
-        comments.add(Comment.builder().content("Comment 2").build());
-        when(commentRepository.findAll()).thenReturn(comments);
+    @DisplayName("댓글 삭제 성공 API")
+    void deleteCommentSuccessTest() {
+        //given
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Section section = createSection();
 
-        // Act
-        List<CommentDto> commentDtos = commentService.getAllComments();
+        Long commentId = 1L;
+        Comment comment = createComment(user, section);
+        ReflectionTestUtils.setField(comment, "id", commentId);
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-        // Assert
-        assertEquals(comments.size(), commentDtos.size());
-        verify(commentRepository, times(1)).findAll();
+        //when
+        commentService.deleteComment(commentId, user);
+
+        //then
+        verify(commentRepository).delete(comment);
     }
 
     @Test
-    void getCommentDTOById() {
-        // Arrange
-        Long id = 1L;
-        String content = "Sample comment";
-        Comment comment = Comment.builder().id(id).content(content).build();
-        when(commentRepository.findById(id)).thenReturn(Optional.of(comment));
+    @DisplayName("존재하지 않는 댓글 삭제 시 예외 발생")
+    void deleteCommentFailTest() {
 
-        // Act
-        CommentDto commentDto = commentService.getCommentDTOById(id);
+        //given
+        Long notExistCommentId = 1L;
+        User user = createUser();
 
-        // Assert
-        assertNotNull(commentDto);
-        assertEquals(id, commentDto.getId());
-        assertEquals(content, commentDto.getContent());
-        verify(commentRepository, times(1)).findById(id);
+        DeleteCommentRequestDto request = new DeleteCommentRequestDto();
+        ReflectionTestUtils.setField(request, "userId", 1L);
+
+        //when
+        when(commentRepository.findById(notExistCommentId)).thenThrow(NoSuchElementException.class);
+
+        //then
+        assertThrows(NoSuchElementException.class,
+            () -> commentService.deleteComment(notExistCommentId, user));
     }
 
-
-    @Test
-    void getCommentDTOById_NotFound() {
-        // Arrange
-        Long id = 1L;
-        when(commentRepository.findById(id)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> commentService.getCommentDTOById(id));
-        verify(commentRepository, times(1)).findById(id);
+    private static Comment createComment(User user,
+        Section section) {
+        return Comment.builder().user(user).content("test")
+            .section(section).build();
     }
 
     @Test
-    void createComment() {
-        // Arrange
-        Comment comment = Comment.builder().content("New comment").build();
-        Comment savedComment = Comment.builder().id(1L).content("New comment").build(); // 예시로 ID를 1L로 설정
-        when(commentRepository.save(comment)).thenReturn(savedComment);
+    @DisplayName("특정 댓글 내용 수정")
+    void updateCommentContentTest() {
 
-        // Act
-        Comment createdComment = commentService.createComment(comment);
+        //given
+        Long userId = 1L;
+        User longinedUser = createUser();
+        ReflectionTestUtils.setField(longinedUser, "id", userId);
 
-        // Assert
-        assertNotNull(createdComment.getId());
-        assertEquals(1L, createdComment.getId()); // 예시로 ID가 1L인지 확인
-        assertEquals("New comment", createdComment.getContent());
-        verify(commentRepository, times(1)).save(comment);
-    }
+        Long commentId = 1L;
+        Comment comment = createComment();
+        ReflectionTestUtils.setField(comment, "id", commentId);
+        ReflectionTestUtils.setField(comment, "user", longinedUser);
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
+        //when
+        UpdateCommentRequestDto request = new UpdateCommentRequestDto();
+        ReflectionTestUtils.setField(request, "commentContent", request.getCommentContent());
+        UpdateCommentResponseDto response = commentService.updateCommentContent(longinedUser,
+            commentId, request);
 
-    @Test
-    void updateComment() {
-        // Arrange
-        Long id = 1L;
-        String existingContent = "Existing comment";
-        String updatedContent = "Updated comment";
-        Comment existingComment = Comment.builder().id(id).content(existingContent).build();
-        Comment updatedComment = Comment.builder().id(id).content(updatedContent).build();
-        when(commentRepository.findById(id)).thenReturn(Optional.of(existingComment));
-
-        // Act
-        Comment savedComment = commentService.updateComment(id, updatedComment);
-
-        // Assert
-        assertEquals(updatedContent, savedComment.getContent());
-        verify(commentRepository, times(1)).findById(id);
-        // verify that existingComment's content is updated but not save() called explicitly
-        assertEquals(updatedContent, existingComment.getContent());
-    }
-
-
-    @Test
-    void updateComment_NotFound() {
-        // Arrange
-        Long id = 1L;
-        Comment updatedComment = Comment.builder().id(id).content("Updated comment").build();
-        when(commentRepository.findById(id)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> commentService.updateComment(id, updatedComment));
-        verify(commentRepository, times(1)).findById(id);
-        verify(commentRepository, never()).save(any());
+        //then
+        assertThat(response.getCommentId()).isEqualTo(commentId);
+        assertThat(response.getContent()).isEqualTo(request.getCommentContent());
     }
 
     @Test
-    void deleteComment() {
-        // Arrange
-        Long id = 1L;
-        Comment commentToDelete = Comment.builder().id(id).content("Comment to delete").build();
-        when(commentRepository.findById(id)).thenReturn(Optional.of(commentToDelete));
+    @DisplayName("모든 댓글 조회 테스트")
+    public void testGetComments() {
+        // Given
+        GetCommentsRequestDto requestDto = new GetCommentsRequestDto();
+        requestDto.setSectionId(1L);
 
-        // Act
-        commentService.deleteComment(id);
+        User user = createUser();
+        ReflectionTestUtils.setField(user, "id", 1L);
 
-        // Assert
-        verify(commentRepository, times(1)).findById(id);
-        verify(commentRepository, times(1)).delete(commentToDelete);
+        List<Comment> mockedComments = new ArrayList<>();
+        // 가짜 댓글 목록 생성
+        for (int i = 1; i <= 3; i++) {
+            Comment comment = createComment();
+            ReflectionTestUtils.setField(comment, "user", user);
+            mockedComments.add(comment);
+        }
+
+        when(commentRepository.getCommentsWithSections(requestDto.getSectionId())).thenReturn(mockedComments);
+
+        // When
+        List<GetCommentsResponseDto> responseDtoList = commentService.getComments(requestDto);
+
+        // Then
+        assertEquals(mockedComments.size(), responseDtoList.size());
+        for (int i = 0; i < mockedComments.size(); i++) {
+            Comment mockedComment = mockedComments.get(i);
+            GetCommentsResponseDto responseDto = responseDtoList.get(i);
+            // 댓글 ID와 내용이 일치하는지 확인
+            assertEquals(mockedComment.getId(), responseDto.getCommentId());
+            assertEquals(mockedComment.getContent(), responseDto.getContent());
+
+        }
     }
 
-    @Test
-    void deleteComment_NotFound() {
-        // Arrange
-        Long id = 1L;
-        when(commentRepository.findById(id)).thenReturn(Optional.empty());
+    private Comment createComment() {
+        return Comment.builder().content("test").build();
+    }
 
-        // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> commentService.deleteComment(id));
-        verify(commentRepository, times(1)).findById(id);
-        verify(commentRepository, never()).delete(any());
+    private Section createSection() {
+        return Section.builder().content("test").build();
+    }
+
+    private static User createUser() {
+        return User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
+            .build();
     }
 }
