@@ -1,7 +1,6 @@
 package aws.retrospective.service;
 
 
-import aws.retrospective.dto.CommentDto;
 import aws.retrospective.dto.CreateCommentDto;
 import aws.retrospective.dto.CreateCommentResponseDto;
 import aws.retrospective.dto.GetCommentsRequestDto;
@@ -14,7 +13,6 @@ import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.SectionRepository;
-import aws.retrospective.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
     private final SectionRepository sectionRepository;
 
 
@@ -43,7 +40,7 @@ public class CommentService {
         Comment createComment = createComment(request.getCommentContent(), findSection, user);
         commentRepository.save(createComment);
 
-        return new CreateCommentResponseDto(createComment.getId(), user.getId(),
+        return new CreateCommentResponseDto(createComment.getUser().getId(), user.getId(),
             request.getSectionId(), request.getCommentContent());
     }
 
@@ -58,7 +55,7 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    public UpdateCommentResponseDto updateCommentContent(User user, Long sectionId, Long commentId, UpdateCommentRequestDto request) {
+    public UpdateCommentResponseDto updateCommentContent(User user, Long commentId, UpdateCommentRequestDto request) {
         Comment findComment = getComment(commentId);
 
         // 댓글 내용 수정은 작성자만 가능하다.
@@ -69,7 +66,7 @@ public class CommentService {
         // 댓글 수정
         findComment.updateComment(request.getCommentContent());
 
-        return new UpdateCommentResponseDto(sectionId, request.getCommentContent());
+        return new UpdateCommentResponseDto(commentId, request.getCommentContent());
     }
 
 
@@ -111,28 +108,10 @@ public class CommentService {
                 ));
         }
     }
-    private Section getSection(Long sectionId) {
-        return sectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("Section not found with ID: " + sectionId));
-    }
-
-    private Section getSection(GetCommentsRequestDto request) {
-        return sectionRepository.findById(request.getSectionId()).orElseThrow(
-            () -> new NoSuchElementException("Not Found Section id: " + request.getSectionId()));
-    }
 
     private Comment getComment(Long commentId) {
         return commentRepository.findById(commentId)
             .orElseThrow(() -> new NoSuchElementException("Comment not found with ID: " + commentId));
     }
 
-    private User getUser(Long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
-    }
-
-    private CommentDto convertToDTO(Comment comment) {
-        return new CommentDto(comment.getId(), comment.getContent());
-        // 필요한 다른 필드들도 엔티티에서 DTO로 복사합니다.
-    }
 }
