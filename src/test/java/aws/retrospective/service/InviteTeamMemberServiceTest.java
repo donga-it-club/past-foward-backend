@@ -1,10 +1,14 @@
 package aws.retrospective.service;
 
+import aws.retrospective.dto.AcceptInvitationDto;
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TeamInvite;
+import aws.retrospective.entity.User;
+import aws.retrospective.entity.UserTeam;
 import aws.retrospective.repository.TeamInvitationRepository;
 import aws.retrospective.repository.TeamRepository;
+import aws.retrospective.repository.UserTeamRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +35,9 @@ class InviteTeamMemberServiceTest {
 
     @Mock
     private QRCodeService qrCodeService;
+
+    @Mock
+    private UserTeamRepository userTeamRepository;
 
     @InjectMocks
     private InviteTeamMemberService inviteTeamMemberService;
@@ -79,7 +86,6 @@ class InviteTeamMemberServiceTest {
     }
 
 
-
     @Test
     void testValidateInvitation_ExpiredInvitation() {
         // 만료된 초대 코드 설정
@@ -118,8 +124,8 @@ class InviteTeamMemberServiceTest {
         assertDoesNotThrow(() -> inviteTeamMemberService.validateInvitation(invitationCode),
                 "유효한 초대 코드가 있으면 예외가 발생해서는 안 됩니다.");
     }
-
 }
+
 
 
 
