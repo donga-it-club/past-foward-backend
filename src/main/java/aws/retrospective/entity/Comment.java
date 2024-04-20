@@ -35,16 +35,21 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "section_id")
     private Section section; // 어떤 Section의 게시물에서 작성된 댓글인지
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_comment_id")
+    private SectionComment sectionComment; // 섹션 댓글 정보
+
     @Builder
-    public Comment(Long id, String content, User user, Section section) {
+    public Comment(Long id, String content, User user, Section section, SectionComment sectionComment) {
         this.id = id;
         this.content = content;
         this.user = user;
         this.section = section;
+        this.sectionComment = sectionComment;
     }
 
-    public void updateContent(String content) {
-        this.content = content;
+    public void updateComment(String updateContent) {
+        this.content = updateContent;
     }
 
 }
