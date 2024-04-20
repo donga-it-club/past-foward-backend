@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -36,19 +35,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.authorizeHttpRequests(
-                (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/v3/**",
-                        "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**", "/swaaagger-ui/**")
-                    .permitAll()
-                    .anyRequest().authenticated()
+            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/v3/**",
+                    "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**", "/swaaagger-ui/**")
+                .permitAll().anyRequest().authenticated()
 
-                    .and()
-                    .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
-            )
-            .csrf((csrf) -> csrf.disable()).oauth2ResourceServer(oauth2 -> oauth2.jwt(
-                jwt -> jwt.decoder(JwtDecoders.fromOidcIssuerLocation(issuerUri))
-                    .jwtAuthenticationConverter(customAuthenticationConverter())));
+        ).csrf((csrf) -> csrf.disable()).oauth2ResourceServer(oauth2 -> oauth2.jwt(
+            jwt -> jwt.decoder(JwtDecoders.fromOidcIssuerLocation(issuerUri))
+                .jwtAuthenticationConverter(customAuthenticationConverter())));
         return http.build();
     }
 
