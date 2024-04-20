@@ -21,7 +21,6 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.specification.RetrospectiveSpecification;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +75,8 @@ public class RetrospectiveService {
     private GetRetrospectiveResponseDto toResponse(Retrospective findRetrospective) {
         return new GetRetrospectiveResponseDto(findRetrospective.getId(),
             findRetrospective.getTitle(), findRetrospective.getTemplate().getId(),
-            findRetrospective.getTeam() == null ? RetrospectiveType.PERSONAL : RetrospectiveType.TEAM
+            findRetrospective.getTeam() == null ? RetrospectiveType.PERSONAL
+                : RetrospectiveType.TEAM
             , findRetrospective.getUser().getId(), findRetrospective.getUser().getUsername(),
             findRetrospective.getDescription(), findRetrospective.getStatus().name(),
             findRetrospective.getThumbnail());
@@ -151,12 +151,12 @@ public class RetrospectiveService {
 
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Not found user: " + userId));
+            .orElseThrow(() -> new NoSuchElementException("Not found user: " + userId));
     }
 
     private RetrospectiveTemplate findTemplateById(Long templateId) {
         return templateRepository.findById(templateId)
-            .orElseThrow(() -> new EntityNotFoundException("Not found template: " + templateId));
+            .orElseThrow(() -> new NoSuchElementException("Not found template: " + templateId));
     }
 
     private Optional<Team> findTeamByIdOptional(Long teamId) {
