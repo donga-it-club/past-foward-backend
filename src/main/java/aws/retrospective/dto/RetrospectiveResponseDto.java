@@ -13,6 +13,7 @@ public class RetrospectiveResponseDto {
     private Long id;
     private String title;
     private Long userId;
+    private String username;
     private Long teamId;
     private Long templateId;
     private String status;
@@ -23,7 +24,8 @@ public class RetrospectiveResponseDto {
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
-    public RetrospectiveResponseDto(Long id, String title, Long userId, Long teamId,
+    public RetrospectiveResponseDto(Long id, String title, Long userId, String username,
+        Long teamId,
         Long templateId,
         String status,
         Boolean isBookmarked,
@@ -36,6 +38,7 @@ public class RetrospectiveResponseDto {
         this.id = id;
         this.title = title;
         this.userId = userId;
+        this.username = username;
         this.teamId = teamId;
         this.templateId = templateId;
         this.status = status;
@@ -54,6 +57,7 @@ public class RetrospectiveResponseDto {
             retrospective.getId(),
             retrospective.getTitle(),
             retrospective.getUser().getId(),
+            retrospective.getUser().getUsername(),
             retrospective.getTeam() != null ? retrospective.getTeam().getId() : null,
             retrospective.getTemplate().getId(),
             retrospective.getStatus().name(),
