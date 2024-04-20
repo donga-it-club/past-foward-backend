@@ -1,7 +1,9 @@
 package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
+import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.SurveyDto;
+import aws.retrospective.entity.User;
 import aws.retrospective.service.SurveyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,12 +32,10 @@ public class SurveyController {
 
     @PostMapping("/responses")
     @Operation(summary = "설문조사 저장", description = "설문조사 결과를 DB에 저장하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "설문조사가 성공적으로 저장됨")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "설문조사가 성공적으로 저장됨")})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addSurvey(@Valid @RequestBody SurveyDto surveyDto) {
-        surveyService.addSurvey(surveyDto);
+    public void addSurvey(@CurrentUser User user, @Valid @RequestBody SurveyDto surveyDto) {
+        surveyService.addSurvey(user, surveyDto);
     }
 
     @Operation(summary = "설문조사 조회", description = "설문조사 데이터를 조회하는 API")

@@ -5,9 +5,11 @@ import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 @Slf4j
@@ -21,6 +23,24 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER,
             errorMessage);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+        HttpMessageNotReadableException ex) {
+        log.error("HttpMessageNotReadableException occurred", ex);
+        ErrorResponse response = new ErrorResponse(ErrorCode.BAD_REQUEST, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
+        log.error("ResponseStatusException occurred", ex);
+        ErrorResponse response = new ErrorResponse(ErrorCode.BAD_REQUEST, ex.getReason());
+        if (ex.getStatusCode() == HttpStatus.CONFLICT) {
+            response = new ErrorResponse(ErrorCode.CONFILCT, ex.getReason());
+        }
+        return new ResponseEntity<>(response, ex.getStatusCode());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
