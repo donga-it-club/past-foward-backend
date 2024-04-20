@@ -34,13 +34,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/**", "/health", "/swagger-ui/**", "/mails",
-                    "/swagger-resources/**",
-                    "/v3/api-docs/**",
-                    "/api-docs/**").permitAll()
-                .anyRequest().authenticated()
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http.authorizeHttpRequests((authorizeHttpRequests) ->
+                authorizeHttpRequests
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/v3/api-docs/**").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/swagger-ui.html").permitAll()
+                    .requestMatchers("/api-docs/**").permitAll()
+                    .requestMatchers("/api/**").permitAll()
+                    .anyRequest().authenticated()
             )
             .csrf((csrf) -> csrf.disable())
             .oauth2ResourceServer(oauth2 -> oauth2
