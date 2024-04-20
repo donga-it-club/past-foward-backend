@@ -18,12 +18,12 @@ import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
+import aws.retrospective.repository.SectionRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import aws.retrospective.repository.SectionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
