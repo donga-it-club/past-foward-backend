@@ -4,7 +4,6 @@ import aws.retrospective.common.CustomAuthenticationConverter;
 import aws.retrospective.repository.UserRepository;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +25,7 @@ public class SecurityConfig {
     private String issuerUri;
 
     @Value("${cors.allowed-origins}")
-    private String allowedOrigins;
+    private List<String> allowedOrigins;
 
     private final UserRepository userRepository;
 
@@ -57,22 +56,14 @@ public class SecurityConfig {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        List<String> origins = parseAllowedOrigins(allowedOrigins);
-
         System.out.println("allowedOrigins = " + allowedOrigins);
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    private List<String> parseAllowedOrigins(String origins) {
-        return Arrays.stream(origins.split(","))
-            .map(String::trim)
-            .collect(Collectors.toList());
     }
 
 }
