@@ -2,9 +2,6 @@ package aws.retrospective.config;
 
 import aws.retrospective.common.CustomAuthenticationConverter;
 import aws.retrospective.repository.UserRepository;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -56,25 +50,5 @@ public class SecurityConfig {
         return new CustomAuthenticationConverter(userRepository);
     }
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        List<String> origins = getAllowedOrigins();
-        System.out.println("allowedOrigins = " + origins);
-
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(origins);
-
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    private List<String> getAllowedOrigins() {
-        return Arrays.stream(allowedOrigins.split(","))
-            .map(url -> "\"" + url.trim() + "\"")
-            .collect(Collectors.toList());
-    }
 
 }
