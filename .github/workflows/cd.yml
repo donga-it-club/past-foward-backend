@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix/cors
 
 jobs:
   build-and-deploy:
