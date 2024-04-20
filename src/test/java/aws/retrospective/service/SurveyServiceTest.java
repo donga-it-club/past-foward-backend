@@ -6,7 +6,9 @@ import static org.mockito.Mockito.when;
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import aws.retrospective.entity.Survey.Gender;
+import aws.retrospective.entity.User;
 import aws.retrospective.repository.SurveyRepository;
+import aws.retrospective.util.TestUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +34,7 @@ public class SurveyServiceTest {
     @DisplayName("설문조사 결과 추가")
     void addSurveyTest() {
         // Given
+        User user = TestUtil.createUser();
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
 
         SurveyDto surveyDto = SurveyDto.builder()
@@ -44,7 +47,7 @@ public class SurveyServiceTest {
             .build();
 
         // When
-        surveyService.addSurvey(surveyDto);
+        surveyService.addSurvey(user, surveyDto);
 
         // Survey 객체 주소가 다른 문제 해결
 
