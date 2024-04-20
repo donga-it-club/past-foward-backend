@@ -15,6 +15,3 @@ management:
   endpoints:
     web:
       base-path: /
-logging:
-  level:
-    org.springframework.security: DEBUG
