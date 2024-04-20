@@ -15,6 +15,7 @@ import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.UserTeam;
+import aws.retrospective.entity.UserTeamRole;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -167,7 +168,8 @@ public class RetrospectiveService {
         Team team = teamRepository.save(Team.builder().build());
         User user = findUserById(userId);
 
-        userTeamRepository.save(UserTeam.builder().team(team).user(user).build());
+        userTeamRepository.save(
+            UserTeam.builder().team(team).user(user).role(UserTeamRole.LEADER).build());
 
         return team;
     }

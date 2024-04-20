@@ -1,6 +1,8 @@
 package aws.retrospective.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,10 +34,17 @@ public class UserTeam {
 
     private LocalDateTime joinedAt;
 
+    @Enumerated(value = EnumType.STRING)
+    UserTeamRole role;
+
+
     @Builder
-    public UserTeam(User user, Team team) {
+    public UserTeam(User user, Team team, UserTeamRole role) {
         this.user = user;
         this.team = team;
         this.joinedAt = LocalDateTime.now();
+        this.role = role;
     }
+
+
 }
