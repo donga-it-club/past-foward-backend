@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,8 +50,7 @@ public class TeamController {
 
     @Operation(summary = "초대 링크를 통해 팀원 초대")
     @GetMapping("/{teamId}/invitation-url")
-    public CommonApiResponse<InviteTeamMemberDTO> getInvitation(
-        @PathVariable Long teamId) {
+    public CommonApiResponse<InviteTeamMemberDTO> getInvitation(@PathVariable Long teamId) {
         InviteTeamMemberDTO inviteTeamMemberDTO = inviteTeamMemberService.generateInvitation(
             teamId);
 
@@ -61,9 +61,17 @@ public class TeamController {
     @ApiResponses(value = {@ApiResponse(responseCode = "204")})
     @PostMapping("accept-invitation")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void acceptInvitation(
-        @CurrentUser User user,
+    public void acceptInvitation(@CurrentUser User user,
         @Valid @RequestBody AcceptInvitationDto dto) {
         inviteTeamMemberService.acceptInvitation(dto, user);
+    }
+
+    @Operation(summary = "리더가 팀원 제거")
+    @DeleteMapping("/{teamId}/users/{userId}")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204")})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeTeamMember(@CurrentUser User user, @PathVariable Long teamId,
+        @PathVariable Long userId) {
+        teamService.removeTeamMember(user, teamId, userId);
     }
 }
