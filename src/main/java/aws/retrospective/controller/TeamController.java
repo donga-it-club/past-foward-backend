@@ -15,8 +15,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 @RestController
 @RequiredArgsConstructor
@@ -68,15 +65,5 @@ public class TeamController {
         @CurrentUser User user,
         @Valid @RequestBody AcceptInvitationDto dto) {
         inviteTeamMemberService.acceptInvitation(dto, user);
-    }
-
-    @Operation(summary = "팀에서 회원 삭제")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204")})
-    @DeleteMapping("/{teamId}/members/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeTeamMember(
-            @PathVariable @NotNull Long teamId,
-            @PathVariable @NotNull Long userId) {
-        inviteTeamMemberService.deleteUserFromTeam(teamId, userId);
     }
 }
