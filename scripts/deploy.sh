@@ -22,7 +22,7 @@ else
 
   while ps -p $CURRENT_PID > /dev/null; do
     echo "> 애플리케이션 종료 대기 중..." >> /home/ec2-user/action/deploy.log
-    sudo kill -15 $CURRENT_PID
+    sudo kill -9 $CURRENT_PID
     sleep 5
   done
 
