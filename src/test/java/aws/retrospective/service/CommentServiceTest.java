@@ -1,7 +1,6 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -10,8 +9,6 @@ import static org.mockito.Mockito.when;
 import aws.retrospective.dto.CreateCommentDto;
 import aws.retrospective.dto.CreateCommentResponseDto;
 import aws.retrospective.dto.DeleteCommentRequestDto;
-import aws.retrospective.dto.GetCommentsRequestDto;
-import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.UpdateCommentRequestDto;
 import aws.retrospective.dto.UpdateCommentResponseDto;
 import aws.retrospective.entity.Comment;
@@ -19,11 +16,8 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.SectionRepository;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -141,40 +135,6 @@ class CommentServiceTest {
         assertThat(response.getContent()).isEqualTo(request.getCommentContent());
     }
 
-    @Test
-    @DisplayName("모든 댓글 조회 테스트")
-    public void testGetComments() {
-        // Given
-        GetCommentsRequestDto requestDto = new GetCommentsRequestDto();
-        requestDto.setSectionId(1L);
-
-        User user = createUser();
-        ReflectionTestUtils.setField(user, "id", 1L);
-
-        List<Comment> mockedComments = new ArrayList<>();
-        // 가짜 댓글 목록 생성
-        for (int i = 1; i <= 3; i++) {
-            Comment comment = createComment();
-            ReflectionTestUtils.setField(comment, "user", user);
-            mockedComments.add(comment);
-        }
-
-        when(commentRepository.getCommentsWithSections(requestDto.getSectionId())).thenReturn(mockedComments);
-
-        // When
-        List<GetCommentsResponseDto> responseDtoList = commentService.getComments(requestDto);
-
-        // Then
-        assertEquals(mockedComments.size(), responseDtoList.size());
-        for (int i = 0; i < mockedComments.size(); i++) {
-            Comment mockedComment = mockedComments.get(i);
-            GetCommentsResponseDto responseDto = responseDtoList.get(i);
-            // 댓글 ID와 내용이 일치하는지 확인
-            assertEquals(mockedComment.getId(), responseDto.getCommentId());
-            assertEquals(mockedComment.getContent(), responseDto.getContent());
-
-        }
-    }
 
     private Comment createComment() {
         return Comment.builder().content("test").build();

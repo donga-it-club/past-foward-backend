@@ -3,7 +3,6 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.CreateCommentDto;
 import aws.retrospective.dto.CreateCommentResponseDto;
-import aws.retrospective.dto.GetCommentsRequestDto;
 import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.UpdateCommentRequestDto;
 import aws.retrospective.dto.UpdateCommentResponseDto;
@@ -13,7 +12,6 @@ import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.SectionRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +38,12 @@ public class CommentService {
         Comment createComment = createComment(request.getCommentContent(), sectionId, user);
         commentRepository.save(createComment);
 
-        return new CreateCommentResponseDto(createComment.getUser().getId(), user.getId(),
-            request.getSectionId(), request.getCommentContent());
+        return new CreateCommentResponseDto(
+            createComment.getId(),
+            createComment.getUser().getId(),
+            createComment.getSection().getId(),
+            createComment.getContent()
+        );
     }
 
     private Comment createComment(String commentContent, Section findSection, User user) {
@@ -55,7 +57,8 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    public UpdateCommentResponseDto updateCommentContent(User user, Long commentId, UpdateCommentRequestDto request) {
+    public UpdateCommentResponseDto updateCommentContent(User user, Long commentId,
+        UpdateCommentRequestDto request) {
         Comment findComment = getComment(commentId);
 
         // 댓글 내용 수정은 작성자만 가능하다.
@@ -87,31 +90,25 @@ public class CommentService {
 
     // 모든 댓글 조회
     @Transactional(readOnly = true)
-    public List<GetCommentsResponseDto> getComments(GetCommentsRequestDto request) {
+    public List<GetCommentsResponseDto> getComments(User user, Long sectionId) {
 
-        List<GetCommentsResponseDto> response = new ArrayList<>();
-        List<Comment> comments = commentRepository.getCommentsWithSections(request.getSectionId());
+        Section findSection = sectionRepository.findById(sectionId)
+            .orElseThrow(() -> new NoSuchElementException("Section not found with ID"));
 
-        revertDto(comments, response);
+        List<Comment> comments = commentRepository.findCommentsBySectionId(sectionId);
 
-        return response;
+        return comments.stream()
+            .map(comment -> new GetCommentsResponseDto(comment.getId(),
+                comment.getUser().getUsername(),
+                comment.getContent(), comment.getCreatedDate()))
+            .toList();
     }
 
-    private void revertDto(List<Comment> comments, List<GetCommentsResponseDto> response) {
-        for (Comment comment : comments) {
-            response.add(
-                new GetCommentsResponseDto(
-                    comment.getId(),
-                    comment.getUser().getUsername(),
-                    comment.getContent(),
-                    comment.getCreatedDate()
-                ));
-        }
-    }
 
     private Comment getComment(Long commentId) {
         return commentRepository.findById(commentId)
-            .orElseThrow(() -> new NoSuchElementException("Comment not found with ID: " + commentId));
+            .orElseThrow(
+                () -> new NoSuchElementException("Comment not found with ID: " + commentId));
     }
 
 }
