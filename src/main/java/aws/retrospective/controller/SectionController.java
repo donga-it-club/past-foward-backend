@@ -7,10 +7,12 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.User;
+import aws.retrospective.service.CommentService;
 import aws.retrospective.service.SectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SectionController {
 
     private final SectionService sectionService;
+    private final CommentService commentService;
 
     // 회고 카드 등록
     @Operation(summary = "회고 카드 등록", description = "회고 카드 등록하는 API")
@@ -103,6 +106,19 @@ public class SectionController {
         @RequestBody @Valid AssignUserRequestDto request) {
         sectionService.assignUserToActionItem(user, request);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+    }
+
+    @Operation(summary = "회고 카드 내 댓글 전체 조회", responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved comments"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/{sectionId}/comments")
+    public CommonApiResponse<List<GetCommentsResponseDto>> getComments(
+        @CurrentUser User user,
+        @PathVariable("sectionId") Long sectionId
+    ) {
+        List<GetCommentsResponseDto> response = commentService.getComments(user, sectionId);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
 }
