@@ -47,14 +47,6 @@ public class InviteTeamMemberService {
 
     }
 
-    @Transactional
-    public void deleteUserFromTeam(Long userId, Long teamId) {
-        // UserTeamRepository를 사용하여 해당 회원을 특정 팀에서 삭제
-        UserTeam userTeam = userTeamRepository.findByUserIdAndTeamId(userId, teamId)
-                .orElseThrow(() -> new IllegalArgumentException("UserTeam not found for userId: " + userId + " and teamId: " + teamId));
-        userTeamRepository.delete(userTeam);
-
-    }
 
     public InviteTeamMemberDTO generateInvitation(Long teamId) {
         // 팀 조회
