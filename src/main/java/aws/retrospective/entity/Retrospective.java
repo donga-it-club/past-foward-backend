@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
@@ -43,7 +42,6 @@ public class Retrospective extends BaseEntity {
 
     private String description; // 회고 설명
 
-    @CreatedDate
     private LocalDateTime startDate; // 회고 시작 일자
 
     private LocalDateTime deletedDate; // 삭제 일자
