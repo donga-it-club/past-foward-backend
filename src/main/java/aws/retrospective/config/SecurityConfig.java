@@ -43,7 +43,17 @@ public class SecurityConfig {
                     .requestMatchers("/swagger-ui.html").permitAll()
                     .requestMatchers("/api-docs/**").permitAll()
                     .requestMatchers("/api/**").permitAll()
-                    .anyRequest().authenticated()
+
+                    .requestMatchers("/comments/**").authenticated()
+                    .requestMatchers("/mails/**").authenticated()
+                    .requestMatchers("/retrospectives/**").authenticated()
+                    .requestMatchers("/retrospective-templates/**").authenticated()
+                    .requestMatchers("/s3/**").authenticated()
+                    .requestMatchers("/sections/**").authenticated()
+                    .requestMatchers("/surveys/**").authenticated()
+                    .requestMatchers("/teams/**").authenticated()
+                    .requestMatchers("/users/**").authenticated()
+
             )
             .csrf((csrf) -> csrf.disable())
             .oauth2ResourceServer(oauth2 -> oauth2
