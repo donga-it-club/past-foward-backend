@@ -2,14 +2,13 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
-import jakarta.validation.Valid;
-import org.springframework.transaction.annotation.Transactional;
 import aws.retrospective.repository.SurveyRepository;
-
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -28,7 +27,7 @@ public class SurveyService {
             .occupation(request.getOccupation())
             .region(request.getRegion())
             .source(request.getSource())
-            .purpose(request.getPurpose())
+            .purposes(request.getPurposes())
             .build();
 
         surveyRepository.save(survey);
@@ -48,7 +47,7 @@ public class SurveyService {
             .occupation(survey.getOccupation())
             .region(survey.getRegion())
             .source(survey.getSource())
-            .purpose(survey.getPurpose())
+            .purposes(survey.getPurposes())
             .build();
     }
 }
