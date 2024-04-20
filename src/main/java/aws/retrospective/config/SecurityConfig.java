@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
@@ -40,7 +41,7 @@ public class SecurityConfig {
                     "/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .cors(Customizer.withDefaults())
             .csrf((csrf) -> csrf.disable())
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt
