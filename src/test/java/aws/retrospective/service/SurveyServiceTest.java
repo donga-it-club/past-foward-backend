@@ -2,48 +2,45 @@ package aws.retrospective.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import aws.retrospective.entity.Survey.Gender;
 import aws.retrospective.repository.SurveyRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class SurveyServiceTest {
 
-    static {
-        System.setProperty("com.amazonaws.sdk.disableEc2Metadata", "true");
-    }
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @InjectMocks
     private SurveyService surveyService;
 
     @Mock
     private SurveyRepository surveyRepository;
-  
+
 
     @Test
     @DisplayName("설문조사 결과 추가")
     void addSurveyTest() {
         // Given
+        List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
+
         SurveyDto surveyDto = SurveyDto.builder()
             .age(22)
             .gender("FEMALE")
             .occupation("student")
             .region("Korea")
             .source("internet")
-            .purpose("research")
+            .purposes(purposes)
             .build();
 
         // When
@@ -57,12 +54,14 @@ public class SurveyServiceTest {
         assertEquals("student", surveyDto.getOccupation());
         assertEquals("Korea", surveyDto.getRegion());
         assertEquals("internet", surveyDto.getSource());
-        assertEquals("research", surveyDto.getPurpose());
+        assertEquals(purposes, surveyDto.getPurposes());
     }
 
     @Test
     void getAllSurveys() {
         // 가짜 데이터 생성
+        List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
+
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
             .age(30)
@@ -70,7 +69,7 @@ public class SurveyServiceTest {
             .occupation("Engineer")
             .region("Seoul")
             .source("Internet")
-            .purpose("research")
+            .purposes(purposes)
             .build());
         // Mock 객체 설정
         when(surveyRepository.findAll()).thenReturn(surveys);

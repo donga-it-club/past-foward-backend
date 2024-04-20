@@ -27,9 +27,7 @@ public class SurveyDto {
     private String source;
 
     @NotEmpty
-    private List<String> purpose;
+    private List<String> purposes;
 
-    // 기타 입력값을 받음
-    private String otherpurpose;
 
 }

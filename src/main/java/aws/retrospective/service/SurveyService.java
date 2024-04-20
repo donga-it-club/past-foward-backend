@@ -27,8 +27,7 @@ public class SurveyService {
             .occupation(request.getOccupation())
             .region(request.getRegion())
             .source(request.getSource())
-            .purpose(request.getPurpose())
-            .otherPurpose(request.getOtherpurpose())
+            .purposes(request.getPurposes())
             .build();
 
         surveyRepository.save(survey);
@@ -48,8 +47,7 @@ public class SurveyService {
             .occupation(survey.getOccupation())
             .region(survey.getRegion())
             .source(survey.getSource())
-            .purpose(survey.getPurpose())
-            .otherpurpose(survey.getOtherPurpose())
+            .purposes(survey.getPurposes())
             .build();
     }
 }
