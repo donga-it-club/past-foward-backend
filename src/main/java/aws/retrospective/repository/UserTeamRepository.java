@@ -12,4 +12,6 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, Long>,
 
     public Optional<UserTeam> findByTeamIdAndRole(Long teamId, UserTeamRole role);
 
+    public Optional<UserTeam> findByTeamIdAndUserId(Long teamId, Long userId);
+
 }

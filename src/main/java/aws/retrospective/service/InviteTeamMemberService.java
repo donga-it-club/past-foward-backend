@@ -6,10 +6,12 @@ import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TeamInvite;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.UserTeam;
+import aws.retrospective.entity.UserTeamRole;
 import aws.retrospective.repository.TeamInvitationRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserTeamRepository;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,9 +40,17 @@ public class InviteTeamMemberService {
                 () -> new IllegalArgumentException("Invalid invitation code: " + invitationCode));
 
         Team team = teamInvite.getTeam();
+        Optional<UserTeam> userTeam = userTeamRepository.findByTeamIdAndUserId(team.getId(),
+            user.getId());
+
+        if (userTeam.isPresent()) {
+            return;
+        }
+
         UserTeam newUserTeam = UserTeam.builder()
             .user(user)
             .team(team)
+            .role(UserTeamRole.MEMBER)
             .build();
 
         userTeamRepository.save(newUserTeam);
