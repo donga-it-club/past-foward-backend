@@ -71,6 +71,7 @@ public class RetrospectiveController {
 
     @Operation(summary = "회고 생성")
     @PostMapping()
+    @ResponseStatus(HttpStatus.CREATED)
     public CommonApiResponse<CreateRetrospectiveResponseDto> createRetrospective(
         @CurrentUser User user, @RequestBody @Valid CreateRetrospectiveDto createRetrospectiveDto) {
         CreateRetrospectiveResponseDto response = retrospectiveService.createRetrospective(user,
