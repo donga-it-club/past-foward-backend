@@ -55,7 +55,8 @@ public class User extends BaseEntity {
     }
 
     // 프로필 이미지 등록
-    public void updateProfileImage(String thumbnail) {
+    public void updateUserInfo(String thumbnail, String username) {
         this.thumbnail = thumbnail;
+        this.username = username;
     }
 }

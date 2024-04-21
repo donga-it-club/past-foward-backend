@@ -31,8 +31,8 @@ public class UserController {
     private final UserService userService;
 
     // 프로필 이미지 등록
-    @PutMapping("/me/thumbnail")
-    @Operation(summary = "프로필 이미지 등록")
+    @PutMapping("/me")
+    @Operation(summary = "유저 정보 수정")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "프로필 이미지 등록 성공"),})
     public CommonApiResponse<UpdateUserProfileResponseDto> updateProfile(@CurrentUser User user,
         @RequestBody @Valid UpdateUserProfileRequestDto request) {
