@@ -19,14 +19,18 @@ public class UserService {
     @Transactional
     public UpdateUserProfileResponseDto updateProfile(User user,
         UpdateUserProfileRequestDto request) {
-        user.updateProfileImage(request.getThumbnail());
-        return new UpdateUserProfileResponseDto(user.getId(), user.getEmail(), user.getThumbnail());
+        User findUser = getUser(user.getId());
+        findUser.updateUserInfo(request.getThumbnail(), request.getUsername());
+        return new UpdateUserProfileResponseDto(findUser.getId(), findUser.getEmail(),
+            findUser.getThumbnail(), findUser.getUsername());
     }
 
     @Transactional(readOnly = true)
     public GetUserInfoDto getUserInfo(User user) {
-        return new GetUserInfoDto(user.getId(), user.getUsername(), user.getEmail(),
-            user.getThumbnail(), user.getPhone(), user.getCreatedDate(), user.getUpdatedDate());
+        User currentUser = getUser(user.getId());
+        return new GetUserInfoDto(currentUser.getId(), currentUser.getUsername(),
+            currentUser.getEmail(), currentUser.getThumbnail(), currentUser.getPhone(),
+            currentUser.getCreatedDate(), currentUser.getUpdatedDate());
     }
 
 

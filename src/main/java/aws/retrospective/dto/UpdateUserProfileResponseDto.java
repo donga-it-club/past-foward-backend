@@ -14,4 +14,6 @@ public class UpdateUserProfileResponseDto {
     private String email;
     @Schema(description = "사용자 썸네일", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private String thumbnail;
+    @Schema(description = "사용자 닉네임", example = "test")
+    private String username;
 }
