@@ -36,17 +36,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.authorizeHttpRequests(
-                (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/v3/**", "/error",
-                        "/health",
-                        "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**", "/swaaagger-ui/**")
-                    .permitAll().anyRequest().authenticated()
+            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/v3/**", "/error",
+                    "/health", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**",
+                    "/swagger-resources/**", "/configuration/security", "/swagger-ui.html",
+                    "/webjars/**")
 
-            ).csrf((csrf) -> csrf.disable())
-            .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS))
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(
-                jwt -> jwt.decoder(JwtDecoders.fromOidcIssuerLocation(issuerUri))
-                    .jwtAuthenticationConverter(customAuthenticationConverter())));
+                .permitAll().anyRequest().authenticated()
+
+        ).csrf((csrf) -> csrf.disable()).sessionManagement(
+            (sessionManagement) -> sessionManagement.sessionCreationPolicy(
+                SessionCreationPolicy.STATELESS)).oauth2ResourceServer(oauth2 -> oauth2.jwt(
+            jwt -> jwt.decoder(JwtDecoders.fromOidcIssuerLocation(issuerUri))
+                .jwtAuthenticationConverter(customAuthenticationConverter())));
         return http.build();
     }
 
