@@ -55,6 +55,7 @@ public class RetrospectiveService {
         Specification<Retrospective> spec = Specification.where(
                 RetrospectiveSpecification.withKeyword(dto.getKeyword()))
             .and(RetrospectiveSpecification.withUserId(userId))
+            .and(RetrospectiveSpecification.withStatus(dto.getStatus()))
             .and(RetrospectiveSpecification.withBookmark(dto.getIsBookmarked(), userId));
 
         Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
@@ -77,10 +78,9 @@ public class RetrospectiveService {
         return new GetRetrospectiveResponseDto(findRetrospective.getId(),
             findRetrospective.getTitle(), findRetrospective.getTemplate().getId(),
             findRetrospective.getTeam() == null ? RetrospectiveType.PERSONAL
-                : RetrospectiveType.TEAM
-            , findRetrospective.getUser().getId(), findRetrospective.getUser().getUsername(),
-            findRetrospective.getDescription(), findRetrospective.getStatus().name(),
-            findRetrospective.getThumbnail());
+                : RetrospectiveType.TEAM, findRetrospective.getUser().getId(),
+            findRetrospective.getUser().getUsername(), findRetrospective.getDescription(),
+            findRetrospective.getStatus().name(), findRetrospective.getThumbnail());
     }
 
     @Transactional

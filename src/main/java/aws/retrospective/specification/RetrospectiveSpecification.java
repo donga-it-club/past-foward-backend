@@ -1,5 +1,6 @@
 package aws.retrospective.specification;
 
+import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -33,6 +34,14 @@ public class RetrospectiveSpecification {
         }
 
         return (root, query, cb) -> cb.equal(root.join("bookmarks").get("user").get("id"), userId);
+    }
+
+    public static Specification<Retrospective> withStatus(ProjectStatus status) {
+        if (status == null) {
+            return null;
+        }
+        
+        return (root, query, cb) -> cb.equal(root.get("status"), status);
     }
 
 }
