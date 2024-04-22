@@ -35,7 +35,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.authorizeHttpRequests(
-            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/v3/**",
+            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/v3/**", "/error",
                     "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**", "/swaaagger-ui/**")
                 .permitAll().anyRequest().authenticated()
 
