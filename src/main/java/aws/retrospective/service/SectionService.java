@@ -156,6 +156,8 @@ public class SectionService {
             throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
         }
 
+        actionItemRepository.deleteBySectionId(findSection.getId());
+
         sectionRepository.delete(findSection);
     }
 
