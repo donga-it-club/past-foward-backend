@@ -30,18 +30,15 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
 
-    private final CorsConfig corsConfig;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.authorizeHttpRequests(
-            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/v3/**", "/error",
-                    "/health", "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**",
-                    "/swagger-resources/**", "/configuration/security", "/swagger-ui.html",
-                    "/webjars/**")
-
-                .permitAll().anyRequest().authenticated()
+            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/health",
+                    "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**",
+                    "/swagger-resources/**", "/swagger-ui.html").permitAll().anyRequest()
+                .authenticated()
 
         ).csrf((csrf) -> csrf.disable()).sessionManagement(
             (sessionManagement) -> sessionManagement.sessionCreationPolicy(
