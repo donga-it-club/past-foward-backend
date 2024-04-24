@@ -1,6 +1,7 @@
 package aws.retrospective.service;
 
 import aws.retrospective.dto.AcceptInvitationDto;
+import aws.retrospective.dto.AcceptInviteResponseDto;
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TeamInvite;
@@ -32,7 +33,7 @@ public class InviteTeamMemberService {
     private String domainUrl;
 
     @Transactional
-    public void acceptInvitation(AcceptInvitationDto dto, User user) {
+    public AcceptInviteResponseDto acceptInvitation(AcceptInvitationDto dto, User user) {
         String invitationCode = dto.getInvitationCode();
         validateInvitation(invitationCode);
         TeamInvite teamInvite = teamInvitationRepository.findByInvitationCode(invitationCode)
@@ -44,7 +45,11 @@ public class InviteTeamMemberService {
             user.getId());
 
         if (userTeam.isPresent()) {
-            return;
+            return AcceptInviteResponseDto.builder()
+                .teamId(team.getId())
+                .userId(user.getId())
+                .role(userTeam.get().getRole())
+                .build();
         }
 
         UserTeam newUserTeam = UserTeam.builder()
@@ -54,6 +59,12 @@ public class InviteTeamMemberService {
             .build();
 
         userTeamRepository.save(newUserTeam);
+
+        return AcceptInviteResponseDto.builder()
+            .teamId(team.getId())
+            .userId(user.getId())
+            .role(UserTeamRole.MEMBER)
+            .build();
 
     }
 
