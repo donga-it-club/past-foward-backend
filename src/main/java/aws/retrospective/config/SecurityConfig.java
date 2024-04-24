@@ -35,7 +35,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.authorizeHttpRequests(
-            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/health",
+            (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/actuator/health",
                     "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**",
                     "/swagger-resources/**", "/swagger-ui.html").permitAll().anyRequest()
                 .authenticated()
