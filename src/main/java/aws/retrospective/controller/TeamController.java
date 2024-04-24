@@ -3,6 +3,7 @@ package aws.retrospective.controller;
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.AcceptInvitationDto;
+import aws.retrospective.dto.AcceptInviteResponseDto;
 import aws.retrospective.dto.GetTeamUsersResponseDto;
 import aws.retrospective.dto.InviteTeamMemberDTO;
 import aws.retrospective.entity.User;
@@ -60,10 +61,10 @@ public class TeamController {
     @Operation(summary = "초대 링크를 통해 팀원 초대 수락")
     @ApiResponses(value = {@ApiResponse(responseCode = "204")})
     @PostMapping("accept-invitation")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void acceptInvitation(@CurrentUser User user,
+    public CommonApiResponse<AcceptInviteResponseDto> acceptInvitation(@CurrentUser User user,
         @Valid @RequestBody AcceptInvitationDto dto) {
-        inviteTeamMemberService.acceptInvitation(dto, user);
+        AcceptInviteResponseDto userTeam = inviteTeamMemberService.acceptInvitation(dto, user);
+        return CommonApiResponse.successResponse(HttpStatus.OK, userTeam);
     }
 
     @Operation(summary = "리더가 팀원 제거")
