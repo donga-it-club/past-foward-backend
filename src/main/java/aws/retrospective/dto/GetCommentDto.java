@@ -16,4 +16,6 @@ public class GetCommentDto {
     private String content;
     @Schema(description = "댓글 작성자", example = "hope")
     private String username;
+    @Schema(description = "프로필 이미지", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    private String thumbnail;
 }
