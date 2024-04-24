@@ -201,13 +201,13 @@ public class SectionService {
     private void revertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
         for (Section section : sections) {
             List<GetCommentDto> collect = section.getComments().stream()
-                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername()))
+                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername(), c.getUser().getThumbnail()))
                 .collect(Collectors.toList());
             response.add(
                 new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
                     section.getContent(), section.getLikeCnt(),
                     section.getTemplateSection().getSectionName(), section.getCreatedDate(),
-                    collect));
+                    collect, section.getUser().getThumbnail()));
         }
     }
 

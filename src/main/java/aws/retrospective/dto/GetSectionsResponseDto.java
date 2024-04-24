@@ -28,6 +28,9 @@ public class GetSectionsResponseDto {
     @Schema(description = "회고 카드 등록일", example = "2021-07-01T00:00:00")
     private LocalDateTime createdDate;
 
+    @Schema(description = "프로필 이미지", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    private String thumbnail;
+
     private List<GetCommentDto> comments = new ArrayList<>();
 
     @QueryProjection
@@ -42,7 +45,7 @@ public class GetSectionsResponseDto {
     }
 
     public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
-        String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments) {
+        String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments, String thumbnail) {
         this.sectionId = sectionId;
         this.username = username;
         this.content = content;
@@ -50,5 +53,6 @@ public class GetSectionsResponseDto {
         this.sectionName = sectionName;
         this.createdDate = createdDate;
         this.comments = comments;
+        this.thumbnail = thumbnail;
     }
 }
