@@ -12,8 +12,6 @@ import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.FindSectionCountRequestDto;
-import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
@@ -28,7 +26,6 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
-import aws.retrospective.entity.UserTeam;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.LikesRepository;
@@ -36,7 +33,6 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
-import aws.retrospective.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -56,8 +52,6 @@ class SectionServiceTest {
 
     @Mock
     SectionRepository sectionRepository;
-    @Mock
-    UserRepository userRepository;
     @Mock
     RetrospectiveRepository retrospectiveRepository;
     @Mock
@@ -134,7 +128,6 @@ class SectionServiceTest {
     @Test
     @DisplayName("존재하지 않는 섹션을 삭제 시 예외가 발생한다.")
     void deleteSectionFailTest() {
-
         //given
         Long notExistSectionId = 1L;
         User user = createUser();
@@ -203,51 +196,6 @@ class SectionServiceTest {
         //then
         assertThat(response.getSectionId()).isEqualTo(sectionId);
         assertThat(response.getLikeCnt()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("회고보드의 각 섹션에 등록된 게시물 개수를 조회 할 수 있다.")
-    void getSectionCountsTest() {
-        //given
-        Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(createTemplate(), createUser(),
-            createTeam());
-        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
-            Optional.of(retrospective));
-
-        Long templateSectionId = 1L;
-        TemplateSection templateSection = createTemplateSection(createTemplate());
-        ReflectionTestUtils.setField(templateSection, "id", templateSectionId);
-        when(templateSectionRepository.findById(templateSectionId)).thenReturn(
-            Optional.of(templateSection));
-
-        when(sectionRepository.countByRetrospectiveAndTemplateSection(retrospective,
-            templateSection)).thenReturn(1);
-
-        //when
-        FindSectionCountRequestDto request = new FindSectionCountRequestDto();
-        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
-        ReflectionTestUtils.setField(request, "templateSectionId", templateSectionId);
-        FindSectionCountResponseDto response = sectionService.getSectionCounts(request);
-
-        //then
-        assertThat(response.getCount()).isEqualTo(1);
-    }
-
-    private static Likes createLikes(Section section, User user) {
-        return Likes.builder().section(section).user(user).build();
-    }
-
-    private static Section createSection(User user, TemplateSection templateSection,
-        Retrospective retrospective) {
-        return Section.builder().user(user).content("test").templateSection(templateSection)
-            .likeCnt(0).retrospective(retrospective).build();
-    }
-
-    private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
-        return TemplateSection.builder().sectionName("Keep").sequence(0).template(kptTemplate)
-            .build();
     }
 
     @Test
@@ -332,8 +280,6 @@ class SectionServiceTest {
         assertThat(result.getComments().size()).isEqualTo(2);
         assertThat(result.getComments().get(0).getContent()).isEqualTo(comment1.getContent());
         assertThat(result.getComments().get(1).getContent()).isEqualTo(comment2.getContent());
-
-
     }
 
     @Test
@@ -372,7 +318,6 @@ class SectionServiceTest {
 
         //then
         assertThrows(ForbiddenAccessException.class, () -> sectionService.getSections(request));
-
     }
 
     @Test
@@ -461,6 +406,21 @@ class SectionServiceTest {
             () -> sectionService.assignUserToActionItem(user, request));
     }
 
+    private static Likes createLikes(Section section, User user) {
+        return Likes.builder().section(section).user(user).build();
+    }
+
+    private static Section createSection(User user, TemplateSection templateSection,
+        Retrospective retrospective) {
+        return Section.builder().user(user).content("test").templateSection(templateSection)
+            .likeCnt(0).retrospective(retrospective).build();
+    }
+
+    private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
+        return TemplateSection.builder().sectionName("Keep").sequence(0).template(kptTemplate)
+            .build();
+    }
+
     private static Section createSection(User loginedUser) {
         return Section.builder().user(loginedUser).content("test").likeCnt(0).build();
     }
@@ -482,9 +442,5 @@ class SectionServiceTest {
     private static User createUser() {
         return User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
             .build();
-    }
-
-    private static UserTeam createUserTeam(User createdUser, Team createdTeam) {
-        return UserTeam.builder().user(createdUser).team(createdTeam).build();
     }
 }

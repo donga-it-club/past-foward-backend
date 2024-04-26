@@ -1,6 +1,7 @@
 package aws.retrospective.entity;
 
-import jakarta.persistence.Column;
+import
+    jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -95,5 +96,9 @@ public class Retrospective extends BaseEntity {
         this.status = status;
         this.thumbnail = thumbnail;
         this.description = description;
+    }
+
+    public boolean isSameTemplate(TemplateSection templateSection) {
+        return this.getTemplate().getName().equals(templateSection.getTemplate().getName());
     }
 }

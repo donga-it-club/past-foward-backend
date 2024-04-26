@@ -71,4 +71,12 @@ public class Section extends BaseEntity {
     public void cancelSectionLikes() {
         this.likeCnt -= 1;
     }
+
+    public boolean isSameUser(User user) {
+        return this.getUser().getId().equals(user.getId());
+    }
+
+    public boolean isActionItemsSection() {
+        return this.getTemplateSection().getSectionName().equals("Action Items");
+    }
 }
