@@ -60,7 +60,7 @@ public class SectionService {
         // 다른 팀의 회고 보드를 조회 할 수 없다
         if (request.getTeamId() != null) {
             Team findTeam = getTeam(request.getTeamId());
-            if (!findRetrospective.getTeam().getId().equals(findTeam.getId())) {
+            if (!findRetrospective.isSameTeam(findTeam)) {
                 throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
             }
         }
@@ -68,7 +68,6 @@ public class SectionService {
         List<GetSectionsResponseDto> response = new ArrayList<>();
         List<Section> sections = sectionRepository.getSectionsWithComments(
             request.getRetrospectiveId());
-
         revertDto(sections, response);
 
         return response;
@@ -116,9 +115,9 @@ public class SectionService {
     public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId, User user) {
         // 회고 카드 조회
         Section findSection = getSection(sectionId);
-
         // 사용자가 해당 회고 카드에 좋아요를 눌렀는지 확인한다.
         Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, findSection);
+
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
         if (findLikes.isEmpty()) {
             Likes createLikes = Likes.builder().section(findSection).user(user).build();
