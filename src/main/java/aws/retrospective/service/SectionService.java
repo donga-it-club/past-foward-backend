@@ -5,8 +5,6 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.FindSectionCountRequestDto;
-import aws.retrospective.dto.FindSectionCountResponseDto;
 import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
@@ -25,7 +23,6 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
-import aws.retrospective.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -42,27 +39,48 @@ import org.springframework.transaction.annotation.Transactional;
 public class SectionService {
 
     private final SectionRepository sectionRepository;
-    private final UserRepository userRepository;
     private final RetrospectiveRepository retrospectiveRepository;
     private final TemplateSectionRepository templateSectionRepository;
     private final LikesRepository likesRepository;
     private final TeamRepository teamRepository;
     private final ActionItemRepository actionItemRepository;
 
+    // 회고 카드 전체 조회
+    @Transactional(readOnly = true)
+    public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
+        Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
+
+        // 개인 회고 조회 시에 teamId 필요 X
+        if (findRetrospective.getTeam() == null) {
+            if (request.getTeamId() != null) {
+                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
+            }
+        }
+
+        // 다른 팀의 회고 보드를 조회 할 수 없다
+        if (request.getTeamId() != null) {
+            Team findTeam = getTeam(request.getTeamId());
+            if (!findRetrospective.isSameTeam(findTeam)) {
+                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
+            }
+        }
+
+        List<GetSectionsResponseDto> response = new ArrayList<>();
+        List<Section> sections = sectionRepository.getSectionsWithComments(
+            request.getRetrospectiveId());
+        revertDto(sections, response);
+
+        return response;
+    }
+
     // 회고 카드 등록
     @Transactional
     public CreateSectionResponseDto createSection(User user, CreateSectionDto request) {
-
-        Retrospective findRetrospective = retrospectiveRepository.findById(
-                request.getRetrospectiveId())
-            .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다"));
-        TemplateSection findTemplateSection = templateSectionRepository.findById(
-                request.getTemplateSectionId())
-            .orElseThrow(() -> new NoSuchElementException("섹션이 조회되지 않습니다."));
+        Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
+        TemplateSection findTemplateSection = getTemplateSection(request.getTemplateSectionId());
 
         // 회고 템플릿 정보가 일치하는지 확인한다.
-        if (!findRetrospective.getTemplate().getName()
-            .equals(findTemplateSection.getTemplate().getName())) {
+        if (!findRetrospective.isSameTemplate(findTemplateSection)) {
             throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
         }
 
@@ -82,7 +100,7 @@ public class SectionService {
         Section findSection = getSection(sectionId);
 
         // 회고 카드 수정은 작성자만 가능하다.
-        if (!findSection.getUser().getId().equals(user.getId())) {
+        if (!findSection.isSameUser(user)) {
             throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
         }
 
@@ -97,9 +115,9 @@ public class SectionService {
     public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId, User user) {
         // 회고 카드 조회
         Section findSection = getSection(sectionId);
-
         // 사용자가 해당 회고 카드에 좋아요를 눌렀는지 확인한다.
         Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, findSection);
+
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
         if (findLikes.isEmpty()) {
             Likes createLikes = Likes.builder().section(findSection).user(user).build();
@@ -114,16 +132,33 @@ public class SectionService {
         return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
     }
 
-    // 회고 카드 개수 조회
-    @Transactional(readOnly = true)
-    public FindSectionCountResponseDto getSectionCounts(FindSectionCountRequestDto request) {
+    // Action Items 사용자 지정
+    @Transactional
+    public void assignUserToActionItem(User user, AssignUserRequestDto request) {
+        Team team = getTeam(request.getTeamId());
         Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
-        TemplateSection templateSection = getTemplateSection(request.getTemplateSectionId());
+        Section section = getSection(request.getSectionId());
 
-        int sectionCounts = sectionRepository.countByRetrospectiveAndTemplateSection(retrospective,
-            templateSection);
+        if (!section.isActionItemsSection()) {
+            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
+        }
 
-        return new FindSectionCountResponseDto(sectionCounts);
+        actionItemRepository.save(createActionItem(user, team, section, retrospective));
+    }
+
+    // 회고카드 삭제
+    @Transactional
+    public void deleteSection(Long sectionId, User user) {
+        Section findSection = getSection(sectionId);
+
+        // 작성자만 회고 카드를 삭제할 수 있다.
+        if (!findSection.isSameUser(user)) {
+            throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
+        }
+
+        actionItemRepository.deleteBySectionId(findSection.getId());
+
+        sectionRepository.delete(findSection);
     }
 
     private TemplateSection getTemplateSection(Long sectionId) {
@@ -141,26 +176,6 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
     }
 
-    private User getUser(Long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("사용자가 조회되지 않습니다."));
-    }
-
-    @Transactional
-    public void deleteSection(Long sectionId, User user) {
-        Section findSection = sectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
-
-        // 작성자만 회고 카드를 삭제할 수 있다.
-        if (!findSection.getUser().getId().equals(user.getId())) {
-            throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
-        }
-
-        actionItemRepository.deleteBySectionId(findSection.getId());
-
-        sectionRepository.delete(findSection);
-    }
-
     // 회고 카드 등록
     private Section createSection(String sectionContent, TemplateSection findTemplateSection,
         Retrospective findRetrospective, User findUser) {
@@ -169,39 +184,11 @@ public class SectionService {
             .build();
     }
 
-    // 회고 카드 전체 조회
-    @Transactional(readOnly = true)
-    public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
-        Retrospective findRetrospective = getRetrospective(request);
-
-        // 개인 회고 조회 시에 teamId 필요 X
-        if(findRetrospective.getTeam() == null) {
-            if(request.getTeamId() != null) {
-                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
-            }
-        }
-
-        // 다른 팀의 회고 보드를 조회 할 수 없다
-        if(request.getTeamId() != null) {
-            Team findTeam = getTeam(request.getTeamId());
-            if (!findRetrospective.getTeam().getId().equals(findTeam.getId())) {
-                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
-            }
-        }
-
-        List<GetSectionsResponseDto> response = new ArrayList<>();
-        List<Section> sections = sectionRepository.getSectionsWithComments(
-            request.getRetrospectiveId());
-
-        revertDto(sections, response);
-
-        return response;
-    }
-
     private void revertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
         for (Section section : sections) {
             List<GetCommentDto> collect = section.getComments().stream()
-                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername(), c.getUser().getThumbnail()))
+                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername(),
+                    c.getUser().getThumbnail()))
                 .collect(Collectors.toList());
             response.add(
                 new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
@@ -214,26 +201,6 @@ public class SectionService {
     private Team getTeam(Long teamId) {
         return teamRepository.findById(teamId)
             .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
-    }
-
-    private Retrospective getRetrospective(GetSectionsRequestDto request) {
-        return retrospectiveRepository.findById(request.getRetrospectiveId()).orElseThrow(
-            () -> new NoSuchElementException(
-                "Not Found Retrospective id : " + request.getRetrospectiveId()));
-    }
-
-    @Transactional
-    // Action Items 사용자 지정
-    public void assignUserToActionItem(User user, AssignUserRequestDto request) {
-        Team team = getTeam(request.getTeamId());
-        Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
-        Section section = getSection(request.getSectionId());
-
-        if (!section.getTemplateSection().getSectionName().equals("Action Items")) {
-            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
-        }
-
-        actionItemRepository.save(createActionItem(user, team, section, retrospective));
     }
 
     private static ActionItem createActionItem(User findUser, Team findTeam, Section section,
