@@ -19,4 +19,8 @@ public class AssignUserRequestDto {
     @NotNull
     @Schema(description = "회고 카드 ID")
     private Long sectionId;
+
+    @NotNull
+    @Schema(description = "담당자 ID")
+    private Long userId;
 }
