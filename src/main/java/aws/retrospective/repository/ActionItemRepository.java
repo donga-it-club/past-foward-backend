@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ActionItemRepository extends JpaRepository<ActionItem, Long> {
 
-    void deleteBySectionId(Long sectionId);
+    Optional<ActionItem> findBySectionId(Long sectionId);
 }

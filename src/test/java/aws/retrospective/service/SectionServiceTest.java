@@ -33,6 +33,7 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
+import aws.retrospective.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -62,6 +63,8 @@ class SectionServiceTest {
     TeamRepository teamRepository;
     @Mock
     ActionItemRepository actionItemRepository;
+    @Mock
+    UserRepository userRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -353,8 +356,11 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(request, "teamId", teamId);
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "sectionId", sectionId);
+        ReflectionTestUtils.setField(request, "userId", 1L);
 
-        sectionService.assignUserToActionItem(user, request);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        sectionService.assignUserToActionItem(request);
 
         //then
         ArgumentCaptor<ActionItem> actionItemArgumentCaptor = ArgumentCaptor.forClass(
@@ -403,7 +409,7 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(request, "sectionId", sectionId);
 
         assertThrows(IllegalArgumentException.class,
-            () -> sectionService.assignUserToActionItem(user, request));
+            () -> sectionService.assignUserToActionItem(request));
     }
 
     private static Likes createLikes(Section section, User user) {

@@ -23,6 +23,7 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
+import aws.retrospective.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -44,6 +45,7 @@ public class SectionService {
     private final LikesRepository likesRepository;
     private final TeamRepository teamRepository;
     private final ActionItemRepository actionItemRepository;
+    private final UserRepository userRepository;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -134,7 +136,7 @@ public class SectionService {
 
     // Action Items 사용자 지정
     @Transactional
-    public void assignUserToActionItem(User user, AssignUserRequestDto request) {
+    public void assignUserToActionItem(AssignUserRequestDto request) {
         Team team = getTeam(request.getTeamId());
         Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
         Section section = getSection(request.getSectionId());
@@ -143,7 +145,14 @@ public class SectionService {
             throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
         }
 
-        actionItemRepository.save(createActionItem(user, team, section, retrospective));
+        ActionItem actionItem = actionItemRepository.findBySectionId(section.getId()).orElse(null);
+        User assignUser = getAssignUser(request);
+
+        if (actionItem == null) {
+            actionItemRepository.save(createActionItem(assignUser, team, section, retrospective));
+        } else {
+            actionItem.assignUser(assignUser);
+        }
     }
 
     // 회고카드 삭제
@@ -155,8 +164,6 @@ public class SectionService {
         if (!findSection.isSameUser(user)) {
             throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
         }
-
-        actionItemRepository.deleteBySectionId(findSection.getId());
 
         sectionRepository.delete(findSection);
     }
@@ -207,5 +214,10 @@ public class SectionService {
         Retrospective retrospective) {
         return ActionItem.builder().user(findUser).team(findTeam).section(section)
             .retrospective(retrospective).build();
+    }
+
+    private User getAssignUser(AssignUserRequestDto request) {
+        return userRepository.findById(request.getUserId()).orElseThrow(
+            () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
     }
 }

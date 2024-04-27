@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/sections")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
-@Tag(name = "Section", description = "Section API<br>" + "200 OK : 요청을 정상적으로 처리<br>"
+@Tag(name = "회고 카드", description = "회고 카드 API<br>" + "200 OK : 요청을 정상적으로 처리<br>"
     + "201 Created : 요청을 정상적으로 처리하여 새로운 엔티티를 생성<br>"
     + "204 NoCont : 요청을 정상적으로 처리하였으나, 반환 할 데이터가 없음<br>"
     + "400 Error : Id로 엔티티를 조회 할 수 없을 때 발생하는 에러<br>")
@@ -104,7 +104,7 @@ public class SectionController {
     @PutMapping("/action-items")
     public CommonApiResponse<Void> assignUser(@CurrentUser User user,
         @RequestBody @Valid AssignUserRequestDto request) {
-        sectionService.assignUserToActionItem(user, request);
+        sectionService.assignUserToActionItem(request);
         return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
     }
 
