@@ -15,6 +15,8 @@ TODO
 - Java
 - Spring boot(3.2.3)
 - JPA
+- MySQL
+- Docker (local DB)
 
 # 인프라
 
@@ -25,16 +27,20 @@ TODO
 - S3
 - Cognito
 - Cloudwatch
+- Secrets Manager
 
 ## CI/CD
 
+Github actions 사용
+
 ### CI
 
-- PR생성된 브랜치 커밋 시 build test
+- [.github\workflows\ci.yml](https://github.com/donga-it-club/past-foward-backend/blob/main/.github/workflows/ci.yml)
 
 ### CD
 
 - main 브랜치 merge시 CodeDeploy 배포 스크립트 동작
+- [.github/workflows/cd.yml](https://github.com/donga-it-club/past-foward-backend/blob/main/.github/workflows/cd.yml)
 
 ## 컨벤션
 
