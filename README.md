@@ -1,8 +1,9 @@
 # past-foward-backend
 
-Past Forward Backend
 
 ![mainPage](https://github.com/donga-it-club/past-forward-frontend/assets/138123134/b19cc815-677f-42e8-ab35-f7acfa4bf988)
+
+<br>
 
 # 📖 팀 회고 작성 서비스 웹 Past-Forward
 
@@ -10,7 +11,7 @@ Past Forward Backend
 
 <br>
 
-## 프로젝트 소개
+## 📝 프로젝트 소개
 
 - Past-Forward는 팀원들과 회고 작성을 할 수 있는 웹페이지입니다.
 - 회고 템플릿(총 두가지)에 따라 다른 주제로 회고 카드를 네가지 섹션으로 나누어 작성이 가능합니다.
@@ -19,7 +20,23 @@ Past Forward Backend
 
 <br>
 
-## 팀 구성
+## 🌁 프로젝트 배경
+회고는 과거의 경험에서 배운 점을 되새기고, 앞으로의 행동을 개선하는 데 중요한 역할을 합니다. 이 과정을 통해 지속적으로 성장할 수 있습니다.
+기존의 웹 애플리케이션들은 프로젝트 관리, 협업 툴, 또는 일반적인 노트 작성 기능을 중심으로 설계되어 있습니다. 이들은 회고 활동에 특화되더 있지 않아, 사용자들이 팀 프로젝트나 개인 경험에 대한 체계적으로 회고하기 어렵게 만듭니다.
+
+따라서 이를 통합적으로 관리할 수 있는 플랫폼의 중요성이 대두되었습니다.
+Past Forward 애플리케이션은 팀원 간의 효과적인 소통을 촉진하고, 프로젝트 관리를 간소화하여 전체적인 작업 효율을 향상시킬 수 있습니다.
+
+### 기존의 회고 애플리케이션
+|서비스명|플랫폼 유형|특징|단점|
+|---|---|---|---|
+|Team Retro|WEB|회고 과정을 단계별로 가이드를 해준다.|한글을 지원하지 않으며, 유료 서비스이다.|
+|Neatro|WEB|새로운 회의나 작업을 시작할 경우, 이전 활동에서 완료되지 않은 작업이 있다면 자동으로 알려준다.|팀별로 월 비용을 지불해야 한다.|
+|Retros.work|WEB|팀원들이 감정과 에너지를 표현할 수 있어, 감정 변화 추이를 확인할 수 있다.|월 비용을 지불해야 한다.|
+
+<br>
+
+## 🙋‍♂️ 팀 구성
 
 <div align="center">
 
@@ -29,7 +46,7 @@ Past Forward Backend
 
 </div>
 
-## 1. 개발 환경
+## 🛠️ 개발 환경
 
 - Java 17
 - Spring boot(3.2.3)
@@ -37,7 +54,7 @@ Past Forward Backend
 - MySQL
 - Docker (local DB)
 
-## 2. 인프라
+## 🚀 인프라
 
 - EC2
   - ASG
@@ -48,14 +65,14 @@ Past Forward Backend
 - Cloudwatch
 - Secrets Manager
 
-## 3. 협업 문서
+## 🧑🏻‍💻 협업 문서
 
 - 디자인 : [Figma](https://www.figma.com/file/zJaBNvTvLlG0d9h5TILICj/Past-Forward-Web-Site?type=design&node-id=1157%3A6652&mode=design&t=eI1Pvgp8EpiHQgEA-1)
 - Ground Rule
   - [👩🏻‍💻 커밋 컨벤션](https://seed-spike-d61.notion.site/350f6f3f1edc4300922cf71f6b626756?pvs=25)
   - [이슈/PR 템플릿](https://www.notion.so/ISSUE-PR-996b39eb2c0244c498886f0946692156?pvs=4)
 
-## 4. 역할 분담
+## 💻 역할 분담
 
 ### 유윤지
 
@@ -79,6 +96,12 @@ Past Forward Backend
     - EC2 + CodeDeploy
 
 ### 이희망
+- **엔티티 설계**
+- **회고 카드(Section)**
+  - CRUD
+  - 좋아요 및 취소
+- **Contact**
+  - 문의 내역을 관리자 메일로 전송
 
 ### 백민정
 
@@ -89,7 +112,7 @@ Past Forward Backend
 - **설문조사(Survey)**
   - 저장
 
-## 4. 개발 기간
+## 🗓️ 개발 기간
 
 ### 개발 기간
 
