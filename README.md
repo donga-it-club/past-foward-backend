@@ -29,16 +29,17 @@ Past Forward Backend
 </div>
 
 ## 1. 개발 환경
-- Java
+- Java 17
 - Spring boot(3.2.3)
 - JPA
 - MySQL
 - Docker (local DB)
 
-## 2. 채택한 개발 기술
+## 2. 협업 문서
 - 디자인 : [Figma](https://www.figma.com/file/zJaBNvTvLlG0d9h5TILICj/Past-Forward-Web-Site?type=design&node-id=1157%3A6652&mode=design&t=eI1Pvgp8EpiHQgEA-1)
-- [👩🏻‍💻 커밋 컨벤션](https://seed-spike-d61.notion.site/350f6f3f1edc4300922cf71f6b626756?pvs=25)
-- [🗂️ Directory 구조](https://seed-spike-d61.notion.site/Directory-085647caa8984dd08388dc901ab55d9f)
+- Ground Rule
+  - [👩🏻‍💻 커밋 컨벤션](https://seed-spike-d61.notion.site/350f6f3f1edc4300922cf71f6b626756?pvs=25)
+  - [이슈/PR 템플릿](https://www.notion.so/ISSUE-PR-996b39eb2c0244c498886f0946692156?pvs=4)
 
 ## 3. 역할 분담
 ### 유윤지
