@@ -22,12 +22,14 @@
 
 ## 🌁 프로젝트 배경
 회고는 과거의 경험에서 배운 점을 되새기고, 앞으로의 행동을 개선하는 데 중요한 역할을 합니다. 이 과정을 통해 지속적으로 성장할 수 있습니다.
-기존의 웹 애플리케이션들은 프로젝트 관리, 협업 툴, 또는 일반적인 노트 작성 기능을 중심으로 설계되어 있습니다. 이들은 회고 활동에 특화되더 있지 않아, 사용자들이 팀 프로젝트나 개인 경험에 대한 체계적으로 회고하기 어렵게 만듭니다.
 
-따라서 이를 통합적으로 관리할 수 있는 플랫폼의 중요성이 대두되었습니다.
+기존의 웹 애플리케이션은 프로젝트 관리, 협업 도구, 또는 노트 작성에 초점을 맞추고 있습니다. 이로 인해 회고 활동에 특화되지 않아, 사용자들이 팀 프로젝트나 개인 경험을 체계적으로 회고하는 데 어려움을 겪고 있습니다. 
+또한, 기존의 회고 애플리케이션 중 상당수는 유료 시스템이어서 접근성이 좋지 않습니다.
+
+따라서 이를 통합적으로 관리할 수 있는 플랫폼의 중요성이 커졌습니다. 
 Past Forward 애플리케이션은 팀원 간의 효과적인 소통을 촉진하고, 프로젝트 관리를 간소화하여 전체적인 작업 효율을 향상시킬 수 있습니다.
 
-### 기존의 회고 애플리케이션
+#### 기존의 회고 애플리케이션
 |서비스명|플랫폼 유형|특징|단점|
 |---|---|---|---|
 |Team Retro|WEB|회고 과정을 단계별로 가이드를 해준다.|한글을 지원하지 않으며, 유료 서비스이다.|
@@ -45,6 +47,7 @@ Past Forward 애플리케이션은 팀원 간의 효과적인 소통을 촉진�
 | [<img src="https://avatars.githubusercontent.com/u/105447233?v=4" height=150 width=150> <br/> @llcodingll](https://github.com/llcodingll) | [<img src="https://avatars.githubusercontent.com/u/90817465?v=4" height=150 width=150> <br/> @Minseok-2001](https://github.com/Minseok-2001) | [<img src="https://avatars.githubusercontent.com/u/122812652?v=4" height=150 width=150> <br/> @w1shope](https://github.com/w1shope) | [<img src="https://avatars.githubusercontent.com/u/110668121?v=4" height=150 width=150> <br/> @yangheeb](https://github.com/yangheeb) | [<img src="https://avatars.githubusercontent.com/u/156206916?v=4" height=150 width=150> <br/> @zzero-o](https://github.com/zzero-o) |
 
 </div>
+<br>
 
 ## 🛠️ 개발 환경
 
@@ -53,6 +56,8 @@ Past Forward 애플리케이션은 팀원 간의 효과적인 소통을 촉진�
 - JPA
 - MySQL
 - Docker (local DB)
+
+<br>
 
 ## 🚀 인프라
 
@@ -65,12 +70,16 @@ Past Forward 애플리케이션은 팀원 간의 효과적인 소통을 촉진�
 - Cloudwatch
 - Secrets Manager
 
+<br>
+
 ## 🧑🏻‍💻 협업 문서
 
 - 디자인 : [Figma](https://www.figma.com/file/zJaBNvTvLlG0d9h5TILICj/Past-Forward-Web-Site?type=design&node-id=1157%3A6652&mode=design&t=eI1Pvgp8EpiHQgEA-1)
 - Ground Rule
   - [👩🏻‍💻 커밋 컨벤션](https://seed-spike-d61.notion.site/350f6f3f1edc4300922cf71f6b626756?pvs=25)
   - [이슈/PR 템플릿](https://www.notion.so/ISSUE-PR-996b39eb2c0244c498886f0946692156?pvs=4)
+
+<br>
 
 ## 💻 역할 분담
 
@@ -111,6 +120,8 @@ Past Forward 애플리케이션은 팀원 간의 효과적인 소통을 촉진�
 ### 변지영
 - **설문조사(Survey)**
   - 저장
+
+<br>
 
 ## 🗓️ 개발 기간
 
