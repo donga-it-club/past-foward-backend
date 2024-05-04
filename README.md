@@ -44,7 +44,7 @@ Past Forward Backend
 ## 3. 역할 분담
 ### 유윤지
 - **댓글(Comment)**
-  - 생성, 조회, 수정, 삭제(CRUD)
+  - CRUD
 - **설문조사(Survey)**
   - 조회
 
