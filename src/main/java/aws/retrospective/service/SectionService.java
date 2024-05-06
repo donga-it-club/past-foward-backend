@@ -1,3 +1,4 @@
+
 package aws.retrospective.service;
 
 import aws.retrospective.dto.AssignUserRequestDto;
@@ -101,20 +102,16 @@ public class SectionService {
         // 회고 카드 조회
         Section findSection = getSection(sectionId);
         // 사용자가 해당 회고 카드에 좋아요를 눌렀는지 확인한다.
-        Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, findSection);
+        Optional<Likes> findLikes = checkUserLikedSection(user, findSection);
 
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
         if (findLikes.isEmpty()) {
-            Likes createLikes = Likes.builder().section(findSection).user(user).build();
-            likesRepository.save(createLikes);
-            findSection.increaseSectionLikes();
+            addLike(findSection, user);
         } else {
-            Likes likes = findLikes.get();
-            likesRepository.delete(likes);
-            findSection.cancelSectionLikes();
+            removeLike(findLikes.get(), findSection);
         }
 
-        return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+        return revertDto(findSection);
     }
 
     // Action Items 사용자 지정
@@ -249,5 +246,26 @@ public class SectionService {
     private static EditSectionResponseDto revertDto(Long sectionId,
         EditSectionRequestDto request) {
         return new EditSectionResponseDto(sectionId, request.getSectionContent());
+    }
+
+    private Optional<Likes> checkUserLikedSection(User user, Section findSection) {
+        Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, findSection);
+        return findLikes;
+    }
+
+    private void addLike(Section section, User user) {
+        Likes createLikes = Likes.builder().section(section).user(user).build();
+        likesRepository.save(createLikes);
+        section.increaseSectionLikes();
+    }
+
+    private void removeLike(Likes likes, Section section) {
+        likesRepository.delete(likes);
+        section.cancelSectionLikes();
+    }
+
+    private static IncreaseSectionLikesResponseDto revertDto(
+        Section findSection) {
+        return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
     }
 }
