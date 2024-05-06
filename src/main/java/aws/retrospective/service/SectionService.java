@@ -70,17 +70,14 @@ public class SectionService {
         TemplateSection findTemplateSection = getTemplateSection(request.getTemplateSectionId());
 
         // 회고 템플릿 정보가 일치하는지 확인한다.
-        if (!findRetrospective.isSameTemplate(findTemplateSection)) {
-            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
-        }
+        validateTemplateMatch(findRetrospective, findTemplateSection);
 
         // 회고 카드 등록
         Section createSection = createSection(request.getSectionContent(), findTemplateSection,
             findRetrospective, user);
         sectionRepository.save(createSection);
 
-        return new CreateSectionResponseDto(createSection.getId(), createSection.getUser().getId(),
-            request.getRetrospectiveId(), request.getSectionContent());
+        return revertDto(request, createSection);
     }
 
     // 회고 카드 수정
@@ -230,5 +227,18 @@ public class SectionService {
                 throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
             }
         }
+    }
+
+    private static void validateTemplateMatch(Retrospective findRetrospective,
+        TemplateSection findTemplateSection) {
+        if (findRetrospective.isNotSameTemplate(findTemplateSection)) {
+            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
+        }
+    }
+
+    private static CreateSectionResponseDto revertDto(CreateSectionDto request,
+        Section createSection) {
+        return new CreateSectionResponseDto(createSection.getId(), createSection.getUser().getId(),
+            request.getRetrospectiveId(), request.getSectionContent());
     }
 }
