@@ -87,14 +87,12 @@ public class SectionService {
         Section findSection = getSection(sectionId);
 
         // 회고 카드 수정은 작성자만 가능하다.
-        if (!findSection.isSameUser(user)) {
-            throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
-        }
+        validateSectionAuthor(user, findSection);
 
         // 회고 카드 수정
         findSection.updateSection(request.getSectionContent());
 
-        return new EditSectionResponseDto(sectionId, request.getSectionContent());
+        return revertDto(sectionId, request);
     }
 
     // 회고 카드 좋아요 API
@@ -146,7 +144,7 @@ public class SectionService {
         Section findSection = getSection(sectionId);
 
         // 작성자만 회고 카드를 삭제할 수 있다.
-        if (!findSection.isSameUser(user)) {
+        if (findSection.isNotSameUser(user)) {
             throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
         }
 
@@ -240,5 +238,16 @@ public class SectionService {
         Section createSection) {
         return new CreateSectionResponseDto(createSection.getId(), createSection.getUser().getId(),
             request.getRetrospectiveId(), request.getSectionContent());
+    }
+
+    private static void validateSectionAuthor(User user, Section findSection) {
+        if (findSection.isNotSameUser(user)) {
+            throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
+        }
+    }
+
+    private static EditSectionResponseDto revertDto(Long sectionId,
+        EditSectionRequestDto request) {
+        return new EditSectionResponseDto(sectionId, request.getSectionContent());
     }
 }
