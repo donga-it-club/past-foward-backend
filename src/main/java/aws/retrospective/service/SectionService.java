@@ -140,9 +140,7 @@ public class SectionService {
         Section findSection = getSection(sectionId);
 
         // 작성자만 회고 카드를 삭제할 수 있다.
-        if (findSection.isNotSameUser(user)) {
-            throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
-        }
+        verifySectionAuthor(user, findSection);
 
         sectionRepository.delete(findSection);
     }
@@ -281,5 +279,11 @@ public class SectionService {
     private void createActionItemsAndSave(User assignUser, Team team, Section section,
         Retrospective retrospective) {
         actionItemRepository.save(createActionItem(assignUser, team, section, retrospective));
+    }
+
+    private static void verifySectionAuthor(User user, Section findSection) {
+        if (findSection.isNotSameUser(user)) {
+            throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
+        }
     }
 }
