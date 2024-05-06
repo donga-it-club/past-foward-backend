@@ -33,6 +33,8 @@ public class GetSectionsResponseDto {
 
     private List<GetCommentDto> comments = new ArrayList<>();
 
+    private GetActionItemsResponseDto actionItems;
+
     @QueryProjection
     public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
         String sectionName, LocalDateTime createdDate) {
@@ -45,7 +47,7 @@ public class GetSectionsResponseDto {
     }
 
     public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
-        String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments, String thumbnail) {
+        String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments, String thumbnail, GetActionItemsResponseDto actionItems) {
         this.sectionId = sectionId;
         this.username = username;
         this.content = content;
@@ -54,5 +56,6 @@ public class GetSectionsResponseDto {
         this.createdDate = createdDate;
         this.comments = comments;
         this.thumbnail = thumbnail;
+        this.actionItems = actionItems;
     }
 }
