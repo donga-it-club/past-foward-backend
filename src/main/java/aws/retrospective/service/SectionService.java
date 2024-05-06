@@ -121,15 +121,14 @@ public class SectionService {
         Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
         Section section = getSection(request.getSectionId());
 
-        if (!section.isActionItemsSection()) {
-            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
-        }
+        // Action Items에만 담당자를 지정할 수 있다.
+        validateSectionDeletionPermission(section);
 
-        ActionItem actionItem = actionItemRepository.findBySectionId(section.getId()).orElse(null);
+        ActionItem actionItem = getActionItems(section);
         User assignUser = getAssignUser(request);
 
         if (actionItem == null) {
-            actionItemRepository.save(createActionItem(assignUser, team, section, retrospective));
+            createActionItemsAndSave(assignUser, team, section, retrospective);
         } else {
             actionItem.assignUser(assignUser);
         }
@@ -267,5 +266,20 @@ public class SectionService {
     private static IncreaseSectionLikesResponseDto revertDto(
         Section findSection) {
         return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+    }
+
+    private static void validateSectionDeletionPermission(Section section) {
+        if (section.isNotActionItemsSection()) {
+            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
+        }
+    }
+
+    private ActionItem getActionItems(Section section) {
+        return actionItemRepository.findBySectionId(section.getId()).orElse(null);
+    }
+
+    private void createActionItemsAndSave(User assignUser, Team team, Section section,
+        Retrospective retrospective) {
+        actionItemRepository.save(createActionItem(assignUser, team, section, retrospective));
     }
 }
