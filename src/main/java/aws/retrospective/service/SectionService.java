@@ -5,6 +5,7 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetActionItemsResponseDto;
 import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
@@ -201,7 +202,12 @@ public class SectionService {
                 new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
                     section.getContent(), section.getLikeCnt(),
                     section.getTemplateSection().getSectionName(), section.getCreatedDate(),
-                    collect, section.getUser().getThumbnail()));
+                    collect, section.getUser().getThumbnail(),
+                    section.getActionItem() != null ? new GetActionItemsResponseDto(
+                        section.getActionItem().getUser().getId(),
+                        section.getActionItem().getUser().getUsername(),
+                        section.getActionItem().getUser().getThumbnail()
+                    ) : null));
         }
     }
 
