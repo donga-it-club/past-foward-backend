@@ -25,7 +25,6 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -54,27 +53,15 @@ public class SectionService {
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
 
         // 개인 회고 조회 시에 teamId 필요 X
-        if (findRetrospective.getTeam() == null) {
-            if (request.getTeamId() != null) {
-                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
-            }
-        }
-
+        validatePersonalRetrospective(request, findRetrospective);
         // 다른 팀의 회고 보드를 조회 할 수 없다
-        if (request.getTeamId() != null) {
-            Team findTeam = getTeam(request.getTeamId());
-            if (!findRetrospective.isSameTeam(findTeam)) {
-                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
-            }
-        }
+        validateTeamRetrospectiveAccess(request, findRetrospective);
 
-        List<GetSectionsResponseDto> response = new ArrayList<>();
         List<Section> sections = sectionRepository.getSectionsWithComments(
             request.getRetrospectiveId());
-        revertDto(sections, response);
-
-        return response;
+        return revertDto(sections);
     }
+
 
     // 회고 카드 등록
     @Transactional
@@ -192,23 +179,23 @@ public class SectionService {
             .build();
     }
 
-    private void revertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
-        for (Section section : sections) {
-            List<GetCommentDto> collect = section.getComments().stream()
-                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername(),
-                    c.getUser().getThumbnail()))
-                .collect(Collectors.toList());
-            response.add(
-                new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
-                    section.getContent(), section.getLikeCnt(),
-                    section.getTemplateSection().getSectionName(), section.getCreatedDate(),
-                    collect, section.getUser().getThumbnail(),
-                    section.getActionItem() != null ? new GetActionItemsResponseDto(
-                        section.getActionItem().getUser().getId(),
-                        section.getActionItem().getUser().getUsername(),
-                        section.getActionItem().getUser().getThumbnail()
-                    ) : null));
-        }
+    private List<GetSectionsResponseDto> revertDto(List<Section> sections) {
+        return sections.stream()
+            .map(section -> {
+                List<GetCommentDto> comments = section.getComments().stream()
+                    .map(comment -> new GetCommentDto(comment.getId(), comment.getContent(),
+                        comment.getUser().getUsername(), comment.getUser().getThumbnail()))
+                    .collect(Collectors.toList());
+
+                return new GetSectionsResponseDto(section.getId(),
+                    section.getUser().getUsername(),
+                    section.getContent(), section.getLikeCnt(), section.getTemplateSection()
+                    .getSectionName(), section.getCreatedDate(), comments,
+                    section.getUser().getThumbnail(),
+                    new GetActionItemsResponseDto(
+                        section.getUser().getId(),
+                        section.getUser().getUsername(), section.getUser().getThumbnail()));
+            }).toList();
     }
 
     private Team getTeam(Long teamId) {
@@ -225,5 +212,23 @@ public class SectionService {
     private User getAssignUser(AssignUserRequestDto request) {
         return userRepository.findById(request.getUserId()).orElseThrow(
             () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
+    }
+
+
+    private void validateTeamRetrospectiveAccess(GetSectionsRequestDto request, Retrospective findRetrospective) {
+        if (request.getTeamId() != null) {
+            Team findTeam = getTeam(request.getTeamId());
+            if (!findRetrospective.isSameTeam(findTeam)) {
+                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
+            }
+        }
+    }
+
+    private static void validatePersonalRetrospective(GetSectionsRequestDto request, Retrospective findRetrospective) {
+        if (findRetrospective.getTeam() == null) {
+            if (request.getTeamId() != null) {
+                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
+            }
+        }
     }
 }
