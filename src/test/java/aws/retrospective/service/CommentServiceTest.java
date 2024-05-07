@@ -141,7 +141,7 @@ class CommentServiceTest {
     }
 
     private Section createSection() {
-        return Section.builder().content("test").build();
+        return Section.createSection("test", null, null, null);
     }
 
     private static User createUser() {

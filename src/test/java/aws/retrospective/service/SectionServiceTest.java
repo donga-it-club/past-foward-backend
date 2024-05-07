@@ -348,8 +348,7 @@ class SectionServiceTest {
             .sequence(4).build();
 
         Long sectionId = 1L;
-        Section section = Section.builder().retrospective(retrospective)
-            .templateSection(actionItemsTemplate).build();
+        Section section = Section.createSection(null, actionItemsTemplate, retrospective, null);
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
@@ -399,8 +398,7 @@ class SectionServiceTest {
             .sequence(4).build();
 
         Long sectionId = 1L;
-        Section section = Section.builder().retrospective(retrospective)
-            .templateSection(actionItemsTemplate).build();
+        Section section = Section.createSection(null, actionItemsTemplate, retrospective, null);
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
@@ -420,8 +418,7 @@ class SectionServiceTest {
 
     private static Section createSection(User user, TemplateSection templateSection,
         Retrospective retrospective) {
-        return Section.builder().user(user).content("test").templateSection(templateSection)
-            .likeCnt(0).retrospective(retrospective).build();
+        return Section.createSection("test", templateSection, retrospective, user);
     }
 
     private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
@@ -430,7 +427,7 @@ class SectionServiceTest {
     }
 
     private static Section createSection(User loginedUser) {
-        return Section.builder().user(loginedUser).content("test").likeCnt(0).build();
+        return Section.createSection("test", null, null, loginedUser);
     }
 
     private static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,

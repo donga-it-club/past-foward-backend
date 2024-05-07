@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,12 +39,16 @@ public class ActionItem extends BaseEntity {
     @JoinColumn(name = "retrospective_id")
     private Retrospective retrospective;
 
-    @Builder
-    public ActionItem(User user, Team team, Section section, Retrospective retrospective) {
+    private ActionItem(User user, Team team, Section section, Retrospective retrospective) {
         this.user = user;
         this.team = team;
         this.section = section;
         this.retrospective = retrospective;
+    }
+
+    public static ActionItem createActionItem(User user, Team team, Section section,
+        Retrospective retrospective) {
+        return new ActionItem(user, team, section, retrospective);
     }
 
     public void assignUser(User user) {

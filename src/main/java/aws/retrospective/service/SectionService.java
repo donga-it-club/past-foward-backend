@@ -58,7 +58,7 @@ public class SectionService {
 
         List<Section> sections = sectionRepository.getSectionsWithComments(
             request.getRetrospectiveId());
-        return revertDto(sections);
+        return convertDto(sections);
     }
 
 
@@ -76,7 +76,7 @@ public class SectionService {
             findRetrospective, user);
         sectionRepository.save(createSection);
 
-        return revertDto(request, createSection);
+        return convertDto(request, createSection);
     }
 
     // 회고 카드 수정
@@ -91,7 +91,7 @@ public class SectionService {
         // 회고 카드 수정
         findSection.updateSection(request.getSectionContent());
 
-        return revertDto(sectionId, request);
+        return convertDto(sectionId, request);
     }
 
     // 회고 카드 좋아요 API
@@ -109,7 +109,7 @@ public class SectionService {
             removeLike(findLikes.get(), findSection);
         }
 
-        return revertDto(findSection);
+        return convertDto(findSection);
     }
 
     // Action Items 사용자 지정
@@ -161,12 +161,11 @@ public class SectionService {
     // 회고 카드 등록
     private Section createSection(String sectionContent, TemplateSection findTemplateSection,
         Retrospective findRetrospective, User findUser) {
-        return Section.builder().templateSection(findTemplateSection)
-            .retrospective(findRetrospective).user(findUser).likeCnt(0).content(sectionContent)
-            .build();
+        return Section.createSection(sectionContent, findTemplateSection, findRetrospective,
+            findUser);
     }
 
-    private List<GetSectionsResponseDto> revertDto(List<Section> sections) {
+    private List<GetSectionsResponseDto> convertDto(List<Section> sections) {
         return sections.stream()
             .map(section -> {
                 List<GetCommentDto> comments = section.getComments().stream()
@@ -183,8 +182,7 @@ public class SectionService {
 
     private static ActionItem createActionItem(User findUser, Team findTeam, Section section,
         Retrospective retrospective) {
-        return ActionItem.builder().user(findUser).team(findTeam).section(section)
-            .retrospective(retrospective).build();
+        return ActionItem.createActionItem(findUser, findTeam, section, retrospective);
     }
 
     private User getAssignUser(AssignUserRequestDto request) {
@@ -217,10 +215,10 @@ public class SectionService {
         }
     }
 
-    private static CreateSectionResponseDto revertDto(CreateSectionDto request,
+    private static CreateSectionResponseDto convertDto(CreateSectionDto request,
         Section createSection) {
-        return new CreateSectionResponseDto(createSection.getId(), createSection.getUser().getId(),
-            request.getRetrospectiveId(), request.getSectionContent());
+        return CreateSectionResponseDto.of(createSection.getUser().getId(), request.getRetrospectiveId(),
+            createSection);
     }
 
     private static void validateSectionAuthor(User user, Section findSection) {
@@ -229,9 +227,9 @@ public class SectionService {
         }
     }
 
-    private static EditSectionResponseDto revertDto(Long sectionId,
+    private static EditSectionResponseDto convertDto(Long sectionId,
         EditSectionRequestDto request) {
-        return new EditSectionResponseDto(sectionId, request.getSectionContent());
+        return EditSectionResponseDto.of(sectionId, request.getSectionContent());
     }
 
     private Optional<Likes> checkUserLikedSection(User user, Section findSection) {
@@ -250,9 +248,9 @@ public class SectionService {
         section.cancelSectionLikes();
     }
 
-    private static IncreaseSectionLikesResponseDto revertDto(
+    private static IncreaseSectionLikesResponseDto convertDto(
         Section findSection) {
-        return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+        return IncreaseSectionLikesResponseDto.of(findSection.getId(), findSection.getLikeCnt());
     }
 
     private static void validateSectionDeletionPermission(Section section) {

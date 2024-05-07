@@ -1,6 +1,6 @@
 package aws.retrospective.entity;
 
-import static aws.retrospective.entity.SectionTemplateStatus.*;
+import static aws.retrospective.entity.SectionTemplateStatus.ACTION_ITEMS;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,7 +16,6 @@ import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -55,14 +54,18 @@ public class Section extends BaseEntity {
     @JoinColumn(name = "action_item")
     private ActionItem actionItem;
 
-    @Builder
-    public Section(String content, long likeCnt, Retrospective retrospective, User user,
+    private Section(String content, long likeCnt, Retrospective retrospective, User user,
         TemplateSection templateSection) {
         this.content = content;
         this.likeCnt = likeCnt;
         this.retrospective = retrospective;
         this.user = user;
         this.templateSection = templateSection;
+    }
+
+    public static Section createSection(String content, TemplateSection templateSection,
+        Retrospective retrospective, User user) {
+        return new Section(content, 0, retrospective, user, templateSection);
     }
 
     // 섹션 내용 update
@@ -74,6 +77,7 @@ public class Section extends BaseEntity {
     public void increaseSectionLikes() {
         this.likeCnt += 1;
     }
+
     // 좋아요 취소
     public void cancelSectionLikes() {
         this.likeCnt -= 1;

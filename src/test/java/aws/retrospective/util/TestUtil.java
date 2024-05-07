@@ -16,11 +16,7 @@ public class TestUtil {
     }
 
     public static Section createSection(User loginedUser) {
-        return Section.builder()
-            .user(loginedUser)
-            .content("test")
-            .likeCnt(0)
-            .build();
+        return Section.createSection("test", null, null, loginedUser);
     }
 
     public static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,
