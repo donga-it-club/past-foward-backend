@@ -159,10 +159,10 @@ public class SectionService {
     }
 
     // 회고 카드 등록
-    private Section createSection(String sectionContent, TemplateSection findTemplateSection,
-        Retrospective findRetrospective, User findUser) {
-        return Section.createSection(sectionContent, findTemplateSection, findRetrospective,
-            findUser);
+    private Section createSection(String sectionContent, TemplateSection templateSection,
+        Retrospective retrospective, User user) {
+        return Section.createSection(sectionContent, templateSection, retrospective,
+            user);
     }
 
     private List<GetSectionsResponseDto> convertDto(List<Section> sections) {
@@ -180,9 +180,9 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
     }
 
-    private static ActionItem createActionItem(User findUser, Team findTeam, Section section,
+    private static ActionItem createActionItem(User user, Team team, Section section,
         Retrospective retrospective) {
-        return ActionItem.createActionItem(findUser, findTeam, section, retrospective);
+        return ActionItem.createActionItem(user, team, section, retrospective);
     }
 
     private User getAssignUser(AssignUserRequestDto request) {
@@ -191,38 +191,38 @@ public class SectionService {
     }
 
 
-    private void validateTeamRetrospectiveAccess(GetSectionsRequestDto request, Retrospective findRetrospective) {
+    private void validateTeamRetrospectiveAccess(GetSectionsRequestDto request, Retrospective retrospective) {
         if (request.getTeamId() != null) {
             Team findTeam = getTeam(request.getTeamId());
-            if (!findRetrospective.isSameTeam(findTeam)) {
+            if (retrospective.isNotSameTeam(findTeam)) {
                 throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
             }
         }
     }
 
-    private static void validatePersonalRetrospective(GetSectionsRequestDto request, Retrospective findRetrospective) {
-        if (findRetrospective.getTeam() == null) {
+    private static void validatePersonalRetrospective(GetSectionsRequestDto request, Retrospective retrospective) {
+        if (retrospective.getTeam() == null) {
             if (request.getTeamId() != null) {
                 throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
             }
         }
     }
 
-    private static void validateTemplateMatch(Retrospective findRetrospective,
-        TemplateSection findTemplateSection) {
-        if (findRetrospective.isNotSameTemplate(findTemplateSection.getTemplate())) {
+    private static void validateTemplateMatch(Retrospective retrospective,
+        TemplateSection templateSection) {
+        if (retrospective.isNotSameTemplate(templateSection.getTemplate())) {
             throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
         }
     }
 
     private static CreateSectionResponseDto convertDto(CreateSectionDto request,
-        Section createSection) {
-        return CreateSectionResponseDto.of(createSection.getUser().getId(), request.getRetrospectiveId(),
-            createSection);
+        Section section) {
+        return CreateSectionResponseDto.of(section.getUser().getId(), request.getRetrospectiveId(),
+            section);
     }
 
-    private static void validateSectionAuthor(User user, Section findSection) {
-        if (findSection.isNotSameUser(user)) {
+    private static void validateSectionAuthor(User user, Section section) {
+        if (section.isNotSameUser(user)) {
             throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
         }
     }
@@ -232,8 +232,8 @@ public class SectionService {
         return EditSectionResponseDto.of(sectionId, request.getSectionContent());
     }
 
-    private Optional<Likes> checkUserLikedSection(User user, Section findSection) {
-        Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, findSection);
+    private Optional<Likes> checkUserLikedSection(User user, Section section) {
+        Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, section);
         return findLikes;
     }
 
@@ -249,8 +249,8 @@ public class SectionService {
     }
 
     private static IncreaseSectionLikesResponseDto convertDto(
-        Section findSection) {
-        return IncreaseSectionLikesResponseDto.of(findSection.getId(), findSection.getLikeCnt());
+        Section section) {
+        return IncreaseSectionLikesResponseDto.of(section.getId(), section.getLikeCnt());
     }
 
     private static void validateSectionDeletionPermission(Section section) {
@@ -268,8 +268,8 @@ public class SectionService {
         actionItemRepository.save(createActionItem(assignUser, team, section, retrospective));
     }
 
-    private static void verifySectionAuthor(User user, Section findSection) {
-        if (findSection.isNotSameUser(user)) {
+    private static void verifySectionAuthor(User user, Section section) {
+        if (section.isNotSameUser(user)) {
             throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
         }
     }

@@ -102,7 +102,7 @@ public class Retrospective extends BaseEntity {
         return !this.getTemplate().getName().equals(template.getName());
     }
 
-    public boolean isSameTeam(Team team) {
-        return this.team.getId().equals(team.getId());
+    public boolean isNotSameTeam(Team team) {
+        return !this.team.getId().equals(team.getId());
     }
 }
