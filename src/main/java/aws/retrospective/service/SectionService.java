@@ -194,7 +194,6 @@ public class SectionService {
         Retrospective retrospective) {
         if (request.getTeamId() == null) {
             return;
-//            throw new MissingRequestValueException("teamId 값이 존재하지 않습니다.");
         }
         Team findTeam = getTeam(request.getTeamId());
 
