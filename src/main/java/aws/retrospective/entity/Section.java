@@ -1,5 +1,7 @@
 package aws.retrospective.entity;
 
+import static aws.retrospective.entity.SectionStatus.*;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -82,6 +84,6 @@ public class Section extends BaseEntity {
     }
 
     public boolean isNotActionItemsSection() {
-        return !this.getTemplateSection().getSectionName().equals("Action Items");
+        return !this.getTemplateSection().getSectionName().equals(ACTION_ITEMS.getSectionName());
     }
 }
