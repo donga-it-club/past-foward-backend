@@ -88,6 +88,6 @@ public class Section extends BaseEntity {
     }
 
     public boolean isNotActionItemsSection() {
-        return !this.getTemplateSection().getTemplateStatus().equals(ACTION_ITEMS);
+        return !this.getTemplateSection().getSectionName().equals(ACTION_ITEMS);
     }
 }

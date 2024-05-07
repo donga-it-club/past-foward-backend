@@ -17,7 +17,12 @@ public class GetActionItemsResponseDto {
     }
 
     public static GetActionItemsResponseDto from(Section section) {
-        return new GetActionItemsResponseDto(section.getUser().getId(),
-            section.getUser().getUsername(), section.getUser().getThumbnail());
+        if (section.getActionItem() == null) {
+            return null;
+        }
+
+        return new GetActionItemsResponseDto(section.getActionItem().getUser().getId(),
+            section.getActionItem().getUser().getUsername(),
+            section.getActionItem().getUser().getThumbnail());
     }
 }

@@ -64,8 +64,8 @@ public class GetSectionsResponseDto {
 
     public static GetSectionsResponseDto of(Section section, List<GetCommentDto> comments) {
         return new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
-            section.getContent(), section.getLikeCnt(), section.getTemplateSection()
-            .getTemplateStatus(), section.getCreatedDate(), comments,
+            section.getContent(), section.getLikeCnt(), section.getTemplateSection().getSectionName()
+            , section.getCreatedDate(), comments,
             section.getUser().getThumbnail(), GetActionItemsResponseDto.from(section));
     }
 }

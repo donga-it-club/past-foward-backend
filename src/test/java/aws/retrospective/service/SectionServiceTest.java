@@ -275,7 +275,7 @@ class SectionServiceTest {
         //then
         assertThat(results.size()).isEqualTo(1);
         GetSectionsResponseDto result = results.get(0);
-        assertThat(result.getSectionName()).isEqualTo(createdTemplateSection.getTemplateStatus());
+        assertThat(result.getSectionName()).isEqualTo(createdTemplateSection.getSectionName());
         assertThat(result.getSectionId()).isEqualTo(createdSection.getId());
         assertThat(result.getCreatedDate()).isEqualTo(createdSection.getCreatedDate());
         assertThat(result.getContent()).isEqualTo(createdSection.getContent());

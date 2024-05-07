@@ -21,7 +21,7 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
         return queryFactory.
             select(
                 new QGetSectionsResponseDto(section.id, user.username, section.content,
-                    section.likeCnt, templateSection.templateStatus, section.createdDate))
+                    section.likeCnt, templateSection.sectionName, section.createdDate))
             .from(section)
             .join(section.retrospective, retrospective)
             .join(section.user, user)

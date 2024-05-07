@@ -190,21 +190,27 @@ public class SectionService {
             () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
     }
 
+    private void validateTeamRetrospectiveAccess(GetSectionsRequestDto request,
+        Retrospective retrospective) {
+        if (request.getTeamId() == null) {
+            return;
+//            throw new MissingRequestValueException("teamId 값이 존재하지 않습니다.");
+        }
+        Team findTeam = getTeam(request.getTeamId());
 
-    private void validateTeamRetrospectiveAccess(GetSectionsRequestDto request, Retrospective retrospective) {
-        if (request.getTeamId() != null) {
-            Team findTeam = getTeam(request.getTeamId());
-            if (retrospective.isNotSameTeam(findTeam)) {
-                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
-            }
+        if (retrospective.isNotSameTeam(findTeam)) {
+            throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
         }
     }
 
-    private static void validatePersonalRetrospective(GetSectionsRequestDto request, Retrospective retrospective) {
-        if (retrospective.getTeam() == null) {
-            if (request.getTeamId() != null) {
-                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
-            }
+    private static void validatePersonalRetrospective(GetSectionsRequestDto request,
+        Retrospective retrospective) {
+        if (retrospective.getTeam() != null) {
+            return;
+        }
+
+        if (request.getTeamId() != null) {
+            throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
         }
     }
 

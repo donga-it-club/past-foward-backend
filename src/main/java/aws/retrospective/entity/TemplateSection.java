@@ -2,6 +2,8 @@ package aws.retrospective.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,7 +31,8 @@ public class TemplateSection extends BaseEntity {
     private RetrospectiveTemplate template;
 
     @NotNull
-    private SectionTemplateStatus templateStatus; // 예: K, P, T
+    @Enumerated(EnumType.STRING)
+    private SectionTemplateStatus sectionName; // 예: K, P, T
 
     @NotNull
     private int sequence; // 섹션 순서
@@ -37,7 +40,7 @@ public class TemplateSection extends BaseEntity {
     @Builder
     public TemplateSection(RetrospectiveTemplate template, SectionTemplateStatus templateStatus, Integer sequence) {
         this.template = template;
-        this.templateStatus = templateStatus;
+        this.sectionName = templateStatus;
         this.sequence = sequence;
     }
 }
