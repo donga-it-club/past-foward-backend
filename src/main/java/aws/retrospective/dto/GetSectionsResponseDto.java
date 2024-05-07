@@ -24,8 +24,8 @@ public class GetSectionsResponseDto {
     @Schema(description = "회고 카드 좋아요 개수", example = "3")
     private long likeCnt;
 
-    @Schema(description = "섹션 유형", example = "Keep")
-    private SectionTemplateStatus sectionName;
+    @Schema(description = "섹션 유형", example = "Action_Items")
+    private String sectionName;
 
     @Schema(description = "회고 카드 등록일", example = "2021-07-01T00:00:00")
     private LocalDateTime createdDate;
@@ -44,7 +44,7 @@ public class GetSectionsResponseDto {
         this.username = username;
         this.content = content;
         this.likeCnt = likeCnt;
-        this.sectionName = templateStatus;
+        this.sectionName = templateStatus.getSectionName();
         this.createdDate = createdDate;
     }
 
@@ -55,7 +55,7 @@ public class GetSectionsResponseDto {
         this.username = username;
         this.content = content;
         this.likeCnt = likeCnt;
-        this.sectionName = templateStatus;
+        this.sectionName = templateStatus.getSectionName();
         this.createdDate = createdDate;
         this.comments = comments;
         this.thumbnail = thumbnail;
