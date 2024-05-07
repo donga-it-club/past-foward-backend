@@ -223,7 +223,7 @@ public class SectionService {
 
     private static void validateTemplateMatch(Retrospective findRetrospective,
         TemplateSection findTemplateSection) {
-        if (findRetrospective.isNotSameTemplate(findTemplateSection)) {
+        if (findRetrospective.isNotSameTemplate(findTemplateSection.getTemplate())) {
             throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
         }
     }
