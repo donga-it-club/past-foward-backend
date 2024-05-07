@@ -6,7 +6,6 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetActionItemsResponseDto;
 import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
@@ -29,7 +28,6 @@ import aws.retrospective.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -172,18 +170,9 @@ public class SectionService {
         return sections.stream()
             .map(section -> {
                 List<GetCommentDto> comments = section.getComments().stream()
-                    .map(comment -> new GetCommentDto(comment.getId(), comment.getContent(),
-                        comment.getUser().getUsername(), comment.getUser().getThumbnail()))
-                    .collect(Collectors.toList());
+                    .map(GetCommentDto::from).toList();
 
-                return new GetSectionsResponseDto(section.getId(),
-                    section.getUser().getUsername(),
-                    section.getContent(), section.getLikeCnt(), section.getTemplateSection()
-                    .getTemplateStatus(), section.getCreatedDate(), comments,
-                    section.getUser().getThumbnail(),
-                    new GetActionItemsResponseDto(
-                        section.getUser().getId(),
-                        section.getUser().getUsername(), section.getUser().getThumbnail()));
+                return GetSectionsResponseDto.of(section, comments);
             }).toList();
     }
 

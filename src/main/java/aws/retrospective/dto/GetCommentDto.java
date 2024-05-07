@@ -1,13 +1,10 @@
 package aws.retrospective.dto;
 
+import aws.retrospective.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public class GetCommentDto {
 
     @Schema(description = "댓글 id", example = "1")
@@ -18,4 +15,16 @@ public class GetCommentDto {
     private String username;
     @Schema(description = "프로필 이미지", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private String thumbnail;
+
+    private GetCommentDto(Long commentId, String content, String username, String thumbnail) {
+        this.commentId = commentId;
+        this.content = content;
+        this.username = username;
+        this.thumbnail = thumbnail;
+    }
+
+    public static GetCommentDto from(Comment comment) {
+        return new GetCommentDto(comment.getId(), comment.getContent(),
+            comment.getUser().getUsername(), comment.getUser().getThumbnail());
+    }
 }

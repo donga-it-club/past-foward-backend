@@ -1,5 +1,6 @@
 package aws.retrospective.dto;
 
+import aws.retrospective.entity.Section;
 import aws.retrospective.entity.SectionTemplateStatus;
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,8 +48,9 @@ public class GetSectionsResponseDto {
         this.createdDate = createdDate;
     }
 
-    public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
-        SectionTemplateStatus templateStatus, LocalDateTime createdDate, List<GetCommentDto> comments, String thumbnail, GetActionItemsResponseDto actionItems) {
+    private GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
+        SectionTemplateStatus templateStatus, LocalDateTime createdDate,
+        List<GetCommentDto> comments, String thumbnail, GetActionItemsResponseDto actionItems) {
         this.sectionId = sectionId;
         this.username = username;
         this.content = content;
@@ -58,5 +60,12 @@ public class GetSectionsResponseDto {
         this.comments = comments;
         this.thumbnail = thumbnail;
         this.actionItems = actionItems;
+    }
+
+    public static GetSectionsResponseDto of(Section section, List<GetCommentDto> comments) {
+        return new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
+            section.getContent(), section.getLikeCnt(), section.getTemplateSection()
+            .getTemplateStatus(), section.getCreatedDate(), comments,
+            section.getUser().getThumbnail(), GetActionItemsResponseDto.from(section));
     }
 }
