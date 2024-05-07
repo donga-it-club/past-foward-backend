@@ -1,5 +1,6 @@
 package aws.retrospective.dto;
 
+import aws.retrospective.entity.SectionTemplateStatus;
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class GetSectionsResponseDto {
     private long likeCnt;
 
     @Schema(description = "섹션 유형", example = "Keep")
-    private String sectionName;
+    private SectionTemplateStatus sectionName;
 
     @Schema(description = "회고 카드 등록일", example = "2021-07-01T00:00:00")
     private LocalDateTime createdDate;
@@ -37,22 +38,22 @@ public class GetSectionsResponseDto {
 
     @QueryProjection
     public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
-        String sectionName, LocalDateTime createdDate) {
+        SectionTemplateStatus templateStatus, LocalDateTime createdDate) {
         this.sectionId = sectionId;
         this.username = username;
         this.content = content;
         this.likeCnt = likeCnt;
-        this.sectionName = sectionName;
+        this.sectionName = templateStatus;
         this.createdDate = createdDate;
     }
 
     public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
-        String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments, String thumbnail, GetActionItemsResponseDto actionItems) {
+        SectionTemplateStatus templateStatus, LocalDateTime createdDate, List<GetCommentDto> comments, String thumbnail, GetActionItemsResponseDto actionItems) {
         this.sectionId = sectionId;
         this.username = username;
         this.content = content;
         this.likeCnt = likeCnt;
-        this.sectionName = sectionName;
+        this.sectionName = templateStatus;
         this.createdDate = createdDate;
         this.comments = comments;
         this.thumbnail = thumbnail;

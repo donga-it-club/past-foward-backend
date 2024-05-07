@@ -29,15 +29,15 @@ public class TemplateSection extends BaseEntity {
     private RetrospectiveTemplate template;
 
     @NotNull
-    private String sectionName; // 예: K, P, T
+    private SectionTemplateStatus templateStatus; // 예: K, P, T
 
     @NotNull
     private int sequence; // 섹션 순서
 
     @Builder
-    public TemplateSection(RetrospectiveTemplate template, String sectionName, Integer sequence) {
+    public TemplateSection(RetrospectiveTemplate template, SectionTemplateStatus templateStatus, Integer sequence) {
         this.template = template;
-        this.sectionName = sectionName;
+        this.templateStatus = templateStatus;
         this.sequence = sequence;
     }
 }

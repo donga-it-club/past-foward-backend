@@ -1,5 +1,6 @@
 package aws.retrospective.dto;
 
+import aws.retrospective.entity.SectionTemplateStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,7 +9,7 @@ import lombok.Getter;
 public class GetTemplateSectionsDto {
 
     private Long id;
-    private String name;
+    private SectionTemplateStatus templateStatus;
     private Long templateId;
     private int sequence;
 

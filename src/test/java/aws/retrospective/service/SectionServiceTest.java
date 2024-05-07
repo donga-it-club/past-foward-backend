@@ -23,6 +23,7 @@ import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
+import aws.retrospective.entity.SectionTemplateStatus;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
@@ -274,7 +275,7 @@ class SectionServiceTest {
         //then
         assertThat(results.size()).isEqualTo(1);
         GetSectionsResponseDto result = results.get(0);
-        assertThat(result.getSectionName()).isEqualTo(createdTemplateSection.getSectionName());
+        assertThat(result.getSectionName()).isEqualTo(createdTemplateSection.getTemplateStatus());
         assertThat(result.getSectionId()).isEqualTo(createdSection.getId());
         assertThat(result.getCreatedDate()).isEqualTo(createdSection.getCreatedDate());
         assertThat(result.getContent()).isEqualTo(createdSection.getContent());
@@ -342,7 +343,8 @@ class SectionServiceTest {
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
 
-        TemplateSection actionItemsTemplate = TemplateSection.builder().sectionName("Action Items")
+        TemplateSection actionItemsTemplate = TemplateSection.builder().templateStatus(
+                SectionTemplateStatus.ACTION_ITEMS)
             .sequence(4).build();
 
         Long sectionId = 1L;
@@ -393,7 +395,7 @@ class SectionServiceTest {
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
 
-        TemplateSection actionItemsTemplate = TemplateSection.builder().sectionName("Keep")
+        TemplateSection actionItemsTemplate = TemplateSection.builder().templateStatus(SectionTemplateStatus.KEEP)
             .sequence(4).build();
 
         Long sectionId = 1L;
@@ -423,7 +425,7 @@ class SectionServiceTest {
     }
 
     private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
-        return TemplateSection.builder().sectionName("Keep").sequence(0).template(kptTemplate)
+        return TemplateSection.builder().templateStatus(SectionTemplateStatus.KEEP).sequence(0).template(kptTemplate)
             .build();
     }
 

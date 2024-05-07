@@ -36,7 +36,7 @@ public class RetrospectiveTemplateService {
 
         return templateSections.stream().map(
             section -> GetTemplateSectionsDto.builder().id(section.getId())
-                .name(section.getSectionName()).sequence(section.getSequence())
+                .templateStatus(section.getTemplateStatus()).sequence(section.getSequence())
                 .templateId(section.getTemplate().getId()).build()).collect(Collectors.toList());
 
     }

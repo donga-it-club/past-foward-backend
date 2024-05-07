@@ -179,7 +179,7 @@ public class SectionService {
                 return new GetSectionsResponseDto(section.getId(),
                     section.getUser().getUsername(),
                     section.getContent(), section.getLikeCnt(), section.getTemplateSection()
-                    .getSectionName(), section.getCreatedDate(), comments,
+                    .getTemplateStatus(), section.getCreatedDate(), comments,
                     section.getUser().getThumbnail(),
                     new GetActionItemsResponseDto(
                         section.getUser().getId(),

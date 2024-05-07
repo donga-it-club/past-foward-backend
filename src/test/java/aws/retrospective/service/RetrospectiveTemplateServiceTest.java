@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import aws.retrospective.dto.GetTemplateSectionsDto;
 import aws.retrospective.dto.RetrospectiveTemplateResponseDto;
 import aws.retrospective.entity.RetrospectiveTemplate;
+import aws.retrospective.entity.SectionTemplateStatus;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
@@ -72,7 +73,7 @@ public class RetrospectiveTemplateServiceTest {
         List<TemplateSection> templateSections = IntStream.range(0, 3).mapToObj(i ->
             TemplateSection.builder()
                 .template(template)
-                .sectionName("Section " + i)
+                .templateStatus(SectionTemplateStatus.KEEP)
                 .sequence(i)
                 .build()
         ).collect(Collectors.toList());
@@ -87,7 +88,7 @@ public class RetrospectiveTemplateServiceTest {
         assertThat(result).hasSize(3);
         IntStream.range(0, 3).forEach(i -> {
             assertThat(result.get(i).getId()).isNull();
-            assertThat(result.get(i).getName()).isEqualTo("Section " + i);
+            assertThat(result.get(i).getTemplateStatus()).isEqualTo(SectionTemplateStatus.KEEP);
             assertThat(result.get(i).getSequence()).isEqualTo(i);
             assertThat(result.get(i).getTemplateId()).isEqualTo(templateId);
         });
