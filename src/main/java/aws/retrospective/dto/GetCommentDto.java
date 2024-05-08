@@ -12,6 +12,8 @@ public class GetCommentDto {
 
     @Schema(description = "댓글 id", example = "1")
     private Long commentId;
+    @Schema(description = "작성자 id", example = "1")
+    private Long userId;
     @Schema(description = "댓글 내용", example = "매우 공감됩니다!")
     private String content;
     @Schema(description = "댓글 작성자", example = "hope")
