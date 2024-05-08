@@ -13,6 +13,9 @@ public class GetSectionsResponseDto {
     @Schema(description = "회고 카드 id", example = "1")
     private Long sectionId;
 
+    @Schema(description = "작성자 id", example = "1")
+    private Long userId;
+
     @Schema(description = "사용자 이름", example = "hope")
     private String username;
 
@@ -46,9 +49,10 @@ public class GetSectionsResponseDto {
         this.createdDate = createdDate;
     }
 
-    public GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
+    public GetSectionsResponseDto(Long sectionId, Long userId, String username, String content, long likeCnt,
         String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments, String thumbnail, GetActionItemsResponseDto actionItems) {
         this.sectionId = sectionId;
+        this.userId = userId;
         this.username = username;
         this.content = content;
         this.likeCnt = likeCnt;
