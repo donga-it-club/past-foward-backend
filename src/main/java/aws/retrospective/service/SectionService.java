@@ -199,7 +199,8 @@ public class SectionService {
                     c.getUser().getThumbnail()))
                 .collect(Collectors.toList());
             response.add(
-                new GetSectionsResponseDto(section.getId(), section.getUser().getUsername(),
+                new GetSectionsResponseDto(section.getId(), section.getUser().getId(),
+                    section.getUser().getUsername(),
                     section.getContent(), section.getLikeCnt(),
                     section.getTemplateSection().getSectionName(), section.getCreatedDate(),
                     collect, section.getUser().getThumbnail(),
