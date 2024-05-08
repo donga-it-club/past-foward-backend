@@ -195,7 +195,8 @@ public class SectionService {
     private void revertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
         for (Section section : sections) {
             List<GetCommentDto> collect = section.getComments().stream()
-                .map(c -> new GetCommentDto(c.getId(), c.getContent(), c.getUser().getUsername(),
+                .map(c -> new GetCommentDto(c.getId(), c.getUser().getId(), c.getContent(),
+                    c.getUser().getUsername(),
                     c.getUser().getThumbnail()))
                 .collect(Collectors.toList());
             response.add(
