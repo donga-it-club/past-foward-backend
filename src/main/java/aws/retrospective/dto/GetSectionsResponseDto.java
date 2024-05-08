@@ -15,6 +15,9 @@ public class GetSectionsResponseDto {
     @Schema(description = "회고 카드 id", example = "1")
     private Long sectionId;
 
+    @Schema(description = "작성자 id", example = "1")
+    private Long userId;
+
     @Schema(description = "사용자 이름", example = "hope")
     private String username;
 
@@ -47,6 +50,7 @@ public class GetSectionsResponseDto {
         this.sectionName = templateStatus.getSectionName();
         this.createdDate = createdDate;
     }
+
 
     private GetSectionsResponseDto(Long sectionId, String username, String content, long likeCnt,
         SectionTemplateStatus templateStatus, LocalDateTime createdDate,

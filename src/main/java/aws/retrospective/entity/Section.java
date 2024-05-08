@@ -90,4 +90,9 @@ public class Section extends BaseEntity {
     public boolean isNotActionItemsSection() {
         return !this.getTemplateSection().getSectionName().equals(ACTION_ITEMS);
     }
+
+    // Action Items 지정
+    public void updateActionItems(ActionItem actionItem) {
+        this.actionItem = actionItem;
+    }
 }
