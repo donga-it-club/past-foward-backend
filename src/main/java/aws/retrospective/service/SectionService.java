@@ -150,7 +150,10 @@ public class SectionService {
         User assignUser = getAssignUser(request);
 
         if (actionItem == null) {
-            actionItemRepository.save(createActionItem(assignUser, team, section, retrospective));
+            ActionItem savedActionItem = actionItemRepository.save(
+                createActionItem(assignUser, team, section, retrospective));
+            section.updateActionItems(savedActionItem);
+
         } else {
             actionItem.assignUser(assignUser);
         }
