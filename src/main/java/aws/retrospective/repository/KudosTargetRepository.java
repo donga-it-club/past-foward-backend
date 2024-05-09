@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface KudosTargetRepository extends JpaRepository<KudosTarget, Long> {
 
     KudosTarget findBySectionId(Long sectionId);
+    void deleteBySectionId(Long sectionId);
 }

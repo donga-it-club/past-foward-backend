@@ -93,4 +93,8 @@ public class Section extends BaseEntity {
     public boolean isNotKudosTemplate() {
         return !this.templateSection.getSectionName().equals("Kudos");
     }
+
+    public boolean isKudosTemplate() {
+        return this.templateSection.getSectionName().equals("Kudos");
+    }
 }
