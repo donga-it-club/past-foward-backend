@@ -439,14 +439,13 @@ class SectionServiceTest {
         //when
         AssignKudosRequestDto request = new AssignKudosRequestDto();
         ReflectionTestUtils.setField(request, "userId", userId);
-        ReflectionTestUtils.setField(request, "sectionId", sectionId);
 
         KudosTarget mockKudosTarget = mock(KudosTarget.class);
         when(mockKudosTarget.getSection()).thenReturn(mockSection);
         when(mockKudosTarget.getUser()).thenReturn(mockUser);
         when(kudosRepository.save(any())).thenReturn(mockKudosTarget);
 
-        AssignKudosResponseDto response = sectionService.assignKudos(request);
+        AssignKudosResponseDto response = sectionService.assignKudos(sectionId, request);
 
         //then
         assertThat(response.getSectionId()).isEqualTo(mockSection.getId());
@@ -479,9 +478,8 @@ class SectionServiceTest {
         //when
         AssignKudosRequestDto request = new AssignKudosRequestDto();
         ReflectionTestUtils.setField(request, "userId", newUserId);
-        ReflectionTestUtils.setField(request, "sectionId", sectionId);
 
-        AssignKudosResponseDto response = sectionService.assignKudos(request);
+        AssignKudosResponseDto response = sectionService.assignKudos(sectionId, request);
 
         //then
         assertThat(response.getKudosId()).isEqualTo(kudosId);
@@ -498,13 +496,9 @@ class SectionServiceTest {
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(mockSection));
         when(mockSection.isNotKudosTemplate()).thenReturn(true);
 
-        //when
-        AssignKudosRequestDto request = new AssignKudosRequestDto();
-        ReflectionTestUtils.setField(request, "sectionId", sectionId);
-
         //then
         assertThrows(IllegalArgumentException.class,
-            () -> sectionService.assignKudos(request));
+            () -> sectionService.assignKudos(sectionId, any()));
     }
 
     private static Likes createLikes(Section section, User user) {

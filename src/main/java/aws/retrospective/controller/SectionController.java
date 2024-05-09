@@ -123,9 +123,13 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
-    @PutMapping("/kudos-target")
-    public CommonApiResponse<AssignKudosResponseDto> assignKudosPerson(@RequestBody AssignKudosRequestDto request) {
-        AssignKudosResponseDto response = sectionService.assignKudos(request);
+    @Operation(summary = "Kudos 템플릿에 사용자 지정", description = "Kudos 유형의 회고 카드에 칭찬할 사용자를 지정하는 API ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200")
+    })
+    @PutMapping("/{sectionId}/kudos-target")
+    public CommonApiResponse<AssignKudosResponseDto> assignKudosPerson(@PathVariable Long sectionId, @Valid @RequestBody AssignKudosRequestDto request) {
+        AssignKudosResponseDto response = sectionService.assignKudos(sectionId, request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 

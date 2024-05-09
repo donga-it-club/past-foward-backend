@@ -178,14 +178,11 @@ public class SectionService {
     }
 
     @Transactional
-    public AssignKudosResponseDto assignKudos(AssignKudosRequestDto request) {
-        Section section = getSection(request.getSectionId()); // Kudos Section
+    public AssignKudosResponseDto assignKudos(Long sectionId, AssignKudosRequestDto request) {
+        Section section = getSection(sectionId); // Kudos Section
 
         // Kudos 유형에만 칭창할 사람을 지정8할 수 있다.
-        if (section.isNotKudosTemplate()) {
-            throw new IllegalArgumentException(
-                "Kudos Section이 아닙니다. id : " + request.getSectionId());
-        }
+        validateKudosTemplate(sectionId, section);
 
         User targetUser = getUser(request); // 칭찬 대상 조회
         /**
@@ -200,6 +197,13 @@ public class SectionService {
         } else {
             kudosSection.assignUser(targetUser);
             return AssignKudosResponseDto.convertResponse(kudosSection);
+        }
+    }
+
+    private static void validateKudosTemplate(Long sectionId, Section section) {
+        if (section.isNotKudosTemplate()) {
+            throw new IllegalArgumentException(
+                "Kudos Section이 아닙니다. id : " + sectionId);
         }
     }
 
