@@ -2,6 +2,8 @@ package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.common.CurrentUser;
+import aws.retrospective.dto.AssignKudosRequestDto;
+import aws.retrospective.dto.AssignKudosResponseDto;
 import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
@@ -118,6 +120,12 @@ public class SectionController {
         @PathVariable("sectionId") Long sectionId
     ) {
         List<GetCommentsResponseDto> response = commentService.getComments(user, sectionId);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @PutMapping("/kudos-target")
+    public CommonApiResponse<AssignKudosResponseDto> assignKudosPerson(@RequestBody AssignKudosRequestDto request) {
+        AssignKudosResponseDto response = sectionService.assignKudos(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 

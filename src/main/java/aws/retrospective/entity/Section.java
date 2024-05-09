@@ -89,4 +89,8 @@ public class Section extends BaseEntity {
     public void updateActionItems(ActionItem actionItem) {
         this.actionItem = actionItem;
     }
+
+    public boolean isNotKudosTemplate() {
+        return !this.templateSection.getSectionName().equals("Kudos");
+    }
 }
