@@ -7,6 +7,7 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetCommentResponseDto;
 import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
@@ -20,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -119,6 +121,15 @@ public class SectionController {
     ) {
         List<GetCommentsResponseDto> response = commentService.getComments(user, sectionId);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @GetMapping("/{sectionId}/new-comments")
+    public CommonApiResponse<List<GetCommentResponseDto>> getNewComments(
+        @PathVariable Long sectionId) {
+        LocalDateTime lastCommentTime = sectionService.getLastCommentTime(sectionId);
+        List<GetCommentResponseDto> result = sectionService.getNewComments(sectionId,
+            lastCommentTime);
+        return CommonApiResponse.successResponse(HttpStatus.OK, result);
     }
 
 }

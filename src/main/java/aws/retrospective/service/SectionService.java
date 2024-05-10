@@ -7,6 +7,7 @@ import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetActionItemsResponseDto;
 import aws.retrospective.dto.GetCommentDto;
+import aws.retrospective.dto.GetCommentResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
@@ -19,12 +20,14 @@ import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
+import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,6 +50,7 @@ public class SectionService {
     private final TeamRepository teamRepository;
     private final ActionItemRepository actionItemRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -172,6 +176,23 @@ public class SectionService {
         sectionRepository.delete(findSection);
     }
 
+    /**
+     * 회고 카드에 마지막으로 댓글이 작성된 시간
+     */
+    public LocalDateTime getLastCommentTime(Long sectionId) {
+        return getSection(sectionId).getLastCommentTime();
+    }
+
+    @Transactional
+    public List<GetCommentResponseDto> getNewComments(Long sectionId,
+        LocalDateTime lastCommentTime) {
+        Section section = getSection(sectionId);
+        // 마지막 댓글 시간 업데이트
+        section.updateLastComment(getNewCommentTime(sectionId));
+
+        return convertResponse(sectionId, lastCommentTime);
+    }
+
     private TemplateSection getTemplateSection(Long sectionId) {
         return templateSectionRepository.findById(sectionId)
             .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
@@ -230,5 +251,24 @@ public class SectionService {
     private User getAssignUser(AssignUserRequestDto request) {
         return userRepository.findById(request.getUserId()).orElseThrow(
             () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
+    }
+
+    /**
+     * 마지막으로 확인된 댓글 시간 이후의 댓글을 조회한다.
+     * @param lastCommentTime 이 시점 이후에 새롭게 작성된 댓글 조회
+     */
+    private List<GetCommentResponseDto> convertResponse(Long sectionId,
+        LocalDateTime lastCommentTime) {
+        return commentRepository.findNewComments(sectionId, lastCommentTime).stream()
+            .map(GetCommentResponseDto::createResponse)
+            .toList();
+    }
+
+    /**
+     * 회고 카드에 마지막으로 작성된 댓글 시간 조회
+     */
+    private LocalDateTime getNewCommentTime(Long sectionId) {
+        return commentRepository.findTopBySectionIdOrderByCreatedDateDesc(
+            sectionId).getCreatedDate();
     }
 }

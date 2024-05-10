@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -53,6 +54,8 @@ public class Section extends BaseEntity {
     @JoinColumn(name = "action_item")
     private ActionItem actionItem;
 
+    private LocalDateTime lastCommentTime;
+
     @Builder
     public Section(String content, long likeCnt, Retrospective retrospective, User user,
         TemplateSection templateSection) {
@@ -88,5 +91,10 @@ public class Section extends BaseEntity {
     // Action Items 지정
     public void updateActionItems(ActionItem actionItem) {
         this.actionItem = actionItem;
+    }
+
+    // 마지막으로 조회된 댓글 시간 업데이트
+    public void updateLastComment(LocalDateTime now) {
+        this.lastCommentTime = now;
     }
 }
