@@ -12,8 +12,23 @@ services:
       MYSQL_PASSWORD: 1234
       volumes: data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
+    networks:
+      - past-forward-backend
+
+  redis:
+    restart: always
+    image: redis:alpine
+    container_name: past-forward-redis
+    command: redis-server --port 6379
+    hostname: redis
+    ports:
+      - "6380:6379"
+    networks:
+      - past-forward-backend
 
 volumes:
   data:
 
+networks:
+  past-forward-backend:

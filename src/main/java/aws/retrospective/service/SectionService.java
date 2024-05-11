@@ -28,6 +28,7 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,7 @@ public class SectionService {
     private final ActionItemRepository actionItemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final StringRedisTemplate redisTemplate;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -179,16 +182,17 @@ public class SectionService {
     /**
      * 회고 카드에 마지막으로 댓글이 작성된 시간
      */
+    @Transactional(readOnly = true)
     public LocalDateTime getLastCommentTime(Long sectionId) {
-        return getSection(sectionId).getLastCommentTime();
+        String lastCommentTime = getLastCommentTimeInRedis(sectionId);
+        return lastCommentTime != null ? parseLastCommentTime(lastCommentTime) : null;
     }
 
     @Transactional
     public List<GetCommentResponseDto> getNewComments(Long sectionId,
         LocalDateTime lastCommentTime) {
-        Section section = getSection(sectionId);
         // 마지막 댓글 시간 업데이트
-        section.updateLastComment(getNewCommentTime(sectionId));
+        updateLastCommentTimeInRedis(sectionId);
 
         return convertResponse(sectionId, lastCommentTime);
     }
@@ -259,6 +263,12 @@ public class SectionService {
      */
     private List<GetCommentResponseDto> convertResponse(Long sectionId,
         LocalDateTime lastCommentTime) {
+        if(lastCommentTime == null) {
+            return commentRepository.findCommentsBySectionId(sectionId).stream()
+                .map(GetCommentResponseDto::createResponse)
+                .toList();
+        }
+
         return commentRepository.findNewComments(sectionId, lastCommentTime).stream()
             .map(GetCommentResponseDto::createResponse)
             .toList();
@@ -270,5 +280,18 @@ public class SectionService {
     private LocalDateTime getNewCommentTime(Long sectionId) {
         return commentRepository.findTopBySectionIdOrderByCreatedDateDesc(
             sectionId).getCreatedDate();
+    }
+
+    private static LocalDateTime parseLastCommentTime(String lastCommentTime) {
+        return LocalDateTime.parse(lastCommentTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }
+
+    private void updateLastCommentTimeInRedis(Long sectionId) {
+        redisTemplate.opsForValue()
+            .set(sectionId.toString(), getNewCommentTime(sectionId).toString());
+    }
+
+    private String getLastCommentTimeInRedis(Long sectionId) {
+        return redisTemplate.opsForValue().get(sectionId.toString());
     }
 }

@@ -23,6 +23,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${ISSUER_URI}
+  data:
+    redis:
+      host: localhost
+      port: 6380
 
 aws:
   secretsmanager:

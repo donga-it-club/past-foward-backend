@@ -44,6 +44,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -411,6 +413,13 @@ class SectionServiceTest {
         assertThrows(IllegalArgumentException.class,
             () -> sectionService.assignUserToActionItem(request));
     }
+
+    @Test
+    @DisplayName("마지막으로 조회된 알림 이후에 새로운 댓글이 작성되면 알림을 받을 수 있다.")
+    void getNewComments() {
+
+    }
+
 
     private static Likes createLikes(Section section, User user) {
         return Likes.builder().section(section).user(user).build();
