@@ -22,7 +22,7 @@ jobs:
           java-version: 17
           distribution: 'zulu'
 
-      - name: Setup MySQL
+      - name: Setup MySQL And Redis
         run: docker-compose up -d
 
       - name: Grant execute permission for gradlew
@@ -31,6 +31,8 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -Plocal
         env:
+          SPRING_REDIS_HOST: ${{ secrets.SPRING_REDIS_HOST }}
+          SPRING_REDIS_PORT: ${{ secrets.SPRING_REDIS_PORT }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_SEND_MAIL_TO: ${{ secrets.AWS_SEND_MAIL_TO }}
