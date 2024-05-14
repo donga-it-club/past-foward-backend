@@ -80,7 +80,8 @@ public class RetrospectiveService {
             findRetrospective.getTeam() == null ? RetrospectiveType.PERSONAL
                 : RetrospectiveType.TEAM, findRetrospective.getUser().getId(),
             findRetrospective.getUser().getUsername(), findRetrospective.getDescription(),
-            findRetrospective.getStatus().name(), findRetrospective.getThumbnail());
+            findRetrospective.getStatus().name(), findRetrospective.getThumbnail(),
+            findRetrospective.getUser().getThumbnail());
     }
 
     @Transactional
