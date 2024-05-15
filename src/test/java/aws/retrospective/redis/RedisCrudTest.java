@@ -2,18 +2,15 @@ package aws.retrospective.redis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import aws.retrospective.config.EmbeddedRedisConfig;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;t st
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("local")
-@Import(EmbeddedRedisConfig.class)
 public class RedisCrudTest {
 
     @Autowired
