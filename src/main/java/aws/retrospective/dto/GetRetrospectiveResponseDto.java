@@ -17,4 +17,5 @@ public class GetRetrospectiveResponseDto {
     private String description; // 회고 설명
     private String status; // 회고 상태 (진행중, 완료)
     private UUID thumbnail; // 회고 썸네일
+    private String leaderProfileImage; // 회고 리더 프로필 이미지
 }
