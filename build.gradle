@@ -70,6 +70,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-oauth2-jose'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.1'
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.9.0'
 }
 
 tasks.named('test') {

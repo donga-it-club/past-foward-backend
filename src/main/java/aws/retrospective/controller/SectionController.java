@@ -2,6 +2,8 @@ package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.common.CurrentUser;
+import aws.retrospective.dto.AssignKudosRequestDto;
+import aws.retrospective.dto.AssignKudosResponseDto;
 import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
@@ -130,6 +132,15 @@ public class SectionController {
         List<GetCommentResponseDto> result = sectionService.getNewComments(sectionId,
             lastCommentTime);
         return CommonApiResponse.successResponse(HttpStatus.OK, result);
+    }
+    @Operation(summary = "Kudos 템플릿에 사용자 지정", description = "Kudos 유형의 회고 카드에 칭찬할 사용자를 지정하는 API ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200")
+    })
+    @PutMapping("/{sectionId}/kudos-target")
+    public CommonApiResponse<AssignKudosResponseDto> assignKudosPerson(@PathVariable Long sectionId, @Valid @RequestBody AssignKudosRequestDto request) {
+        AssignKudosResponseDto response = sectionService.assignKudos(sectionId, request);
+        return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
 }

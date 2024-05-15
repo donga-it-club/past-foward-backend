@@ -1,5 +1,7 @@
 package aws.retrospective.service;
 
+import aws.retrospective.dto.AssignKudosRequestDto;
+import aws.retrospective.dto.AssignKudosResponseDto;
 import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
@@ -12,6 +14,7 @@ import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.ActionItem;
+import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
@@ -21,6 +24,7 @@ import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.CommentRepository;
+import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -54,6 +58,7 @@ public class SectionService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final StringRedisTemplate redisTemplate;
+    private final KudosTargetRepository kudosRepository;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -176,6 +181,11 @@ public class SectionService {
             throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
         }
 
+        // 연관관계에 있는 Kudos 테이블의 row를 먼저 삭제한다.
+        if (findSection.isKudosTemplate()) {
+            kudosRepository.deleteBySectionId(sectionId);
+        }
+
         sectionRepository.delete(findSection);
     }
 
@@ -195,6 +205,36 @@ public class SectionService {
         updateLastCommentTimeInRedis(sectionId);
 
         return convertResponse(sectionId, lastCommentTime);
+    }
+  
+    @Transactional
+    public AssignKudosResponseDto assignKudos(Long sectionId, AssignKudosRequestDto request) {
+        Section section = getSection(sectionId); // Kudos Section
+
+        // Kudos 유형에만 칭창할 사람을 지정8할 수 있다.
+        validateKudosTemplate(sectionId, section);
+
+        User targetUser = getUser(request); // 칭찬 대상 조회
+        /**
+         * 이전에 해당 Section에 다른 사람을 칭창할 사람으로 지정한 적이 있는지 조회
+         * 조회O : DB 값만 변경하면 된다.
+         * 조회X : DB에 새로운 row 삽입
+         */
+        KudosTarget kudosSection = kudosRepository.findBySectionId(section.getId());
+
+        if (kudosSection == null) {
+            return AssignKudosResponseDto.convertResponse(assignKudos(section, targetUser));
+        } else {
+            kudosSection.assignUser(targetUser);
+            return AssignKudosResponseDto.convertResponse(kudosSection);
+        }
+    }
+
+    private static void validateKudosTemplate(Long sectionId, Section section) {
+        if (section.isNotKudosTemplate()) {
+            throw new IllegalArgumentException(
+                "Kudos Section이 아닙니다. id : " + sectionId);
+        }
     }
 
     private TemplateSection getTemplateSection(Long sectionId) {
@@ -293,5 +333,15 @@ public class SectionService {
 
     private String getLastCommentTimeInRedis(Long sectionId) {
         return redisTemplate.opsForValue().get(sectionId.toString());
+    }
+  
+    private User getUser(AssignKudosRequestDto request) {
+        return userRepository.findById(request.getUserId())
+            .orElseThrow(
+                () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
+    }
+
+    private KudosTarget assignKudos(Section section, User targetUser) {
+        return kudosRepository.save(KudosTarget.createKudosTarget(section, targetUser));
     }
 }
