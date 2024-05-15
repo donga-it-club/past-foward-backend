@@ -20,6 +20,10 @@ public class RedisCrudTest {
     final String VALUE = "MY_VALUE";
 
     @Test
+    void contextLoads() {
+    }
+
+    @Test
     @DisplayName("키 저장")
     void saveKey() {
         redisTemplate.opsForValue().set(KEY, VALUE);

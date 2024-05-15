@@ -1,0 +1,50 @@
+# JPA
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: "jdbc:mysql://localhost:3306/past-forward"
+    username: dev
+    password: 1234
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  config:
+    activate:
+      on-profile: local
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+  data:
+    redis:
+      host: localhost
+      port: 6380
+
+aws:
+  secretsmanager:
+    enabled: off
+  ses:
+    send-mail-to: "test@gmail.com"
+  region: "region"
+  s3:
+    bucket: "bucket"
+
+
+cors:
+  allowed-origins: "some-origin"
+
+
+server:
+  url: "http://localhost:8080"
+
+
+domain:
+  url: "http://localhost:3000"
