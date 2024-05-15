@@ -2,10 +2,14 @@ package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+import aws.retrospective.dto.AssignKudosRequestDto;
+import aws.retrospective.dto.AssignKudosResponseDto;
 import aws.retrospective.dto.AssignUserRequestDto;
 import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
@@ -18,6 +22,7 @@ import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.Comment;
+import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
@@ -28,6 +33,7 @@ import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
+import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -65,6 +71,8 @@ class SectionServiceTest {
     ActionItemRepository actionItemRepository;
     @Mock
     UserRepository userRepository;
+    @Mock
+    KudosTargetRepository kudosRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -410,6 +418,87 @@ class SectionServiceTest {
 
         assertThrows(IllegalArgumentException.class,
             () -> sectionService.assignUserToActionItem(request));
+    }
+
+    @Test
+    @DisplayName("Kudos Section에 처음으로 칭찬할 사람을 지정할 수 있다.")
+    void assignKudosSection_new() {
+        //given
+        Long sectionId = 1L;
+        Section mockSection = mock(Section.class);
+        when(mockSection.getId()).thenReturn(sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(mockSection));
+        when(mockSection.isNotKudosTemplate()).thenReturn(false);
+
+        Long userId = 1L;
+        User mockUser = mock(User.class);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+        when(kudosRepository.findBySectionId(sectionId)).thenReturn(null);
+
+        //when
+        AssignKudosRequestDto request = new AssignKudosRequestDto();
+        ReflectionTestUtils.setField(request, "userId", userId);
+
+        KudosTarget mockKudosTarget = mock(KudosTarget.class);
+        when(mockKudosTarget.getSection()).thenReturn(mockSection);
+        when(mockKudosTarget.getUser()).thenReturn(mockUser);
+        when(kudosRepository.save(any())).thenReturn(mockKudosTarget);
+
+        AssignKudosResponseDto response = sectionService.assignKudos(sectionId, request);
+
+        //then
+        assertThat(response.getSectionId()).isEqualTo(mockSection.getId());
+        assertThat(response.getUserId()).isEqualTo(mockUser.getId());
+    }
+
+    @Test
+    @DisplayName("Kudos Section에 이미 지정된 사람을 다른 사람으로 바꿀 수 있다.")
+    void assignKudosSection_exist() {
+        //given
+        Long sectionId = 1L;
+        Section mockSection = mock(Section.class);
+        when(mockSection.getId()).thenReturn(sectionId);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(mockSection));
+        when(mockSection.isNotKudosTemplate()).thenReturn(false);
+
+        Long newUserId = 1L;
+        User newUser = mock(User.class);
+        when(newUser.getId()).thenReturn(newUserId);
+        when(userRepository.findById(newUserId)).thenReturn(Optional.of(newUser));
+
+        Long kudosId = 1L;
+        KudosTarget mockKudos = mock(KudosTarget.class);
+        when(mockKudos.getId()).thenReturn(kudosId);
+        when(mockKudos.getUser()).thenReturn(newUser);
+        when(mockKudos.getSection()).thenReturn(mockSection);
+
+        when(kudosRepository.findBySectionId(sectionId)).thenReturn(mockKudos);
+
+        //when
+        AssignKudosRequestDto request = new AssignKudosRequestDto();
+        ReflectionTestUtils.setField(request, "userId", newUserId);
+
+        AssignKudosResponseDto response = sectionService.assignKudos(sectionId, request);
+
+        //then
+        assertThat(response.getKudosId()).isEqualTo(kudosId);
+        assertThat(response.getSectionId()).isEqualTo(sectionId);
+        assertThat(response.getUserId()).isEqualTo(newUserId);
+    }
+
+    @Test
+    @DisplayName("Kudos 유형이 아니면 칭찬 대상을 지정할 수 없다.")
+    void assignKudosSection_fail() {
+        //given
+        Long sectionId = 1L;
+        Section mockSection = mock(Section.class);
+        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(mockSection));
+        when(mockSection.isNotKudosTemplate()).thenReturn(true);
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+            () -> sectionService.assignKudos(sectionId, any()));
     }
 
     private static Likes createLikes(Section section, User user) {
