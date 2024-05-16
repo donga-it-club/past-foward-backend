@@ -422,12 +422,6 @@ class SectionServiceTest {
             () -> sectionService.assignUserToActionItem(request));
     }
 
-    @Test
-    @DisplayName("마지막으로 조회된 알림 이후에 새로운 댓글이 작성되면 알림을 받을 수 있다.")
-    void getNewComments() {
-
-    }
-
     @DisplayName("Kudos Section에 처음으로 칭찬할 사람을 지정할 수 있다.")
     void assignKudosSection_new() {
         //given
