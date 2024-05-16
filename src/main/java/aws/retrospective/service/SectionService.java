@@ -9,11 +9,12 @@ import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetActionItemsResponseDto;
 import aws.retrospective.dto.GetCommentDto;
-import aws.retrospective.dto.GetCommentResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
+import aws.retrospective.dto.SectionNotificationDto;
 import aws.retrospective.entity.ActionItem;
+import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Retrospective;
@@ -59,6 +60,8 @@ public class SectionService {
     private final CommentRepository commentRepository;
     private final StringRedisTemplate redisTemplate;
     private final KudosTargetRepository kudosRepository;
+
+    private final String SECTION_ID = "sectionId_";
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -189,24 +192,101 @@ public class SectionService {
         sectionRepository.delete(findSection);
     }
 
-    /**
-     * 회고 카드에 마지막으로 댓글이 작성된 시간
-     */
-    @Transactional(readOnly = true)
-    public LocalDateTime getLastCommentTime(Long sectionId) {
-        String lastCommentTime = getLastCommentTimeInRedis(sectionId);
-        return lastCommentTime != null ? parseLastCommentTime(lastCommentTime) : null;
-    }
-
     @Transactional
-    public List<GetCommentResponseDto> getNewComments(Long sectionId,
-        LocalDateTime lastCommentTime) {
-        // 마지막 댓글 시간 업데이트
-        updateLastCommentTimeInRedis(sectionId);
+    public List<SectionNotificationDto> getNewCommentsAndLikes() {
+        // 1. 모든 Section을 조회한다.
+        List<Section> sections = sectionRepository.findAll();
+        List<SectionNotificationDto> notifications = new ArrayList<>();
 
-        return convertResponse(sectionId, lastCommentTime);
+        // 2. 모든 Section 순회한다.
+        sections
+            .forEach(section -> {
+                // DB에서 마지막으로 작성된 댓글과 좋아요를 조회한다.
+                Comment lastCommentInDB = getLatestCommentBySection(section);
+                Likes lastLikeInDB = getLatestLikeBySection(section);
+                LocalDateTime lastCommentTimeInDB = getLastTimeInDB(lastCommentInDB);
+                LocalDateTime lastLikeTimeInDB = getLastTimeInDB(lastLikeInDB);
+
+                // Redis에서 마지막으로 알림이 전송된 시간을 조회한다.
+                String lastCommentTimeInRedis = getLastTimeInRedis(SECTION_ID + section.getId(),
+                    "comment");
+                String lastLikeTimeInRedis = getLastTimeInRedis(SECTION_ID + section.getId(),
+                    "like");
+
+                // 마지막으로 작성된 댓글과 좋아요 시간을 Redis에 저장한다.
+                updateRedisValue(section, lastCommentTimeInDB, lastLikeTimeInDB);
+
+                // 마지막으로 작성된 댓글과 좋아요 시간을 비교하여 새로운 댓글과 좋아요를 조회한다.
+                List<Comment> comments = getComments(section.getId(), lastCommentTimeInRedis);
+                List<Likes> likes = getLikes(section.getId(), lastLikeTimeInRedis);
+
+                // 새로운 댓글과 좋아요가 있을 경우 알림을 생성한다.
+                if (!likes.isEmpty() || !comments.isEmpty()) {
+                    notifications.add(createNotification(section, comments, likes));
+                }
+            });
+
+        return notifications;
     }
-  
+
+    private void updateRedisValue(Section section, LocalDateTime lastCommentTimeInDB,
+        LocalDateTime lastLikeTimeInDB) {
+        saveLastTimeInRedis(SECTION_ID + section.getId(), "comment", lastCommentTimeInDB);
+        saveLastTimeInRedis(SECTION_ID + section.getId(), "like", lastLikeTimeInDB);
+    }
+
+    private LocalDateTime getLastTimeInDB(Object entity) {
+        if (entity != null) {
+            if (entity instanceof Comment) {
+                return ((Comment) entity).getCreatedDate();
+            } else if (entity instanceof Likes) {
+                return ((Likes) entity).getCreatedDate();
+            }
+        }
+        return null;
+    }
+
+    private String getLastTimeInRedis(String key, String hashKey) {
+        return (String) redisTemplate.opsForHash().get(key, hashKey);
+    }
+
+    private void saveLastTimeInRedis(String key, String hashKey, LocalDateTime lastTimeInDB) {
+        if (lastTimeInDB != null) {
+            redisTemplate.opsForHash().put(key, hashKey, lastTimeInDB.toString());
+        }
+    }
+
+    private Likes getLatestLikeBySection(Section section) {
+        return likesRepository.findLatestLikeBySection(section.getId());
+    }
+
+    private Comment getLatestCommentBySection(Section section) {
+        return commentRepository.findLatestCommentBySection(section.getId());
+    }
+
+    private List<Comment> getComments(Long sectionId, String lastCommentTimeInRedis) {
+        if (lastCommentTimeInRedis != null) {
+            return commentRepository.findCommentsAfterDate(sectionId,
+                convertStringToLocalDateTime(lastCommentTimeInRedis));
+        } else {
+            return commentRepository.findAllComments(sectionId);
+        }
+    }
+
+    private List<Likes> getLikes(Long sectionId, String lastLikeTimeInRedis) {
+        if (lastLikeTimeInRedis != null) {
+            return likesRepository.findLikesAfterDate(sectionId,
+                convertStringToLocalDateTime(lastLikeTimeInRedis));
+        } else {
+            return likesRepository.findAllLikes(sectionId);
+        }
+    }
+
+    private SectionNotificationDto createNotification(Section section, List<Comment> comments,
+        List<Likes> likes) {
+        return SectionNotificationDto.createNotification(section, comments, likes);
+    }
+
     @Transactional
     public AssignKudosResponseDto assignKudos(Long sectionId, AssignKudosRequestDto request) {
         Section section = getSection(sectionId); // Kudos Section
@@ -297,42 +377,8 @@ public class SectionService {
             () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
     }
 
-    /**
-     * 마지막으로 확인된 댓글 시간 이후의 댓글을 조회한다.
-     * @param lastCommentTime 이 시점 이후에 새롭게 작성된 댓글 조회
-     */
-    private List<GetCommentResponseDto> convertResponse(Long sectionId,
-        LocalDateTime lastCommentTime) {
-        if(lastCommentTime == null) {
-            return commentRepository.findCommentsBySectionId(sectionId).stream()
-                .map(GetCommentResponseDto::createResponse)
-                .toList();
-        }
-
-        return commentRepository.findNewComments(sectionId, lastCommentTime).stream()
-            .map(GetCommentResponseDto::createResponse)
-            .toList();
-    }
-
-    /**
-     * 회고 카드에 마지막으로 작성된 댓글 시간 조회
-     */
-    private LocalDateTime getNewCommentTime(Long sectionId) {
-        return commentRepository.findTopBySectionIdOrderByCreatedDateDesc(
-            sectionId).getCreatedDate();
-    }
-
-    private static LocalDateTime parseLastCommentTime(String lastCommentTime) {
-        return LocalDateTime.parse(lastCommentTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-    }
-
-    private void updateLastCommentTimeInRedis(Long sectionId) {
-        redisTemplate.opsForValue()
-            .set(sectionId.toString(), getNewCommentTime(sectionId).toString());
-    }
-
-    private String getLastCommentTimeInRedis(Long sectionId) {
-        return redisTemplate.opsForValue().get(sectionId.toString());
+    private static LocalDateTime convertStringToLocalDateTime(String time) {
+        return LocalDateTime.parse(time, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
   
     private User getUser(AssignKudosRequestDto request) {

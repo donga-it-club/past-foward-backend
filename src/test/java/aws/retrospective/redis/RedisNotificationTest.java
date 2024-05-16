@@ -2,8 +2,9 @@ package aws.retrospective.redis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import aws.retrospective.dto.GetCommentResponseDto;
+import aws.retrospective.dto.SectionNotificationDto;
 import aws.retrospective.entity.Comment;
+import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
@@ -13,6 +14,7 @@ import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
+import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.SectionRepository;
@@ -20,7 +22,6 @@ import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.service.SectionService;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,11 +54,13 @@ public class RedisNotificationTest {
     SectionRepository sectionRepository;
     @Autowired
     CommentRepository commentRepository;
+    @Autowired
+    private LikesRepository likesRepository;
 
-    @Test
-    @DisplayName("새로운 댓글이 작성되면 알림을 조회할 수 있다.")
-    void commentNotificationTest() {
+    record Result(User user, Retrospective retrospective, Section section) {
+    }
 
+    private Result init() {
         User user = getUser();
         userRepository.save(user);
         Team team = getTeam();
@@ -72,33 +75,120 @@ public class RedisNotificationTest {
             .content("keep section").likeCnt(0).build();
         sectionRepository.save(section);
 
-        User commentWriter1 = getUser(); // 마지막으로 알림이 조회되는 시점에 댓글을 남긴 사용자1
-        userRepository.save(commentWriter1);
-        Comment prevComment = getComment(section, commentWriter1); // 사용자1이 작성한 댓글
-        commentRepository.save(prevComment);
+        return new Result(user, retrospective, section);
+    }
 
-        // 마지막으로 알림이 조회되는 시점을 저장 -> 사용자1의 댓글이 마지막으로 조회된 시점
-        redisTemplate.opsForValue()
-            .set(section.getId().toString(), prevComment.getCreatedDate().toString());
-        // 사용자1이 작성한 댓글 시간
-        LocalDateTime lastCommentTime = sectionService.getLastCommentTime(section.getId());
+    @Test
+    @DisplayName("회고 카드에 처음으로 작성된 댓글을 알림으로 받는다.")
+    void receiveNotificationForFirstComment() {
+        //given
+        Result init = init();
 
-        User commentWriter2 = getUser(); // 마지막으로 알림이 조회되는 시점 이후에 댓글을 남긴 사용자2
-        userRepository.save(commentWriter2);
-        Comment newComment = getComment(section, commentWriter2); // 사용자2가 작성한 댓글
+        Comment comment = getComment(init.section(), init.user());
+        commentRepository.save(comment);
+
+        //when
+        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
+
+        //then
+        SectionNotificationDto notification = response.get(0);
+        assertThat(notification.getSectionId()).isEqualTo(init.section().getId());
+        assertThat(notification.getRetrospectiveId()).isEqualTo(init.retrospective().getId());
+        assertThat(notification.getComments().get(0).getUsername()).isEqualTo(
+            init.user().getUsername());
+        assertThat(notification.getComments().get(0).getCreatedDate()).isEqualTo(
+            comment.getCreatedDate());
+        assertThat(notification.getLikes()).isEmpty();
+    }
+
+
+    @Test
+    @DisplayName("회고 카드에 처음으로 눌린 좋아요를 알림으로 받는다.")
+    void receiveNotificationForFirstLike() {
+        //given
+        Result init = init();
+
+        Likes like = getLikes(init.section, init.user);
+        likesRepository.save(like);
+
+        //when
+        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
+
+        //then
+        SectionNotificationDto notification = response.get(0);
+        assertThat(notification.getSectionId()).isEqualTo(init.section().getId());
+        assertThat(notification.getRetrospectiveId()).isEqualTo(init.retrospective().getId());
+        assertThat(notification.getLikes().get(0).getUsername()).isEqualTo(
+            init.user().getUsername());
+        assertThat(notification.getLikes().get(0).getCreatedDate()).isEqualTo(
+            like.getCreatedDate());
+        assertThat(notification.getComments()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("알림을 받은 후 새로운 댓글이 작성돠면 추가 알림을 전송 받는다")
+    void receiveNotificationForNewCommentAfterNotification() {
+        //given
+        Result init = init();
+
+        // 이미 알림을 받은 댓글
+        Comment comment = getComment(init.section(), init.user());
+        commentRepository.save(comment);
+
+        redisTemplate.opsForHash().put("sectionId_" + init.section().getId(), "comment",
+            comment.getCreatedDate().toString());
+
+        // 알림 이후에 작성된 댓글
+        Comment newComment = getComment(init.section(), init.user());
         commentRepository.save(newComment);
 
-        // 사용자1의 댓글이 마지막으로 조회된 시점 이후에 작성된 댓글 조회
-        List<GetCommentResponseDto> response = sectionService.getNewComments(section.getId(),
-            lastCommentTime);
+        //when
+        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
 
-        // 사용자1의 댓글은 조회되지 않고 사용자2의 댓글만 조회되어야 한다.
-        assertThat(response.size()).isEqualTo(1);
-        GetCommentResponseDto comment = response.get(0);
-        assertThat(comment.getCreatedDate()).isEqualTo(newComment.getCreatedDate());
-        assertThat(comment.getUsername()).isEqualTo(commentWriter2.getUsername());
-        assertThat(comment.getSectionId()).isEqualTo(section.getId());
-        assertThat(comment.getRetrospectiveId()).isEqualTo(retrospective.getId());
+        //then
+        SectionNotificationDto notification = response.get(0);
+        assertThat(notification.getSectionId()).isEqualTo(init.section().getId());
+        assertThat(notification.getRetrospectiveId()).isEqualTo(init.retrospective().getId());
+        assertThat(notification.getComments().get(0).getUsername()).isEqualTo(
+            init.user().getUsername());
+        assertThat(notification.getComments().get(0).getCreatedDate()).isEqualTo(
+            newComment.getCreatedDate());
+        assertThat(notification.getLikes()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("알림을 받은 후 새로운 좋아요가 눌리면 추가 알림을 전송 받는다")
+    void receiveNotificationForNewLikeAfterNotification() {
+        //given
+        Result init = init();
+
+        // 이미 알림을 받은 댓글
+        Likes oldLike = getLikes(init.section(), init.user());
+        likesRepository.save(oldLike);
+
+        redisTemplate.opsForHash().put("sectionId_" + init.section().getId(), "comment",
+            oldLike.getCreatedDate().toString());
+
+        // 알림 이후에 작성된 댓글
+        Likes newLike = getLikes(init.section(), init.user());
+        likesRepository.save(newLike);
+
+        //when
+        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
+
+        //then
+        SectionNotificationDto notification = response.get(0);
+        assertThat(notification.getSectionId()).isEqualTo(init.section().getId());
+        assertThat(notification.getRetrospectiveId()).isEqualTo(init.retrospective().getId());
+        assertThat(notification.getLikes().get(0).getUsername()).isEqualTo(
+            init.user().getUsername());
+        assertThat(notification.getLikes().get(0).getCreatedDate()).isEqualTo(
+            newLike.getCreatedDate());
+        assertThat(notification.getComments()).isEmpty();
+    }
+
+    private static Likes getLikes(Section section, User user) {
+        return Likes.builder().section(section).user(user).build();
     }
 
     private static Comment getComment(Section section, User user) {
