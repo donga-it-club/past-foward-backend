@@ -19,6 +19,7 @@ import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
+import aws.retrospective.entity.SectionNotification;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
@@ -28,11 +29,13 @@ import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
+import aws.retrospective.repository.SectionNotificationRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +63,7 @@ public class SectionService {
     private final CommentRepository commentRepository;
     private final StringRedisTemplate redisTemplate;
     private final KudosTargetRepository kudosRepository;
+    private final SectionNotificationRepository notificationRepository;
 
     private final String SECTION_ID = "sectionId_";
 
@@ -208,17 +212,16 @@ public class SectionService {
                 LocalDateTime lastLikeTimeInDB = getLastTimeInDB(lastLikeInDB);
 
                 // Redis에서 마지막으로 알림이 전송된 시간을 조회한다.
-                String lastCommentTimeInRedis = getLastTimeInRedis(SECTION_ID + section.getId(),
-                    "comment");
-                String lastLikeTimeInRedis = getLastTimeInRedis(SECTION_ID + section.getId(),
-                    "like");
-
-                // 마지막으로 작성된 댓글과 좋아요 시간을 Redis에 저장한다.
-                updateRedisValue(section, lastCommentTimeInDB, lastLikeTimeInDB);
+                SectionNotification findPrevNotification = getLastTimeInRedis(
+                    SECTION_ID + section.getId());
 
                 // 마지막으로 작성된 댓글과 좋아요 시간을 비교하여 새로운 댓글과 좋아요를 조회한다.
-                List<Comment> comments = getComments(section.getId(), lastCommentTimeInRedis);
-                List<Likes> likes = getLikes(section.getId(), lastLikeTimeInRedis);
+                List<Comment> comments = getComments(section.getId(), findPrevNotification);
+                List<Likes> likes = getLikes(section.getId(), findPrevNotification);
+
+                // 마지막으로 작성된 댓글과 좋아요 시간을 Redis에 저장한다.
+                updateRedisValue(findPrevNotification, section.getId(), lastCommentTimeInDB,
+                    lastLikeTimeInDB);
 
                 // 새로운 댓글과 좋아요가 있을 경우 알림을 생성한다.
                 if (!likes.isEmpty() || !comments.isEmpty()) {
@@ -229,10 +232,28 @@ public class SectionService {
         return notifications;
     }
 
-    private void updateRedisValue(Section section, LocalDateTime lastCommentTimeInDB,
+    private void updateRedisValue(SectionNotification notification, Long sectionId,
+        LocalDateTime lastCommentTimeInDB,
         LocalDateTime lastLikeTimeInDB) {
-        saveLastTimeInRedis(SECTION_ID + section.getId(), "comment", lastCommentTimeInDB);
-        saveLastTimeInRedis(SECTION_ID + section.getId(), "like", lastLikeTimeInDB);
+        if (notification == null) {
+            notification = SectionNotification.builder()
+                .id(SECTION_ID + sectionId)
+                .lastCommentTimeAt(
+                    lastCommentTimeInDB != null ? lastCommentTimeInDB.toString()
+                        : LocalDateTime.now(ZoneOffset.UTC).toString())
+                .lastLikeTimeAt(lastLikeTimeInDB != null ? lastLikeTimeInDB.toString()
+                    : LocalDateTime.now(ZoneOffset.UTC).toString())
+                .build();
+            notificationRepository.save(notification);
+        } else {
+            if (lastCommentTimeInDB != null) {
+                notification.updateLastCommentTimeAt(lastCommentTimeInDB);
+            }
+            if (lastLikeTimeInDB != null) {
+                notification.updateLastLikeTimeAt(lastLikeTimeInDB);
+            }
+            notificationRepository.save(notification);
+        }
     }
 
     private LocalDateTime getLastTimeInDB(Object entity) {
@@ -246,14 +267,8 @@ public class SectionService {
         return null;
     }
 
-    private String getLastTimeInRedis(String key, String hashKey) {
-        return (String) redisTemplate.opsForHash().get(key, hashKey);
-    }
-
-    private void saveLastTimeInRedis(String key, String hashKey, LocalDateTime lastTimeInDB) {
-        if (lastTimeInDB != null) {
-            redisTemplate.opsForHash().put(key, hashKey, lastTimeInDB.toString());
-        }
+    private SectionNotification getLastTimeInRedis(String key) {
+        return notificationRepository.findById(key).orElse(null);
     }
 
     private Likes getLatestLikeBySection(Section section) {
@@ -264,19 +279,19 @@ public class SectionService {
         return commentRepository.findLatestCommentBySection(section.getId());
     }
 
-    private List<Comment> getComments(Long sectionId, String lastCommentTimeInRedis) {
-        if (lastCommentTimeInRedis != null) {
+    private List<Comment> getComments(Long sectionId, SectionNotification notification) {
+        if (notification != null) {
             return commentRepository.findCommentsAfterDate(sectionId,
-                convertStringToLocalDateTime(lastCommentTimeInRedis));
+                convertStringToLocalDateTime(notification.getLastCommentTimeAt()));
         } else {
             return commentRepository.findAllComments(sectionId);
         }
     }
 
-    private List<Likes> getLikes(Long sectionId, String lastLikeTimeInRedis) {
-        if (lastLikeTimeInRedis != null) {
+    private List<Likes> getLikes(Long sectionId, SectionNotification notification) {
+        if (notification != null) {
             return likesRepository.findLikesAfterDate(sectionId,
-                convertStringToLocalDateTime(lastLikeTimeInRedis));
+                convertStringToLocalDateTime(notification.getLastLikeTimeAt()));
         } else {
             return likesRepository.findAllLikes(sectionId);
         }
