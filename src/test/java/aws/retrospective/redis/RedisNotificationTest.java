@@ -21,6 +21,7 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import aws.retrospective.service.NotificationService;
 import aws.retrospective.service.SectionService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -56,6 +57,8 @@ public class RedisNotificationTest {
     CommentRepository commentRepository;
     @Autowired
     private LikesRepository likesRepository;
+    @Autowired
+    NotificationService notificationService;
 
     record Result(User user, Retrospective retrospective, Section section) {
     }
@@ -88,7 +91,7 @@ public class RedisNotificationTest {
         commentRepository.save(comment);
 
         //when
-        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
+        List<SectionNotificationDto> response = notificationService.getNewCommentsAndLikes();
 
         //then
         SectionNotificationDto notification = response.get(0);
@@ -112,7 +115,7 @@ public class RedisNotificationTest {
         likesRepository.save(like);
 
         //when
-        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
+        List<SectionNotificationDto> response = notificationService.getNewCommentsAndLikes();
 
         //then
         SectionNotificationDto notification = response.get(0);
@@ -143,7 +146,7 @@ public class RedisNotificationTest {
         commentRepository.save(newComment);
 
         //when
-        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
+        List<SectionNotificationDto> response = notificationService.getNewCommentsAndLikes();
 
         //then
         SectionNotificationDto notification = response.get(0);
@@ -174,7 +177,7 @@ public class RedisNotificationTest {
         likesRepository.save(newLike);
 
         //when
-        List<SectionNotificationDto> response = sectionService.getNewCommentsAndLikes();
+        List<SectionNotificationDto> response = notificationService.getNewCommentsAndLikes();
 
         //then
         SectionNotificationDto notification = response.get(0);

@@ -13,7 +13,6 @@ import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
-import aws.retrospective.dto.SectionNotificationDto;
 import aws.retrospective.entity.User;
 import aws.retrospective.service.CommentService;
 import aws.retrospective.service.SectionService;
@@ -122,16 +121,6 @@ public class SectionController {
     ) {
         List<GetCommentsResponseDto> response = commentService.getComments(user, sectionId);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
-    }
-
-    @Operation(summary = "새로운 댓글 및 좋아요 조회", description = "새로운 댓글과 좋아요를 조회하는 API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "성공적으로 알림이 조회되었습니다.")
-    })
-    @GetMapping("/notifications")
-    public CommonApiResponse<List<SectionNotificationDto>> getNewComments() {
-        List<SectionNotificationDto> result = sectionService.getNewCommentsAndLikes();
-        return CommonApiResponse.successResponse(HttpStatus.OK, result);
     }
 
     @Operation(summary = "Kudos 템플릿에 사용자 지정", description = "Kudos 유형의 회고 카드에 칭찬할 사용자를 지정하는 API ")

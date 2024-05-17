@@ -14,12 +14,14 @@ public class SectionNotification {
     private String id;
     private String lastCommentTimeAt;
     private String lastLikeTimeAt;
+    private boolean isRead;
 
     @Builder
     public SectionNotification(String id, String lastCommentTimeAt, String lastLikeTimeAt) {
         this.id = id;
         this.lastCommentTimeAt = lastCommentTimeAt;
         this.lastLikeTimeAt = lastLikeTimeAt;
+        this.isRead = false;
     }
 
     public void updateLastCommentTimeAt(LocalDateTime time) {
@@ -28,5 +30,9 @@ public class SectionNotification {
 
     public void updateLastLikeTimeAt(LocalDateTime time) {
         this.lastLikeTimeAt = time.toString();
+    }
+
+    public void readNotification() {
+        this.isRead = true;
     }
 }
