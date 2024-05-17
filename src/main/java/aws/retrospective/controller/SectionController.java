@@ -128,7 +128,7 @@ public class SectionController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "성공적으로 알림이 조회되었습니다.")
     })
-    @GetMapping("/new-comments")
+    @GetMapping("/notifications")
     public CommonApiResponse<List<SectionNotificationDto>> getNewComments() {
         List<SectionNotificationDto> result = sectionService.getNewCommentsAndLikes();
         return CommonApiResponse.successResponse(HttpStatus.OK, result);
