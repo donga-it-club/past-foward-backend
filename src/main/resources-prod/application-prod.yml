@@ -25,6 +25,10 @@ spring:
   config:
     activate:
       on-profile: prod
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST}
+      port: ${SPRING_REDIS_PORT}
 
 aws:
   ses:

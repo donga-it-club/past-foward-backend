@@ -15,6 +15,7 @@ import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
+import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.SectionRepository;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -33,6 +34,8 @@ class CommentServiceTest {
     private SectionRepository sectionRepository;
     @Mock
     private CommentRepository commentRepository;
+    @Mock
+    private NotificationRepository notificationRepository;
     @InjectMocks
     private CommentService commentService;
 
