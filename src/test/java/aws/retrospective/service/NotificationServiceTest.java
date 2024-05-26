@@ -95,8 +95,8 @@ class NotificationServiceTest {
         assertThat(notification.getSectionId()).isEqualTo(savedSection.getId());
         assertThat(notification.getRetrospectiveTitle()).isEqualTo(
             retrospective.getTitle());
-        assertThat(notification.getToUserId()).isEqualTo(savedUser.getId());
-        assertThat(notification.getFromUsername()).isEqualTo(savedUser.getUsername());
+        assertThat(notification.getReceiverId()).isEqualTo(savedUser.getId());
+        assertThat(notification.getSenderName()).isEqualTo(savedUser.getUsername());
         assertThat(notification.getThumbnail()).isEqualTo(savedUser.getThumbnail());
         assertThat(notification.getNotificationType()).isEqualTo(NotificationType.COMMENT);
     }
@@ -135,8 +135,8 @@ class NotificationServiceTest {
         assertThat(notification.getSectionId()).isEqualTo(savedSection.getId());
         assertThat(notification.getRetrospectiveTitle()).isEqualTo(
             retrospective.getTitle());
-        assertThat(notification.getToUserId()).isEqualTo(savedUser.getId());
-        assertThat(notification.getFromUsername()).isEqualTo(savedUser.getUsername());
+        assertThat(notification.getReceiverId()).isEqualTo(savedUser.getId());
+        assertThat(notification.getSenderName()).isEqualTo(savedUser.getUsername());
         assertThat(notification.getThumbnail()).isEqualTo(savedUser.getThumbnail());
         assertThat(notification.getNotificationType()).isEqualTo(NotificationType.LIKE);
     }
@@ -191,8 +191,8 @@ class NotificationServiceTest {
         assertThat(notification.getSectionId()).isEqualTo(savedSection.getId());
         assertThat(notification.getRetrospectiveTitle()).isEqualTo(
             retrospective.getTitle());
-        assertThat(notification.getToUserId()).isEqualTo(savedUser.getId());
-        assertThat(notification.getFromUsername()).isEqualTo(savedUser.getUsername());
+        assertThat(notification.getReceiverId()).isEqualTo(savedUser.getId());
+        assertThat(notification.getSenderName()).isEqualTo(savedUser.getUsername());
         assertThat(notification.getThumbnail()).isEqualTo(savedUser.getThumbnail());
         assertThat(notification.getNotificationType()).isEqualTo(NotificationType.LIKE);
     }

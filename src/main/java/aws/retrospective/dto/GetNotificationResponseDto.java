@@ -16,9 +16,9 @@ public class GetNotificationResponseDto {
     @Schema(description = "회고 제목", example = "중간 회고")
     private String retrospectiveTitle;
     @Schema(description = "알림을 받는 사용자 ID", example = "1")
-    private Long toUserId;
+    private Long receiverId;
     @Schema(description = "알림을 발생시킨 사용자 이름", example = "test")
-    private String fromUsername;
+    private String senderName;
     @Schema(description = "이벤트를 발생시킨 사용자 프로필 이미지", example = "4728e325-6215-40ba-abd8-7bf26bcd9029")
     private String thumbnail;
     @Schema(description = "알림 타입", example = "COMMENT")
@@ -27,14 +27,14 @@ public class GetNotificationResponseDto {
     private LocalDateTime dateTime;
 
     private GetNotificationResponseDto(Long notificationId, Long sectionId,
-        String retrospectiveTitle, Long toUserId,
-        String fromUsername, String thumbnail, NotificationType notificationType,
+        String retrospectiveTitle, Long receiverId,
+        String senderName, String thumbnail, NotificationType notificationType,
         LocalDateTime dateTime) {
         this.notificationId = notificationId;
         this.sectionId = sectionId;
         this.retrospectiveTitle = retrospectiveTitle;
-        this.toUserId = toUserId;
-        this.fromUsername = fromUsername;
+        this.receiverId = receiverId;
+        this.senderName = senderName;
         this.thumbnail = thumbnail;
         this.notificationType = notificationType;
         this.dateTime = dateTime;
@@ -43,8 +43,8 @@ public class GetNotificationResponseDto {
     public static GetNotificationResponseDto of(Notification notification) {
         return new GetNotificationResponseDto(notification.getId(),
             notification.getSection().getId(),
-            notification.getRetrospective().getTitle(), notification.getToUser().getId(),
-            notification.getFromUser().getUsername(), notification.getFromUser().getThumbnail(),
+            notification.getRetrospective().getTitle(), notification.getSender().getId(),
+            notification.getReceiver().getUsername(), notification.getReceiver().getThumbnail(),
             notification.getNotificationType(), notification.getCreatedDate());
     }
 }
