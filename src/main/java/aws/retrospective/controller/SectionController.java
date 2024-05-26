@@ -87,7 +87,7 @@ public class SectionController {
     public CommonApiResponse<Void> deleteSection(@CurrentUser User user,
         @PathVariable("sectionId") Long sectionId) {
         sectionService.deleteSection(sectionId, user);
-        return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+        return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT);
     }
 
     // 회고 카드 전체 조회
@@ -107,7 +107,7 @@ public class SectionController {
     public CommonApiResponse<Void> assignUser(@CurrentUser User user,
         @RequestBody @Valid AssignUserRequestDto request) {
         sectionService.assignUserToActionItem(request);
-        return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT, null);
+        return CommonApiResponse.successResponse(HttpStatus.NO_CONTENT);
     }
 
     @Operation(summary = "회고 카드 내 댓글 전체 조회", responses = {

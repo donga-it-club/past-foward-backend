@@ -35,6 +35,6 @@ public class NotificationController {
     @PostMapping("/{notificationId}")
     public CommonApiResponse<String> readNotification(@PathVariable Long notificationId) {
         notificationService.readNotification(notificationId);
-        return CommonApiResponse.successResponse(HttpStatus.OK, null);
+        return CommonApiResponse.successResponse(HttpStatus.OK);
     }
 }
