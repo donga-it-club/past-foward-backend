@@ -136,7 +136,7 @@ public class SectionService {
             likesRepository.save(createLikes);
             findSection.increaseSectionLikes();
 
-            Notification notification = Notification.createNotification(findSection,
+            Notification notification = Notification.of(findSection,
                 findSection.getRetrospective(),
                 user, findSection.getUser(), null, createLikes, NotificationType.LIKE);
             notificationRepository.save(notification);

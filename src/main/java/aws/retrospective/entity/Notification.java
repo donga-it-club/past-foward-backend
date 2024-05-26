@@ -67,7 +67,7 @@ public class Notification extends BaseEntity {
         this.notificationType = notificationType;
     }
 
-    public static Notification createNotification(Section section, Retrospective retrospective,
+    public static Notification of(Section section, Retrospective retrospective,
         User sender, User receiver, Comment comment, Likes likes,
         NotificationType notificationType) {
         return new Notification(section, retrospective, sender, receiver, comment, likes,
