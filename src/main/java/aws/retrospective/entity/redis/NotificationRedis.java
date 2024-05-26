@@ -18,7 +18,7 @@ public class NotificationRedis {
         this.lastNotificationTime = lastNotificationTime;
     }
 
-    public static NotificationRedis createNotification(String notification, LocalDateTime lastNotificationTime) {
+    public static NotificationRedis of(String notification, LocalDateTime lastNotificationTime) {
         return new NotificationRedis(notification, lastNotificationTime);
     }
 }

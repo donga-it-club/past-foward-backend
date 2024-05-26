@@ -44,14 +44,14 @@ public class NotificationService {
     }
 
     private static NotificationRedis createNotification() {
-        return NotificationRedis.createNotification(NOTIFICATION,
+        return NotificationRedis.of(NOTIFICATION,
             LocalDateTime.now());
     }
 
     private List<GetNotificationResponseDto> convertDto(NotificationRedis notificationRedis) {
         return notificationRepository.findByIsReadOrCreatedDateAfter(
                 NotificationStatus.UNREAD, notificationRedis.getLastNotificationTime()).stream()
-            .map(GetNotificationResponseDto::createNotificationDto)
+            .map(GetNotificationResponseDto::of)
             .toList();
     }
 

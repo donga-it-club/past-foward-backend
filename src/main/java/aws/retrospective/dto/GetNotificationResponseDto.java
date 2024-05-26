@@ -40,7 +40,7 @@ public class GetNotificationResponseDto {
         this.dateTime = dateTime;
     }
 
-    public static GetNotificationResponseDto createNotificationDto(Notification notification) {
+    public static GetNotificationResponseDto of(Notification notification) {
         return new GetNotificationResponseDto(notification.getId(),
             notification.getSection().getId(),
             notification.getRetrospective().getTitle(), notification.getToUser().getId(),

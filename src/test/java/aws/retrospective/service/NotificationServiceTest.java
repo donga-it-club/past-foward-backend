@@ -80,7 +80,7 @@ class NotificationServiceTest {
         ReflectionTestUtils.setField(request, "sectionId", savedSection.getId());
         ReflectionTestUtils.setField(request, "commentContent", "content");
 
-        NotificationRedis redis = NotificationRedis.createNotification("notification",
+        NotificationRedis redis = NotificationRedis.of("notification",
             LocalDateTime.now());// 마지막으로 알림이 전송된 시간을 레디스에 저장
         notificationRedisRepository.save(redis);
 
@@ -120,7 +120,7 @@ class NotificationServiceTest {
             .build();
         Section savedSection = sectionRepository.save(section);
 
-        NotificationRedis redis = NotificationRedis.createNotification("notification",
+        NotificationRedis redis = NotificationRedis.of("notification",
             LocalDateTime.now());// 마지막으로 알림이 전송된 시간을 레디스에 저장
         notificationRedisRepository.save(redis);
 
@@ -160,7 +160,7 @@ class NotificationServiceTest {
             .build();
         Section savedSection = sectionRepository.save(section);
 
-        NotificationRedis redis = NotificationRedis.createNotification("notification",
+        NotificationRedis redis = NotificationRedis.of("notification",
             LocalDateTime.now());// 마지막으로 알림이 전송된 시간을 레디스에 저장
         notificationRedisRepository.save(redis);
 
