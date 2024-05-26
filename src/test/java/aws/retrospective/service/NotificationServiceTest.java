@@ -17,6 +17,7 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.UserRepository;
+import aws.retrospective.util.TestUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -76,9 +76,7 @@ class NotificationServiceTest {
             .build();
         Section savedSection = sectionRepository.save(section);
 
-        CreateCommentDto request = new CreateCommentDto();
-        ReflectionTestUtils.setField(request, "sectionId", savedSection.getId());
-        ReflectionTestUtils.setField(request, "commentContent", "content");
+        CreateCommentDto request = TestUtil.createCommentDto(section.getId());
 
         NotificationRedis redis = NotificationRedis.of("notification",
             LocalDateTime.now());// 마지막으로 알림이 전송된 시간을 레디스에 저장
@@ -164,9 +162,7 @@ class NotificationServiceTest {
             LocalDateTime.now());// 마지막으로 알림이 전송된 시간을 레디스에 저장
         notificationRedisRepository.save(redis);
 
-        CreateCommentDto request = new CreateCommentDto();
-        ReflectionTestUtils.setField(request, "sectionId", savedSection.getId());
-        ReflectionTestUtils.setField(request, "commentContent", "content");
+        CreateCommentDto request = TestUtil.createCommentDto(section.getId());
         commentService.createComment(savedUser, request); // 댓글 작성
 
         sectionService.increaseSectionLikes(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
