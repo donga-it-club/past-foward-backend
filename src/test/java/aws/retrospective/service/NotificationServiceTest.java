@@ -10,7 +10,7 @@ import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
-import aws.retrospective.entity.redis.NotificationRedis;
+import aws.retrospective.entity.NotificationRedis;
 import aws.retrospective.repository.NotificationRedisRepository;
 import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.RetrospectiveRepository;

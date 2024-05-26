@@ -1,4 +1,4 @@
-package aws.retrospective.entity.redis;
+package aws.retrospective.entity;
 
 import java.time.LocalDateTime;
 import lombok.AccessLevel;

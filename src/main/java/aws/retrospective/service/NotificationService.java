@@ -3,7 +3,7 @@ package aws.retrospective.service;
 import aws.retrospective.dto.GetNotificationResponseDto;
 import aws.retrospective.entity.Notification;
 import aws.retrospective.entity.NotificationStatus;
-import aws.retrospective.entity.redis.NotificationRedis;
+import aws.retrospective.entity.NotificationRedis;
 import aws.retrospective.repository.NotificationRedisRepository;
 import aws.retrospective.repository.NotificationRepository;
 import java.time.LocalDateTime;
