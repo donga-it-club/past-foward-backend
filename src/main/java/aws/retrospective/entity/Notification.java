@@ -34,12 +34,11 @@ public class Notification extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_user_id")
-    private User fromUser; // 이벤트 발생시킨 사람
+    private User sender; // 알림을 발생시킨 사용자
 
-    // 알림을 받는 사용자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_user_id")
-    private User toUser;
+    private User receiver; // 알림을 받는 사용자
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
@@ -55,12 +54,13 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType; // COMMENT, LIKE
 
-    private Notification(Section section, Retrospective retrospective, User fromUser, User toUser, Comment comment,
+    private Notification(Section section, Retrospective retrospective, User sender, User receiver,
+        Comment comment,
         Likes likes, NotificationType notificationType) {
         this.section = section;
         this.retrospective = retrospective;
-        this.fromUser = fromUser;
-        this.toUser = toUser;
+        this.sender = sender;
+        this.receiver = receiver;
         this.comment = comment;
         this.likes = likes;
         this.isRead = NotificationStatus.UNREAD;
@@ -68,8 +68,9 @@ public class Notification extends BaseEntity {
     }
 
     public static Notification createNotification(Section section, Retrospective retrospective,
-        User fromUser, User toUser, Comment comment, Likes likes, NotificationType notificationType) {
-        return new Notification(section, retrospective, fromUser, toUser, comment, likes,
+        User sender, User receiver, Comment comment, Likes likes,
+        NotificationType notificationType) {
+        return new Notification(section, retrospective, sender, receiver, comment, likes,
             notificationType);
     }
 
