@@ -1,16 +1,18 @@
 package aws.retrospective.service;
 
-
 import aws.retrospective.dto.CreateCommentDto;
 import aws.retrospective.dto.CreateCommentResponseDto;
 import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.UpdateCommentRequestDto;
 import aws.retrospective.dto.UpdateCommentResponseDto;
 import aws.retrospective.entity.Comment;
+import aws.retrospective.entity.Notification;
+import aws.retrospective.entity.NotificationType;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.CommentRepository;
+import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.SectionRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,6 +26,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final SectionRepository sectionRepository;
+    private final NotificationRepository notificationRepository;
 
 
     // 댓글 생성
@@ -31,12 +34,15 @@ public class CommentService {
     public CreateCommentResponseDto createComment(User user, CreateCommentDto request) {
 
         // 댓글이 속한 섹션 정보 가져오기
-        Section sectionId = sectionRepository.findById(request.getSectionId())
+        Section section = sectionRepository.findById(request.getSectionId())
             .orElseThrow(() -> new NoSuchElementException("Section not found with ID"));
 
         // 새 댓글 생성
-        Comment createComment = createComment(request.getCommentContent(), sectionId, user);
+        Comment createComment = createComment(request.getCommentContent(), section, user);
         commentRepository.save(createComment);
+
+        Notification notification = createNotification(user, section, createComment);
+        notificationRepository.save(notification);
 
         return new CreateCommentResponseDto(
             createComment.getId(),
@@ -84,8 +90,10 @@ public class CommentService {
             throw new ForbiddenAccessException("작성자만 댓글을 삭제할 수 있습니다.");
         }
 
-        commentRepository.delete(findComment);
+        notificationRepository.findNotificationByCommentId(commentId)
+            .ifPresent(notificationRepository::delete);
 
+        commentRepository.delete(findComment);
     }
 
     // 모든 댓글 조회
@@ -109,6 +117,12 @@ public class CommentService {
         return commentRepository.findById(commentId)
             .orElseThrow(
                 () -> new NoSuchElementException("Comment not found with ID: " + commentId));
+    }
+
+    private static Notification createNotification(User user, Section section, Comment comment) {
+        return Notification.of(section,
+            section.getRetrospective(), comment.getUser(), section.getUser(), comment, null,
+            NotificationType.COMMENT);
     }
 
 }

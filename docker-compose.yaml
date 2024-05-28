@@ -14,6 +14,15 @@ services:
     ports:
       - "3306:3306"
 
+  redis:
+    restart: always
+    image: redis:alpine
+    container_name: past-forward-redis
+    command: redis-server --port 6379
+    hostname: redis
+    ports:
+      - "6380:6379"
+
 volumes:
   data:
 

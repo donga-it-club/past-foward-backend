@@ -1,5 +1,6 @@
 package aws.retrospective.util;
 
+import aws.retrospective.dto.CreateCommentDto;
 import aws.retrospective.entity.Bookmark;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
@@ -9,6 +10,7 @@ import aws.retrospective.entity.Team;
 import aws.retrospective.entity.User;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class TestUtil {
 
@@ -63,6 +65,13 @@ public class TestUtil {
             .user(user)
             .retrospective(retrospective)
             .build();
+    }
+
+    public static CreateCommentDto createCommentDto(Long sectionId) {
+        CreateCommentDto request = new CreateCommentDto();
+        ReflectionTestUtils.setField(request, "sectionId", sectionId);
+        ReflectionTestUtils.setField(request, "commentContent", "content");
+        return request;
     }
 
 }

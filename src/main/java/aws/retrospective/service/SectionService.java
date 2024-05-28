@@ -15,6 +15,8 @@ import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
+import aws.retrospective.entity.Notification;
+import aws.retrospective.entity.NotificationType;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
@@ -24,6 +26,7 @@ import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
+import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -52,6 +55,7 @@ public class SectionService {
     private final ActionItemRepository actionItemRepository;
     private final UserRepository userRepository;
     private final KudosTargetRepository kudosRepository;
+    private final NotificationRepository notificationRepository;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -131,8 +135,15 @@ public class SectionService {
             Likes createLikes = Likes.builder().section(findSection).user(user).build();
             likesRepository.save(createLikes);
             findSection.increaseSectionLikes();
+
+            Notification notification = Notification.of(findSection,
+                findSection.getRetrospective(),
+                user, findSection.getUser(), null, createLikes, NotificationType.LIKE);
+            notificationRepository.save(notification);
         } else {
             Likes likes = findLikes.get();
+            notificationRepository.findNotificationByLikesId(likes.getId())
+                .ifPresent(notificationRepository::delete);
             likesRepository.delete(likes);
             findSection.cancelSectionLikes();
         }

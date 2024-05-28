@@ -35,6 +35,7 @@ import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
+import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -73,6 +74,8 @@ class SectionServiceTest {
     UserRepository userRepository;
     @Mock
     KudosTargetRepository kudosRepository;
+    @Mock
+    NotificationRepository notificationRepository;
     @InjectMocks
     SectionService sectionService;
 

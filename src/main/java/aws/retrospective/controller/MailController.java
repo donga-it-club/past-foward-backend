@@ -34,6 +34,6 @@ public class MailController {
     })
     public CommonApiResponse<?> sendMail(@Valid @RequestBody SendMailRequestDto request) {
         mailService.sendMail(request);
-        return CommonApiResponse.successResponse(HttpStatus.OK, null);
+        return CommonApiResponse.successResponse(HttpStatus.OK);
     }
 }
