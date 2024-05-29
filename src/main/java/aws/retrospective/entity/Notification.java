@@ -33,11 +33,11 @@ public class Notification extends BaseEntity {
     private Retrospective retrospective;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_user_id")
+    @JoinColumn(name = "sender_id")
     private User sender; // 알림을 발생시킨 사용자
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_user_id")
+    @JoinColumn(name = "receiver_id")
     private User receiver; // 알림을 받는 사용자
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -33,7 +33,7 @@ public class NotificationController {
     @Operation(summary = "알림 읽기", description = "알림 읽음 처리 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @PostMapping("/{notificationId}")
-    public CommonApiResponse<String> readNotification(@PathVariable Long notificationId) {
+    public CommonApiResponse<Void> readNotification(@PathVariable Long notificationId) {
         notificationService.readNotification(notificationId);
         return CommonApiResponse.successResponse(HttpStatus.OK);
     }
