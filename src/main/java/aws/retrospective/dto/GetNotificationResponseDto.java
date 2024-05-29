@@ -44,7 +44,7 @@ public class GetNotificationResponseDto {
         return new GetNotificationResponseDto(notification.getId(),
             notification.getSection().getId(),
             notification.getRetrospective().getTitle(), notification.getSender().getId(),
-            notification.getReceiver().getUsername(), notification.getReceiver().getThumbnail(),
+            notification.getReceiver().getUsername(), notification.getSender().getThumbnail(),
             notification.getNotificationType(), notification.getCreatedDate());
     }
 }
