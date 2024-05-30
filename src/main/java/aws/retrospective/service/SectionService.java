@@ -7,7 +7,6 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetActionItemsResponseDto;
 import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
@@ -80,7 +79,7 @@ public class SectionService {
         List<GetSectionsResponseDto> response = new ArrayList<>();
         List<Section> sections = sectionRepository.getSectionsWithComments(
             request.getRetrospectiveId());
-        revertDto(sections, response);
+        convertDto(sections, response);
 
         return response;
     }
@@ -246,24 +245,10 @@ public class SectionService {
             .build();
     }
 
-    private void revertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
+    private void convertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
         for (Section section : sections) {
-            List<GetCommentDto> collect = section.getComments().stream()
-                .map(c -> new GetCommentDto(c.getId(), c.getUser().getId(), c.getContent(),
-                    c.getUser().getUsername(),
-                    c.getUser().getThumbnail()))
-                .collect(Collectors.toList());
             response.add(
-                new GetSectionsResponseDto(section.getId(), section.getUser().getId(),
-                    section.getUser().getUsername(),
-                    section.getContent(), section.getLikeCnt(),
-                    section.getTemplateSection().getSectionName(), section.getCreatedDate(),
-                    collect, section.getUser().getThumbnail(),
-                    section.getActionItem() != null ? new GetActionItemsResponseDto(
-                        section.getActionItem().getUser().getId(),
-                        section.getActionItem().getUser().getUsername(),
-                        section.getActionItem().getUser().getThumbnail()
-                    ) : null));
+                GetSectionsResponseDto.of(section, getKudosTarget(section), getComments(section)));
         }
     }
 
@@ -291,5 +276,15 @@ public class SectionService {
 
     private KudosTarget assignKudos(Section section, User targetUser) {
         return kudosRepository.save(KudosTarget.createKudosTarget(section, targetUser));
+    }
+
+    private KudosTarget getKudosTarget(Section section) {
+        return kudosRepository.findBySection(section).orElse(null);
+    }
+
+    private static List<GetCommentDto> getComments(Section section) {
+        return section.getComments().stream()
+            .map(GetCommentDto::from)
+            .collect(Collectors.toList());
     }
 }
