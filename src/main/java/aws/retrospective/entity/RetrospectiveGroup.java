@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -47,4 +48,29 @@ public class RetrospectiveGroup extends BaseEntity {
 
     @OneToMany(mappedBy = "retrospectiveGroup")
     private List<Bookmark> bookmarks = new ArrayList<>();
+
+    @Builder
+    public RetrospectiveGroup(String title, UUID thumbnail, String description,
+        ProjectStatus status, User user) {
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.description = description;
+        this.status = status;
+        this.user = user;
+    }
+
+    public void update(String title, ProjectStatus status, UUID thumbnail, String description) {
+        this.title = title;
+        this.status = status;
+        this.thumbnail = thumbnail;
+        this.description = description;
+    }
+
+    public boolean isOwnedByUser(Long userId) {
+        return this.user.getId().equals(userId);
+    }
+
+    public boolean isSameRetrospective(Retrospective retrospective) {
+        return this.getId().equals(retrospective.getId());
+    }
 }
