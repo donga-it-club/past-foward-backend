@@ -6,10 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
@@ -20,11 +17,7 @@ import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectiveType;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.dto.UpdateRetrospectiveDto;
-import aws.retrospective.entity.ProjectStatus;
-import aws.retrospective.entity.Retrospective;
-import aws.retrospective.entity.RetrospectiveTemplate;
-import aws.retrospective.entity.Team;
-import aws.retrospective.entity.User;
+import aws.retrospective.entity.*;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -37,12 +30,16 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.aspectj.apache.bcel.Repository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -50,6 +47,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +72,10 @@ public class RetrospectiveServiceTest {
 
     @InjectMocks
     private RetrospectiveService retrospectiveService;
+
+    @InjectMocks
+    private UserService userService;
+
 
     @Test
     void getRetrospectives_ReturnsRetrospectiveList_WhenCalledWithValidDto() {
@@ -320,6 +324,91 @@ public class RetrospectiveServiceTest {
         assertThat(findRetrospective.getStatus()).isEqualTo("IN_PROGRESS");
         assertThat(findRetrospective.getThumbnail()).isEqualTo(retrospective.getThumbnail());
 
+    }
+
+    @Test
+    @DisplayName("리더가 아닌 경우, 리더 권한 전환 불가")
+    void testTransferRetrospectiveLeadership_CurrentUserNotLeader() {
+        // given (변수 설정)
+        User currentUser = new User("user1", "test", "test", "test");
+        User newLeader = new User("user2", "test", "test", "test");
+        Team team = new Team("Team Name");
+
+        // 리더가 아닌 역할로 설정된 UserTeam 객체 생성
+        UserTeam currentUserTeam = UserTeam.builder()
+                .user(currentUser)
+                .team(team)
+                .role(UserTeamRole.MEMBER)
+                .build();
+
+        Retrospective retrospective = new Retrospective("New Retro",
+                null,
+                "some description",
+                null,
+                ProjectStatus.IN_PROGRESS,
+                team, currentUser,
+                new RetrospectiveTemplate("Template Name"),
+                LocalDateTime.now());
+
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(java.util.Optional.of(retrospective));
+
+        // 리더가 아닌 역할로 설정
+        currentUserTeam.setTeam(team);
+        currentUserTeam.setRole(UserTeamRole.MEMBER);
+
+        // 사용자가 인증되지 않은 상태를 시뮬레이트하기 위해 SecurityContextHolder에 null 값을 설정
+        SecurityContextHolder.getContext().setAuthentication(null);
+
+        //when
+        assertThrows(NullPointerException.class, () -> {
+            retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, 2L);
+        });
+
+        //then
+        verify(userTeamRepository, never()).save(any(UserTeam.class));
+        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
+    }
+
+    @Test
+    @DisplayName("리더가 아닌 경우, 리더 권한 전환 불가")
+    void testTransferRetrospectiveLeadership_CurrentUserLeader() {
+        // given (변수 설정)
+        User currentUser = new User("user1", "test", "test", "test");
+        User newLeader = new User("user2", "test", "test", "test");
+        Team team = new Team("Team Name");
+
+        // 리더로 설정된 UserTeam 객체 생성
+        UserTeam currentUserTeam = UserTeam.builder()
+                .user(currentUser)
+                .team(team)
+                .role(UserTeamRole.LEADER)
+                .build();
+
+        Retrospective retrospective = new Retrospective("New Retro",
+                null,
+                "some description",
+                null,
+                ProjectStatus.IN_PROGRESS,
+                team, currentUser,
+                new RetrospectiveTemplate("Template Name"),
+                LocalDateTime.now());
+
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(java.util.Optional.of(retrospective));
+
+        // 리더 역할로 설정
+        currentUserTeam.setTeam(team);
+        currentUserTeam.setRole(UserTeamRole.LEADER);
+
+        // 사용자가 인증된 상태를 시뮬레이트하기 위해 SecurityContextHolder에 인증정보 설정
+        Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        //when
+        retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, 2L);
+
+        //then
+        verify(userTeamRepository, times(1)).save(any(UserTeam.class));
+        verify(retrospectiveRepository, times(1)).save(any(Retrospective.class));
     }
 
 
