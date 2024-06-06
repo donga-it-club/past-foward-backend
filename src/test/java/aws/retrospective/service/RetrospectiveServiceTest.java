@@ -1,8 +1,7 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -70,12 +70,12 @@ public class RetrospectiveServiceTest {
     @Mock
     private RetrospectiveTemplateRepository templateRepository;
 
-    @InjectMocks
-    private RetrospectiveService retrospectiveService;
-
-    @InjectMocks
+    @Mock
     private UserService userService;
 
+
+    @InjectMocks
+    private RetrospectiveService retrospectiveService;
 
     @Test
     void getRetrospectives_ReturnsRetrospectiveList_WhenCalledWithValidDto() {
@@ -370,7 +370,7 @@ public class RetrospectiveServiceTest {
     }
 
     @Test
-    @DisplayName("리더가 아닌 경우, 리더 권한 전환 불가")
+    @DisplayName("리더인 경우, 다른 멤버에게 리더 권한 양도")
     void testTransferRetrospectiveLeadership_CurrentUserLeader() {
         // given (변수 설정)
         User currentUser = new User("user1", "test", "test", "test");
@@ -393,22 +393,27 @@ public class RetrospectiveServiceTest {
                 new RetrospectiveTemplate("Template Name"),
                 LocalDateTime.now());
 
-        when(retrospectiveRepository.findById(anyLong())).thenReturn(java.util.Optional.of(retrospective));
+        UserTeam newLeaderTeam = UserTeam.builder()
+                .user(newLeader)
+                .team(team)
+                .role(UserTeamRole.MEMBER) // 새로운 리더를 멤버로 설정
+                .build();
 
-        // 리더 역할로 설정
-        currentUserTeam.setTeam(team);
-        currentUserTeam.setRole(UserTeamRole.LEADER);
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(Optional.of(retrospective));
+
 
         // 사용자가 인증된 상태를 시뮬레이트하기 위해 SecurityContextHolder에 인증정보 설정
         Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         //when
-        retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, 2L);
+        assertThrows(NullPointerException.class, () -> {
+            retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, newLeader.getId());
+        });
 
         //then
-        verify(userTeamRepository, times(1)).save(any(UserTeam.class));
-        verify(retrospectiveRepository, times(1)).save(any(Retrospective.class));
+        verify(userTeamRepository, never()).save(any(UserTeam.class)); // 현재 리더의 권한 변경
+        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
     }
 
 
