@@ -27,7 +27,7 @@ public class Team extends BaseEntity {
     private String name; // 팀 이름
 
     @OneToMany(mappedBy = "team")
-    private List<UserTeam> users = new ArrayList<>();
+    private List<UserTeam> userTeams = new ArrayList<>();
 
     @Builder
     public Team(String name) {

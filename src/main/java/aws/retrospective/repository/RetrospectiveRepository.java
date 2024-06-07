@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RetrospectiveRepository extends JpaRepository<Retrospective, Long>,
-    JpaSpecificationExecutor<Retrospective> {
+    JpaSpecificationExecutor<Retrospective>, RetrospectiveCustomRepository {
 
     @Query("select r from Retrospective r"
         + " left join fetch r.team t"
@@ -16,4 +16,5 @@ public interface RetrospectiveRepository extends JpaRepository<Retrospective, Lo
         + " join fetch r.template rt"
         + " where r.id = :retrospectiveId")
     Optional<Retrospective> findRetrospectiveById(@Param("retrospectiveId") Long retrospectiveId);
+
 }
