@@ -45,6 +45,7 @@ public class RetrospectiveCustomRepositoryImpl implements RetrospectiveCustomRep
         }
 
         return queryFactory.selectFrom(retrospective)
+            .distinct()
             .leftJoin(retrospective.team, team)
             .leftJoin(team.userTeams, userTeam)
             .leftJoin(userTeam.user)
@@ -80,6 +81,7 @@ public class RetrospectiveCustomRepositoryImpl implements RetrospectiveCustomRep
         }
 
         return queryFactory.selectFrom(retrospective)
+            .distinct()
             .leftJoin(retrospective.team, team)
             .leftJoin(team.userTeams, userTeam)
             .leftJoin(userTeam.user)
