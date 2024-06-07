@@ -1,12 +1,12 @@
 package aws.retrospective.repository;
 
+import static aws.retrospective.entity.QBookmark.bookmark;
+import static aws.retrospective.entity.QRetrospective.retrospective;
+import static aws.retrospective.entity.QTeam.team;
+import static aws.retrospective.entity.QUserTeam.userTeam;
+
 import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.RetrospectivesOrderType;
-import aws.retrospective.entity.QBookmark;
-import aws.retrospective.entity.QRetrospective;
-import aws.retrospective.entity.QTeam;
-import aws.retrospective.entity.QUser;
-import aws.retrospective.entity.QUserTeam;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.User;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -24,12 +24,6 @@ public class RetrospectiveCustomRepositoryImpl implements RetrospectiveCustomRep
 
     @Override
     public List<Retrospective> findRetrospectives(User user, GetRetrospectivesDto dto) {
-        QRetrospective retrospective = QRetrospective.retrospective;
-        QTeam team = QTeam.team;
-        QUserTeam userTeam = QUserTeam.userTeam;
-        QUser qUser = QUser.user;
-        QBookmark bookmark = QBookmark.bookmark;
-
         BooleanExpression predicate = retrospective.deletedDate.isNull()
             .and(retrospective.user.id.eq(user.getId())
                 .or(userTeam.user.id.eq(user.getId())));
@@ -53,7 +47,7 @@ public class RetrospectiveCustomRepositoryImpl implements RetrospectiveCustomRep
         return queryFactory.selectFrom(retrospective)
             .leftJoin(retrospective.team, team)
             .leftJoin(team.userTeams, userTeam)
-            .leftJoin(userTeam.user, qUser)
+            .leftJoin(userTeam.user)
             .where(predicate)
             .orderBy(
                 dto.getOrder() == RetrospectivesOrderType.OLDEST ? retrospective.createdDate.asc()
@@ -65,12 +59,6 @@ public class RetrospectiveCustomRepositoryImpl implements RetrospectiveCustomRep
 
     @Override
     public long countRetrospectives(User user, GetRetrospectivesDto dto) {
-        QRetrospective retrospective = QRetrospective.retrospective;
-        QTeam team = QTeam.team;
-        QUserTeam userTeam = QUserTeam.userTeam;
-        QUser qUser = QUser.user;
-        QBookmark bookmark = QBookmark.bookmark;
-
         BooleanExpression predicate = retrospective.deletedDate.isNull()
             .and(retrospective.user.id.eq(user.getId())
                 .or(userTeam.user.id.eq(user.getId())));
@@ -94,7 +82,7 @@ public class RetrospectiveCustomRepositoryImpl implements RetrospectiveCustomRep
         return queryFactory.selectFrom(retrospective)
             .leftJoin(retrospective.team, team)
             .leftJoin(team.userTeams, userTeam)
-            .leftJoin(userTeam.user, qUser)
+            .leftJoin(userTeam.user)
             .where(predicate)
             .fetch().size();
     }
