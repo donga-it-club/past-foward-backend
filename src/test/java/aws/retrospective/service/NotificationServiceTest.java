@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 class NotificationServiceTest {
 
     @Autowired
