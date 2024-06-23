@@ -61,27 +61,16 @@ public class SectionService {
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
 
-        // 개인 회고 조회 시에 teamId 필요 X
-        if (findRetrospective.getTeam() == null) {
-            if (request.getTeamId() != null) {
-                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
-            }
-        }
-
+        // 개인 회고 조회 시에 팀 정보가 필요 없다.
+        validatePersonalRetrospective(findRetrospective, request.getTeamId());
         // 다른 팀의 회고 보드를 조회 할 수 없다
-        if (request.getTeamId() != null) {
-            Team findTeam = getTeam(request.getTeamId());
-            if (!findRetrospective.isSameTeam(findTeam)) {
-                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
-            }
-        }
+        validateTeamAccess(request.getTeamId(), findRetrospective);
 
-        List<GetSectionsResponseDto> response = new ArrayList<>();
+        // 회고 카드 전체 조회
         List<Section> sections = sectionRepository.getSectionsWithComments(
             request.getRetrospectiveId());
-        convertDto(sections, response);
 
-        return response;
+        return convertSectionToResponse(sections);
     }
 
     // 회고 카드 생성 API
@@ -249,11 +238,13 @@ public class SectionService {
             .build();
     }
 
-    private void convertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
+    private List<GetSectionsResponseDto> convertSectionToResponse(List<Section> sections) {
+        List<GetSectionsResponseDto> response = new ArrayList<>();
         for (Section section : sections) {
             response.add(
                 GetSectionsResponseDto.of(section, getKudosTarget(section), getComments(section)));
         }
+        return response;
     }
 
     private Team getTeam(Long teamId) {
@@ -334,5 +325,22 @@ public class SectionService {
         }
         // Section 삭제
         sectionRepository.delete(section);
+    }
+
+    private void validateTeamAccess(Long teamId, Retrospective retrospective) {
+        if (teamId != null) {
+            if (retrospective.isNotSameTeam(getTeam(teamId))) {
+                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
+            }
+        }
+    }
+
+    private void validatePersonalRetrospective(Retrospective retrospective, Long teamId) {
+        if (retrospective.isPersonalRetrospective()) {
+            // 개인 회고시에 팀 ID 정보는 필요하지 않다.
+            if (teamId != null) {
+                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
+            }
+        }
     }
 }
