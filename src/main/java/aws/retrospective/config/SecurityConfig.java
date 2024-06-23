@@ -37,8 +37,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
             (authorizeHttpRequests) -> authorizeHttpRequests.requestMatchers("/actuator/health",
                     "/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/api/**",
-                    "/swagger-resources/**", "/swagger-ui.html").permitAll().anyRequest()
-                .authenticated()
+                    "/swagger-resources/**", "/swagger-ui.html").permitAll()
+                    .requestMatchers("/boards/create").hasAuthority("ROLE_ADMIN")
+                    .anyRequest().authenticated()
 
         ).csrf((csrf) -> csrf.disable()).sessionManagement(
             (sessionManagement) -> sessionManagement.sessionCreationPolicy(
