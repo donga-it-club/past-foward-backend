@@ -48,7 +48,8 @@ public class User extends BaseEntity {
     private boolean administrator; // 관리자 여부
 
     @Builder
-    public User(String email, String username, String phone, String tenantId, boolean administrator) {
+    public User(Long id, String email, String username, String phone, String tenantId, boolean administrator) {
+        this.id = id;
         this.email = email;
         this.username = username;
         this.phone = phone;
