@@ -54,10 +54,10 @@ public class Section extends BaseEntity {
     private ActionItem actionItem;
 
     @Builder
-    public Section(String content, long likeCnt, Retrospective retrospective, User user,
+    public Section(String content, Retrospective retrospective, User user,
         TemplateSection templateSection) {
         this.content = content;
-        this.likeCnt = likeCnt;
+        this.likeCnt = 0;
         this.retrospective = retrospective;
         this.user = user;
         this.templateSection = templateSection;

@@ -84,24 +84,25 @@ public class SectionService {
         return response;
     }
 
-    // 회고 카드 등록
+    // 회고 카드 생성 API
     @Transactional
     public CreateSectionResponseDto createSection(User user, CreateSectionDto request) {
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
         TemplateSection findTemplateSection = getTemplateSection(request.getTemplateSectionId());
 
-        // 회고 템플릿 정보가 일치하는지 확인한다.
-        if (!findRetrospective.isSameTemplate(findTemplateSection)) {
-            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
-        }
+        /**
+         * 회고 템플릿이 일치하는지 확인한다.
+         * 회고 템플릿이 일치하지 않으면 예외를 발생시킨다.
+         */
+        validateTemplateMatch(findRetrospective, findTemplateSection);
 
-        // 회고 카드 등록
+        // 회고 카드 생성
         Section createSection = createSection(request.getSectionContent(), findTemplateSection,
             findRetrospective, user);
         sectionRepository.save(createSection);
 
-        return new CreateSectionResponseDto(createSection.getId(), createSection.getUser().getId(),
-            request.getRetrospectiveId(), request.getSectionContent());
+        // Entity를 Dto로 변환하여 반환한다.
+        return convertCreateSectionResponseDto(request, createSection);
     }
 
     // 회고 카드 수정
@@ -237,11 +238,18 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
     }
 
-    // 회고 카드 등록
-    private Section createSection(String sectionContent, TemplateSection findTemplateSection,
-        Retrospective findRetrospective, User findUser) {
-        return Section.builder().templateSection(findTemplateSection)
-            .retrospective(findRetrospective).user(findUser).likeCnt(0).content(sectionContent)
+    /**
+     * Section 생성
+     * @param sectionContent 회고 카드 내용
+     * @param templateSection 회고 카드의 템플릿 (ex. Keep, Problem, Try)
+     * @param retrospective 회고 카드가 속한 회고 보드
+     * @param user 회고 카드를 작성한 사용자
+     * @return
+     */
+    private Section createSection(String sectionContent, TemplateSection templateSection,
+        Retrospective retrospective, User user) {
+        return Section.builder().templateSection(templateSection)
+            .retrospective(retrospective).user(user).content(sectionContent)
             .build();
     }
 
@@ -286,5 +294,21 @@ public class SectionService {
         return section.getComments().stream()
             .map(GetCommentDto::from)
             .collect(Collectors.toList());
+    }
+
+    private void validateTemplateMatch(Retrospective retrospective, TemplateSection templateSection) {
+        if(retrospective.isNotSameTemplate(templateSection.getTemplate())) {
+            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
+        }
+    }
+
+    private static CreateSectionResponseDto convertCreateSectionResponseDto(CreateSectionDto request,
+        Section createSection) {
+        return CreateSectionResponseDto.builder()
+            .id(createSection.getId())
+            .userId(createSection.getUser().getId())
+            .retrospectiveId(request.getRetrospectiveId())
+            .sectionContent(request.getSectionContent())
+            .build();
     }
 }
