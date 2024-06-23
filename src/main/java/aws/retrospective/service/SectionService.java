@@ -180,15 +180,13 @@ public class SectionService {
     public void deleteSection(Long sectionId, User user) {
         Section findSection = getSection(sectionId);
 
-        // 작성자만 회고 카드를 삭제할 수 있다.
+        /**
+         * 회고 카드 작성자와 현재 사용자가 일치하는지 확인한다.
+         * 일치하지 않으면 예외를 발생시킨다.
+         */
         validateSameUser(findSection, user);
 
-        // 연관관계에 있는 Kudos 테이블의 row를 먼저 삭제한다.
-        if (findSection.isKudosTemplate()) {
-            kudosRepository.deleteBySectionId(sectionId);
-        }
-
-        sectionRepository.delete(findSection);
+        deleteSection(findSection);
     }
 
     @Transactional
@@ -323,5 +321,18 @@ public class SectionService {
         String sectionContent) {
         return EditSectionResponseDto.builder().sectionId(sectionId)
             .content(sectionContent).build();
+    }
+
+    /**
+     * Section 삭제
+     * @param section 삭제할 회고 카드
+     */
+    public void deleteSection(Section section) {
+        // 연관관계에 있는 Kudos 테이블의 row를 먼저 삭제한다.
+        if (section.isKudosTemplate()) {
+            kudosRepository.deleteBySectionId(section.getId());
+        }
+        // Section 삭제
+        sectionRepository.delete(section);
     }
 }
