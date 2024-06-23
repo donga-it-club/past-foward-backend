@@ -105,21 +105,21 @@ public class SectionService {
         return convertCreateSectionResponseDto(request, createSection);
     }
 
-    // 회고 카드 수정
+    // 회고 카드 수정 API
     @Transactional
     public EditSectionResponseDto updateSectionContent(User user, Long sectionId,
         EditSectionRequestDto request) {
         Section findSection = getSection(sectionId);
 
-        // 회고 카드 수정은 작성자만 가능하다.
-        if (!findSection.isSameUser(user)) {
-            throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
-        }
+        /**
+         * 회고 카드 작성자와 현재 사용자가 일치하는지 확인한다.
+         * 일치하지 않으면 예외를 발생시킨다.
+         */
+        validateSameUser(findSection, user);
 
-        // 회고 카드 수정
-        findSection.updateSection(request.getSectionContent());
-
-        return new EditSectionResponseDto(sectionId, request.getSectionContent());
+        // 회고 카드 내용 수정
+        findSection.updateSectionContent(request.getSectionContent());
+        return convertUpdateSectionResponseDto(findSection.getId(), findSection.getContent());
     }
 
     // 회고 카드 좋아요 API
@@ -310,5 +310,20 @@ public class SectionService {
             .retrospectiveId(request.getRetrospectiveId())
             .sectionContent(request.getSectionContent())
             .build();
+    }
+
+    private boolean validateSameUser(Section section, User user) {
+        return section.isNotSameUser(user);
+    }
+
+    /**
+     * 회고 카드 수정 응답 Dto 변환
+     * @param sectionId 수정된 회고 카드 ID
+     * @param sectionContent 수정된 회고 카드 내용
+     */
+    private static EditSectionResponseDto convertUpdateSectionResponseDto(Long sectionId,
+        String sectionContent) {
+        return EditSectionResponseDto.builder().sectionId(sectionId)
+            .content(sectionContent).build();
     }
 }

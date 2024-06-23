@@ -64,8 +64,8 @@ public class Section extends BaseEntity {
     }
 
     // 섹션 내용 update
-    public void updateSection(String updateContent) {
-        this.content = updateContent;
+    public void updateSectionContent(String content) {
+        this.content = content;
     }
 
     // 좋아요 등록
@@ -79,6 +79,10 @@ public class Section extends BaseEntity {
 
     public boolean isSameUser(User user) {
         return this.getUser().getId().equals(user.getId());
+    }
+
+    public boolean isNotSameUser(User user) {
+        return !isSameUser(user);
     }
 
     public boolean isActionItemsSection() {
