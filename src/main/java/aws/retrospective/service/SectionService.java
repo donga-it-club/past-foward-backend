@@ -181,9 +181,7 @@ public class SectionService {
         Section findSection = getSection(sectionId);
 
         // 작성자만 회고 카드를 삭제할 수 있다.
-        if (!findSection.isSameUser(user)) {
-            throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
-        }
+        validateSameUser(findSection, user);
 
         // 연관관계에 있는 Kudos 테이블의 row를 먼저 삭제한다.
         if (findSection.isKudosTemplate()) {
