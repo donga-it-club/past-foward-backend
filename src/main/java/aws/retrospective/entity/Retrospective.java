@@ -67,6 +67,10 @@ public class Retrospective extends BaseEntity {
     @OneToMany(mappedBy = "retrospective")
     private List<Bookmark> bookmarks = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "retrospectiveGroup_id")
+    private RetrospectiveGroup retrospectiveGroup;
+
     @Builder
     public Retrospective(String title, UUID thumbnail,
         String description,
