@@ -120,9 +120,10 @@ public class CommentService {
     }
 
     private static Notification createNotification(User user, Section section, Comment comment) {
-        return Notification.of(section,
-            section.getRetrospective(), comment.getUser(), section.getUser(), comment, null,
-            NotificationType.COMMENT);
+        return Notification.builder().notificationType(NotificationType.COMMENT)
+            .retrospective(section.getRetrospective()).section(section).sender(comment.getUser())
+            .receiver(section.getUser()).comment(comment)
+            .build();
     }
 
 }

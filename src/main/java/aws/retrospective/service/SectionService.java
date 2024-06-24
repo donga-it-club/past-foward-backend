@@ -121,23 +121,22 @@ public class SectionService {
 
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
         if (findLikes.isEmpty()) {
-            Likes createLikes = Likes.builder().section(findSection).user(user).build();
+            Likes createLikes = createLikes(findSection, user);
             likesRepository.save(createLikes);
-            findSection.increaseSectionLikes();
+            findSection.increaseSectionLikes(); // 좋아요 기록 저장
 
-            Notification notification = Notification.of(findSection,
-                findSection.getRetrospective(),
-                user, findSection.getUser(), null, createLikes, NotificationType.LIKE);
+            // 댓글 알림 생성
+            Notification notification = createNotification(findSection, findSection.getRetrospective(),
+                user, findSection.getUser(), createLikes);
             notificationRepository.save(notification);
         } else {
             Likes likes = findLikes.get();
-            notificationRepository.findNotificationByLikesId(likes.getId())
-                .ifPresent(notificationRepository::delete);
-            likesRepository.delete(likes);
-            findSection.cancelSectionLikes();
+            deleteNotification(likes); // 기존의 알림을 삭제
+            likesRepository.delete(likes); // 좋아요 기록 삭제
+            findSection.cancelSectionLikes(); // 좋아요 취소
         }
 
-        return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+        return convertIncreaseSectionLikesResponseDto(findSection);
     }
 
     // Action Items 사용자 지정
@@ -377,5 +376,25 @@ public class SectionService {
 
     private KudosTarget getKudosSection(Section section) {
         return kudosRepository.findBySectionId(section.getId());
+    }
+
+    private IncreaseSectionLikesResponseDto convertIncreaseSectionLikesResponseDto(Section section) {
+        return new IncreaseSectionLikesResponseDto(section.getId(), section.getLikeCnt());
+    }
+
+    private Notification createNotification(Section section, Retrospective retrospective,
+        User sender, User receiver, Likes likes) {
+        return Notification.builder().section(section).retrospective(retrospective)
+            .sender(sender).receiver(receiver).comment(null).likes(likes)
+            .notificationType(NotificationType.LIKE).build();
+    }
+
+    private Likes createLikes(Section section, User user) {
+        return Likes.builder().user(user).section(section).build();
+    }
+
+    private void deleteNotification(Likes likes) {
+        notificationRepository.findNotificationByLikesId(likes.getId())
+            .ifPresent(notificationRepository::delete);
     }
 }
