@@ -147,19 +147,22 @@ public class SectionService {
         Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
         Section section = getSection(request.getSectionId());
 
-        if (!section.isActionItemsSection()) {
-            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
-        }
+        // Action Items 유형인지 확인한다.
+        validateActionItems(section);
 
-        ActionItem actionItem = actionItemRepository.findBySectionId(section.getId()).orElse(null);
+        // Action Item을 가져온다.
+        ActionItem actionItem = section.getActionItem();
+        // Action Item에 지정할 사용자를 조회한다.
         User assignUser = getAssignUser(request);
 
+        /**
+         * Action Item이 없을 때는 새로 생성하고, 있을 때는 사용자를 지정한다.
+         */
         if (actionItem == null) {
-            ActionItem savedActionItem = actionItemRepository.save(
-                createActionItem(assignUser, team, section, retrospective));
-            section.updateActionItems(savedActionItem);
-
+            // Action Item 사용자 지정
+            assignActionItem(assignUser, team, section, retrospective);
         } else {
+            // 기존에 등록된 Action Item에 새로운 사용자를 지정한다.
             actionItem.assignUser(assignUser);
         }
     }
@@ -252,9 +255,9 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
     }
 
-    private static ActionItem createActionItem(User findUser, Team findTeam, Section section,
+    private static ActionItem createActionItem(User user, Team team, Section section,
         Retrospective retrospective) {
-        return ActionItem.builder().user(findUser).team(findTeam).section(section)
+        return ActionItem.builder().user(user).team(team).section(section)
             .retrospective(retrospective).build();
     }
 
@@ -342,5 +345,26 @@ public class SectionService {
                 throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
             }
         }
+    }
+
+    private static void validateActionItems(Section section) {
+        if (section.isNotActionItemsSection()) {
+            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
+        }
+    }
+
+    /**
+     * Action Item 생성 및 사용자 지정
+     * @param user Action Item에 지정할 사용자
+     * @param team 팀 정보 (개인 : null)
+     * @param section Action Item을 지정할 회고 카드
+     * @param retrospective Action Item을 지정할 회고 보드
+     */
+    private void assignActionItem(User user, Team team, Section section,
+        Retrospective retrospective) {
+        // Action Item 생성
+        ActionItem savedActionItem = actionItemRepository.save(
+            createActionItem(user, team, section, retrospective));
+        section.updateActionItems(savedActionItem); // 생성된 Action Item을 Section에 지정한다.
     }
 }
