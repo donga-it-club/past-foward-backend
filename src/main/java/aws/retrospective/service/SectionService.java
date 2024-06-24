@@ -189,19 +189,13 @@ public class SectionService {
         validateKudosTemplate(sectionId, section);
 
         User targetUser = getUser(request); // 칭찬 대상 조회
-        /**
-         * 이전에 해당 Section에 다른 사람을 칭창할 사람으로 지정한 적이 있는지 조회
-         * 조회O : DB 값만 변경하면 된다.
-         * 조회X : DB에 새로운 row 삽입
-         */
-        KudosTarget kudosSection = kudosRepository.findBySectionId(section.getId());
+        KudosTarget kudosSection = getKudosSection(section); // DB에 저장된 Kudos 정보 조회
 
-        if (kudosSection == null) {
-            return AssignKudosResponseDto.convertResponse(assignKudos(section, targetUser));
-        } else {
-            kudosSection.assignUser(targetUser);
-            return AssignKudosResponseDto.convertResponse(kudosSection);
-        }
+        /**
+         * Kudos 정보가 없을 때는 새로 생성하고, 있을 때는 사용자를 지정(변경)한다.
+         */
+        return convertAssignKudosResponse(
+            kudosSection == null ? assignKudos(section, targetUser) : kudosSection);
     }
 
     private static void validateKudosTemplate(Long sectionId, Section section) {
@@ -272,8 +266,14 @@ public class SectionService {
                 () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
     }
 
-    private KudosTarget assignKudos(Section section, User targetUser) {
-        return kudosRepository.save(KudosTarget.createKudosTarget(section, targetUser));
+    /**
+     * 칭찬 대상을 지정한다.
+     * @param section 칭찬 대상을 지정할 Section
+     * @param user 칭찬 대상
+     * @return
+     */
+    private KudosTarget assignKudos(Section section, User user) {
+        return kudosRepository.save(KudosTarget.createKudosTarget(section, user));
     }
 
     private KudosTarget getKudosTarget(Section section) {
@@ -366,5 +366,16 @@ public class SectionService {
         ActionItem savedActionItem = actionItemRepository.save(
             createActionItem(user, team, section, retrospective));
         section.updateActionItems(savedActionItem); // 생성된 Action Item을 Section에 지정한다.
+    }
+
+    private AssignKudosResponseDto convertAssignKudosResponse(KudosTarget kudosTarget) {
+        return AssignKudosResponseDto.builder()
+            .kudosId(kudosTarget.getId())
+            .sectionId(kudosTarget.getSection().getId())
+            .userId(kudosTarget.getUser().getId()).build();
+    }
+
+    private KudosTarget getKudosSection(Section section) {
+        return kudosRepository.findBySectionId(section.getId());
     }
 }
