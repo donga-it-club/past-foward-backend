@@ -49,7 +49,7 @@ public class User extends BaseEntity {
 
     @Builder
     public User(Long id, String email, String username, String phone, String tenantId, boolean administrator) {
-        this.id = id;
+        this.id= id;
         this.email = email;
         this.username = username;
         this.phone = phone;
