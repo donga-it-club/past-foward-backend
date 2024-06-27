@@ -54,18 +54,18 @@ public class Section extends BaseEntity {
     private ActionItem actionItem;
 
     @Builder
-    public Section(String content, long likeCnt, Retrospective retrospective, User user,
+    public Section(String content, Retrospective retrospective, User user,
         TemplateSection templateSection) {
         this.content = content;
-        this.likeCnt = likeCnt;
+        this.likeCnt = 0;
         this.retrospective = retrospective;
         this.user = user;
         this.templateSection = templateSection;
     }
 
     // 섹션 내용 update
-    public void updateSection(String updateContent) {
-        this.content = updateContent;
+    public void updateSectionContent(String content) {
+        this.content = content;
     }
 
     // 좋아요 등록
@@ -81,8 +81,16 @@ public class Section extends BaseEntity {
         return this.getUser().getId().equals(user.getId());
     }
 
+    public boolean isNotSameUser(User user) {
+        return !isSameUser(user);
+    }
+
     public boolean isActionItemsSection() {
         return this.getTemplateSection().getSectionName().equals("Action Items");
+    }
+
+    public boolean isNotActionItemsSection() {
+        return !isActionItemsSection();
     }
 
     // Action Items 지정
