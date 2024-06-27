@@ -22,7 +22,7 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/noticeboardwriting")
+@RequestMapping("/admin/notices")
 @Tag(name = "Admin Notice Board Writing")
 @SecurityRequirement(name = "JWT")
 public class NoticeBoardWritingAdminController {
@@ -31,7 +31,7 @@ public class NoticeBoardWritingAdminController {
 
     @Operation(summary = "게시글 작성", description = "새로운 게시글을 작성하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "게시글 작성 성공")})
-    @PostMapping("/create")
+    @PostMapping("/posts")
     public CommonApiResponse<NoticeBoardWritingResponseDto> createPost(@CurrentUser User user, @RequestBody @Valid NoticeBoardWritingRequestDto requestDto) {
         if (!user.isAdministrator()) {
             throw new ForbiddenAccessException("글쓰기 권한이 없습니다.");
@@ -42,7 +42,7 @@ public class NoticeBoardWritingAdminController {
 
     @Operation(summary = "임시 게시글 저장", description = "임시 게시글을 저장하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "임시 게시글 저장 성공")})
-    @PostMapping("/save-temp")
+    @PostMapping("/temp-posts")
     public CommonApiResponse<NoticeBoardWritingResponseDto> saveTempPost(@CurrentUser User user, @RequestBody @Valid NoticeBoardWritingRequestDto requestDto) {
         if (!user.isAdministrator()) {
             throw new ForbiddenAccessException("글쓰기 권한이 없습니다.");
@@ -53,7 +53,7 @@ public class NoticeBoardWritingAdminController {
 
     @Operation(summary = "파일 업로드", description = "파일을 업로드하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "파일 업로드 성공")})
-    @PostMapping("/upload")
+    @PostMapping("/files")
     public CommonApiResponse<String> uploadFile(@CurrentUser User user, @RequestParam("file") MultipartFile file) {
         if (!user.isAdministrator()) {
             throw new ForbiddenAccessException("파일 업로드 권한이 없습니다.");
@@ -68,7 +68,7 @@ public class NoticeBoardWritingAdminController {
 
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "게시글 삭제 성공")})
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/posts/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(@CurrentUser User user, @PathVariable Long id) {
         if (!user.isAdministrator()) {

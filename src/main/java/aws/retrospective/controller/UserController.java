@@ -47,7 +47,7 @@ public class UserController {
     }
 
     // 관리자 권한 설정
-    @PostMapping("/me/admin")
+    @PostMapping("/me/admin-status")
     @Operation(summary = "관리자 권한 설정")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "관리자 권한 설정 성공"),})
     public CommonApiResponse<Void> updateAdminStatus(@CurrentUser User user, @RequestBody @Valid AdminRoleDTO adminRoleDTO) {
