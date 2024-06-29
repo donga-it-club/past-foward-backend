@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -87,5 +88,19 @@ public class RetrospectiveGroupController {
             user, retrospectiveGroupId);
 
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @Operation(summary = "Delete a retrospective group", responses = {
+        @ApiResponse(responseCode = "204", description = "Retrospective group deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Retrospective group not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @DeleteMapping("/{retrospectiveGroupId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRetrospectiveGroup(
+        @CurrentUser User user,
+        @PathVariable("retrospectiveGroupId") Long retrospectiveGroupId) {
+        retrospectiveGroupService.deleteRetrospectiveGroup(retrospectiveGroupId, user);
+
     }
 }
