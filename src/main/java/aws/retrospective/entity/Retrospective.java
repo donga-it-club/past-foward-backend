@@ -67,7 +67,7 @@ public class Retrospective extends BaseEntity {
     @OneToMany(mappedBy = "retrospective")
     private List<Bookmark> bookmarks = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "retrospectiveGroup_id")
     private RetrospectiveGroup retrospectiveGroup;
 

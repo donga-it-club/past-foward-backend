@@ -43,10 +43,6 @@ public class RetrospectiveGroup extends BaseEntity {
     @NotNull
     private User user; //회고를 작성한 사용자 정보
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "retrospective_id")
-    private Retrospective retrospective; //어떤 Retrospective인지
-
     @Enumerated(value = EnumType.STRING)
     private ProjectStatus status; //회고 진행 상태(진행 중, 완료)
 
@@ -86,6 +82,7 @@ public class RetrospectiveGroup extends BaseEntity {
         retrospectives.remove(retrospective);
         retrospective.setRetrospectiveGroup(null);
     }
+
     public boolean isOwnedByUser(Long userId) {
         return this.user.getId().equals(userId);
     }
