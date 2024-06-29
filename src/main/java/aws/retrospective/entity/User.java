@@ -45,16 +45,15 @@ public class User extends BaseEntity {
     private List<Likes> likes = new ArrayList<>();
 
     private String thumbnail; // 프로필 이미지
-    private boolean administrator; // 관리자 여부
+    private boolean isAdministrator; // 관리자 여부
 
     @Builder
-    public User(Long id, String email, String username, String phone, String tenantId, boolean administrator) {
-        this.id = id;
+    public User(String email, String username, String phone, String tenantId, boolean isAdministrator) {
         this.email = email;
         this.username = username;
         this.phone = phone;
         this.tenantId = tenantId;
-        this.administrator = administrator;
+        this.isAdministrator = isAdministrator;
     }
 
     // 프로필 이미지 등록
@@ -64,7 +63,7 @@ public class User extends BaseEntity {
     }
 
     // 관리자 여부 업데이트
-    public void updateAdministrator(boolean administrator) {
-        this.administrator = administrator;
+    public void updateAdministrator(boolean isAdministrator) {
+        this.isAdministrator = isAdministrator;
     }
 }
