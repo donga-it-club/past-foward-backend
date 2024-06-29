@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminRoleDTO {
+public class AdminRoleDtO {
 
     private String email;
     private boolean isAdmin;
