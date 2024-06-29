@@ -102,8 +102,12 @@ public class Retrospective extends BaseEntity {
         this.description = description;
     }
 
-    public boolean isSameTemplate(TemplateSection templateSection) {
-        return this.getTemplate().getName().equals(templateSection.getTemplate().getName());
+    public boolean isSameTemplate(RetrospectiveTemplate template) {
+        return this.getTemplate().getName().equals(template.getName());
+    }
+
+    public boolean isNotSameTemplate(RetrospectiveTemplate template) {
+        return !isSameTemplate(template);
     }
 
     public boolean isSameTeam(Team team) {
@@ -112,5 +116,17 @@ public class Retrospective extends BaseEntity {
 
     public void setRetrospectiveGroup(RetrospectiveGroup retrospectiveGroup) {
         this.retrospectiveGroup = retrospectiveGroup;
+    }
+
+    public boolean isNotSameTeam(Team team) {
+        return !isSameTeam(team);
+    }
+
+    /**
+     * 개인 회고인지 팀 회고인지 확인한다. true : 개인 회고 false : 팀 회고
+     */
+    public boolean isPersonalRetrospective() {
+        return this.team == null;
+
     }
 }

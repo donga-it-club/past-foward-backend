@@ -22,7 +22,6 @@ public class TestUtil {
         return Section.builder()
             .user(loginedUser)
             .content("test")
-            .likeCnt(0)
             .build();
     }
 
