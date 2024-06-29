@@ -3,6 +3,7 @@ package aws.retrospective.service;
 import aws.retrospective.dto.*;
 import aws.retrospective.entity.*;
 import aws.retrospective.repository.RetrospectiveGroupRepository;
+import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.specification.RetrospectiveGroupSpecification;
 import aws.retrospective.util.TestUtil;
@@ -38,6 +39,12 @@ public class RetrospectiveGroupServiceTest {
 
     @Mock
     private RetrospectiveGroupRepository retrospectiveGroupRepository;
+
+    @Mock
+    private RetrospectiveRepository retrospectiveRepository;
+
+    @Mock
+    private RetrospectiveService retrospectiveService;
 
     @Mock
     private UserRepository userRepository;
@@ -143,7 +150,19 @@ public class RetrospectiveGroupServiceTest {
         ReflectionTestUtils.setField(dto, "thumbnail", UUID.randomUUID());
         ReflectionTestUtils.setField(dto, "description", "New Description");
 
+        // 새로운 회고 ID 리스트를 dto에 설정
+        List<Long> retrospectiveIds = List.of(2L, 3L);
+        ReflectionTestUtils.setField(dto, "retrospectiveIds", retrospectiveIds);
+
+        // 새로 추가될 회고 객체 모킹
+        Retrospective retrospective1 = mock(Retrospective.class);
+        Retrospective retrospective2 = mock(Retrospective.class);
+        // 모킹된 회고 객체에 ID 설정
+        when(retrospective1.getId()).thenReturn(2L);
+        when(retrospective2.getId()).thenReturn(3L);
         when(retrospectiveGroupRepository.findById(1L)).thenReturn(Optional.of(retrospectiveGroup));
+        // 회고 리포지토리 모킹: ID 리스트로 회고들을 찾았을 때 미리 생성한 회고 객체 리스트 반환
+        when(retrospectiveRepository.findAllById(retrospectiveIds)).thenReturn(List.of(retrospective1, retrospective2));
 
         // when
         RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroup(user,
@@ -154,6 +173,10 @@ public class RetrospectiveGroupServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(retrospectiveGroup.getId());
         assertThat(response.getThumbnail()).isEqualTo(retrospectiveGroup.getThumbnail());
+        // 회고 그룹에 새로 추가된 회고들의 개수가 2개인지 확인
+        assertThat(retrospectiveGroup.getRetrospectives()).hasSize(2);
+        // 회고 그룹에 새로 추가된 회고들의 ID가 설정한 ID와 동일한지 확인
+        assertThat(retrospectiveGroup.getRetrospectives()).extracting("id").containsExactlyInAnyOrder(2L, 3L);
     }
 
     private RetrospectiveGroup createRetrospectiveGroup(User loginedUser) {
