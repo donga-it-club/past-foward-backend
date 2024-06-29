@@ -7,11 +7,13 @@ import aws.retrospective.dto.GetRetrospectiveGroupsDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveGroupResponseDto;
 import aws.retrospective.dto.UpdateRetrospectiveGroupDto;
+import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveGroup;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.RetrospectiveGroupRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.specification.RetrospectiveGroupSpecification;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -107,6 +109,20 @@ public class RetrospectiveGroupService {
 
         retrospectiveGroup.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail(),
             dto.getDescription());
+
+        // 기존 회고 제거
+        retrospectiveGroup.getRetrospectives().clear();
+
+        // 새 회고 추가
+        if (dto.getRetrospectiveIds() != null && !dto.getRetrospectiveIds().isEmpty()) {
+            List<Retrospective> retrospectives = retrospectiveRepository.findAllById(dto.getRetrospectiveIds());
+            for (Retrospective retrospective : retrospectives) {
+                retrospectiveGroup.addRetrospective(retrospective);
+            }
+        }
+
+        // 회고 그룹 저장
+        retrospectiveGroupRepository.save(retrospectiveGroup);
 
         boolean hasBookmarksByUser = hasBookmarksByUser(retrospectiveGroup, user.getId());
 

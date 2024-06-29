@@ -20,8 +20,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -79,7 +77,15 @@ public class RetrospectiveGroup extends BaseEntity {
         this.thumbnail = thumbnail;
         this.description = description;
     }
+    public void addRetrospective(Retrospective retrospective) {
+        retrospectives.add(retrospective);
+        retrospective.setRetrospectiveGroup(this);
+    }
 
+    public void removeRetrospective(Retrospective retrospective) {
+        retrospectives.remove(retrospective);
+        retrospective.setRetrospectiveGroup(null);
+    }
     public boolean isOwnedByUser(Long userId) {
         return this.user.getId().equals(userId);
     }

@@ -109,4 +109,8 @@ public class Retrospective extends BaseEntity {
     public boolean isSameTeam(Team team) {
         return this.team.getId().equals(team.getId());
     }
+
+    public void setRetrospectiveGroup(RetrospectiveGroup retrospectiveGroup) {
+        this.retrospectiveGroup = retrospectiveGroup;
+    }
 }

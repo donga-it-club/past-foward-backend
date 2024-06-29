@@ -3,6 +3,7 @@ package aws.retrospective.dto;
 import aws.retrospective.entity.ProjectStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,4 +22,6 @@ public class UpdateRetrospectiveGroupDto {
     private ProjectStatus status = ProjectStatus.IN_PROGRESS;
 
     private UUID thumbnail;
+
+    private List<Long> retrospectiveIds;
 }
