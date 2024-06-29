@@ -1,6 +1,6 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.AdminRoleDTO;
+import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
 import aws.retrospective.dto.UpdateUserProfileResponseDto;
@@ -35,7 +35,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateAdminStatus(User user, AdminRoleDTO adminRoleDTO) {
+    public void updateAdminStatus(User user, AdminRoleDtO adminRoleDTO) {
         user.updateAdministrator(adminRoleDTO.isAdmin());
         userRepository.save(user);
     }

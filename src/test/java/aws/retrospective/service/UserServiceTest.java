@@ -1,6 +1,6 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.AdminRoleDTO;
+import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
 import aws.retrospective.dto.UpdateUserProfileResponseDto;
@@ -35,7 +35,6 @@ public class UserServiceTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         user = User.builder()
-                .id(1L)
                 .email("test@example.com")
                 .username("testuser")
                 .phone("123-456-7890")
@@ -73,7 +72,7 @@ public class UserServiceTest {
 
     @Test
     public void testUpdateAdminStatus() {
-        AdminRoleDTO adminRoleDTO = new AdminRoleDTO("test@example.com", true);
+        AdminRoleDtO adminRoleDTO = new AdminRoleDtO("test@example.com", true);
 
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         userService.updateAdminStatus(user, adminRoleDTO);
