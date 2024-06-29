@@ -34,7 +34,6 @@ public class NoticeBoardWritingService {
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
         return new NoticeBoardWritingResponseDto(
-                savedNoticeBoardWriting.getId(),
                 savedNoticeBoardWriting.getTitle(),
                 savedNoticeBoardWriting.getContent(),
                 savedNoticeBoardWriting.getStatus(),
@@ -52,7 +51,6 @@ public class NoticeBoardWritingService {
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
         return new NoticeBoardWritingResponseDto(
-                savedNoticeBoardWriting.getId(),
                 savedNoticeBoardWriting.getTitle(),
                 savedNoticeBoardWriting.getContent(),
                 savedNoticeBoardWriting.getStatus(),
@@ -89,7 +87,6 @@ public class NoticeBoardWritingService {
         List<NoticeBoardWriting> posts = noticeBoardWritingRepository.findAll();
         return posts.stream()
                 .map(post -> new NoticeBoardWritingResponseDto(
-                        post.getId(),
                         post.getTitle(),
                         post.getContent(),
                         post.getStatus(),
@@ -103,7 +100,6 @@ public class NoticeBoardWritingService {
     public Optional<NoticeBoardWritingResponseDto> getPostById(Long id) {
         Optional<NoticeBoardWriting> post = noticeBoardWritingRepository.findById(id);
         return post.map(p -> new NoticeBoardWritingResponseDto(
-                p.getId(),
                 p.getTitle(),
                 p.getContent(),
                 p.getStatus(),

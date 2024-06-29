@@ -31,8 +31,7 @@ public class NoticeBoardWriting extends BaseEntity {
     private LocalDateTime modifiedDate;
 
     @Builder
-    public NoticeBoardWriting(Long id, String title, String content, String status) {
-        this.id = id;
+    public NoticeBoardWriting(String content, String status) {
         this.title = title;
         this.content = content;
         this.status = status;
