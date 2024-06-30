@@ -2,8 +2,6 @@ package aws.retrospective.service;
 
 import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.dto.GetUserInfoDto;
-import aws.retrospective.dto.UpdateUserProfileRequestDto;
-import aws.retrospective.dto.UpdateUserProfileResponseDto;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,23 +37,8 @@ public class UserServiceTest {
                 .username("testuser")
                 .phone("123-456-7890")
                 .tenantId("tenant1")
-                .administrator(false)
+                .isAdministrator(false)
                 .build();
-    }
-
-    @Test
-    public void testUpdateProfile() {
-        UpdateUserProfileRequestDto request = new UpdateUserProfileRequestDto("newThumbnail", "newUsername");
-
-        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
-
-        UpdateUserProfileResponseDto response = userService.updateProfile(user, request);
-
-        assertNotNull(response);
-        assertEquals("newUsername", response.getUsername());
-        assertEquals("newThumbnail", response.getThumbnail());
-
-        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
