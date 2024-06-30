@@ -50,7 +50,7 @@ public class Notification extends BaseEntity {
     private Likes likes;
 
     @Enumerated(EnumType.STRING)
-    private NotificationStatus isRead; // 0: unread, 1: read
+    private NotificationStatus isRead; // UNREAD, READ
 
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType; // COMMENT, LIKE
