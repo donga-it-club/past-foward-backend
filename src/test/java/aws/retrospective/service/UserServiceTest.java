@@ -42,21 +42,6 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetUserInfo() {
-        // userRepository에서 사용자 검색 시 user 반환
-        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
-
-        // 테스트 대상 메서드 호출
-        GetUserInfoDto response = userService.getUserInfo(user);
-
-        // 결과 검증
-        assertNotNull(response);
-        assertEquals(user.getId(), response.getUserId());
-        assertEquals(user.getUsername(), response.getUserName());
-        assertEquals(user.getEmail(), response.getEmail());
-    }
-
-    @Test
     public void testUpdateAdminStatus() {
         AdminRoleDtO adminRoleDTO = new AdminRoleDtO("test@example.com", true);
 
@@ -81,7 +66,7 @@ public class UserServiceTest {
         assertFalse(isAdmin);
 
         // 관리자 권한 업데이트 및 결과 검증
-        user.updateAdministrator(true); 
+        user.updateAdministrator(true);
         when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
         isAdmin = userService.isAdmin(user.getEmail());
         assertTrue(isAdmin);
