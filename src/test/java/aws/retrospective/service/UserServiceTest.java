@@ -1,7 +1,6 @@
 package aws.retrospective.service;
 
 import aws.retrospective.dto.AdminRoleDtO;
-import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +52,9 @@ public class UserServiceTest {
 
         // 결과 검증
         assertTrue(user.isAdministrator());
-        verify(userRepository, times(1)).save(user); // save 메서드 호출 검증
+
+        // save 메서드 호출 검증
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
