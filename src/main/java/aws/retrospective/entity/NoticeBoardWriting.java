@@ -1,12 +1,6 @@
 package aws.retrospective.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,12 +20,14 @@ public class NoticeBoardWriting extends BaseEntity {
 
     private String title;
     private String content;
-    private String status; // 'PUBLISHED', 'TEMP'
+
+    @Enumerated(EnumType.STRING) // JPA가 enum 타입을 데이터베이스에 매핑하는 방식을 지정 -> 문자열로 저장할 것임 
+    private Status status; // 'PUBLISHED', 'TEMP'
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
     @Builder
-    public NoticeBoardWriting(String title,String content, String status) {
+    public NoticeBoardWriting(String title,String content, Status status) {
         this.title = title;
         this.content = content;
         this.status = status;
@@ -48,7 +44,7 @@ public class NoticeBoardWriting extends BaseEntity {
     }
 
     // 상태 업데이트 메서드
-    public void updateStatus(String status) {
+    public void updateStatus(Status status) {
         this.status = status;
     }
 }
