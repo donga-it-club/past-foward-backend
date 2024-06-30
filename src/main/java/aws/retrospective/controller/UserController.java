@@ -2,7 +2,7 @@ package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.common.CurrentUser;
-import aws.retrospective.dto.AdminRoleDTO;
+import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
 import aws.retrospective.dto.UpdateUserProfileResponseDto;
@@ -49,9 +49,9 @@ public class UserController {
     // 관리자 권한 설정
     @PostMapping("/me/admin-status")
     @Operation(summary = "관리자 권한 설정")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "관리자 권한 설정 성공"),})
-    public CommonApiResponse<Void> updateAdminStatus(@CurrentUser User user, @RequestBody @Valid AdminRoleDTO adminRoleDTO) {
-        userService.updateAdminStatus(user, adminRoleDTO);
-        return CommonApiResponse.successResponse(HttpStatus.OK, null);
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "관리자 권한 설정 성공"),})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateAdminStatus(@CurrentUser User user, @RequestBody @Valid AdminRoleDtO adminRoleDtO) {
+        userService.updateAdminStatus(user, adminRoleDtO);
     }
 }
