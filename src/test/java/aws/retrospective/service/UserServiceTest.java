@@ -52,9 +52,6 @@ public class UserServiceTest {
 
         // 결과 검증
         assertTrue(user.isAdministrator());
-
-        // save 메서드 호출 검증
-        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test

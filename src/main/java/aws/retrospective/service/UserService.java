@@ -37,7 +37,6 @@ public class UserService {
     @Transactional
     public void updateAdminStatus(User user, AdminRoleDtO adminRoleDTO) {
         user.updateAdministrator(adminRoleDTO.isAdmin());
-        userRepository.save(user);
     }
 
 
