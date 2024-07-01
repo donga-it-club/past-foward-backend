@@ -4,7 +4,6 @@ import aws.retrospective.dto.*;
 import aws.retrospective.entity.*;
 import aws.retrospective.repository.RetrospectiveGroupRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
-import aws.retrospective.repository.UserRepository;
 import aws.retrospective.specification.RetrospectiveGroupSpecification;
 import aws.retrospective.util.TestUtil;
 import java.util.UUID;
@@ -42,12 +41,6 @@ public class RetrospectiveGroupServiceTest {
 
     @Mock
     private RetrospectiveRepository retrospectiveRepository;
-
-    @Mock
-    private RetrospectiveService retrospectiveService;
-
-    @Mock
-    private UserRepository userRepository;
 
     @InjectMocks
     private RetrospectiveGroupService retrospectiveGroupService;
@@ -162,10 +155,6 @@ public class RetrospectiveGroupServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(retrospectiveGroup.getId());
         assertThat(response.getThumbnail()).isEqualTo(retrospectiveGroup.getThumbnail());
-    }
-
-    private RetrospectiveGroup createRetrospectiveGroup(User loginedUser) {
-        return RetrospectiveGroup.builder().user(loginedUser).title("title").description("description").status(ProjectStatus.IN_PROGRESS).thumbnail(null).build();
     }
 
     @Test
