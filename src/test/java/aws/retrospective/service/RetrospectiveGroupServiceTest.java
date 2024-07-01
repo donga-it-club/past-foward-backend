@@ -134,7 +134,7 @@ public class RetrospectiveGroupServiceTest {
     }
 
     @Test
-    @DisplayName("회고 그룹 수정 API")
+    @DisplayName("회고 그룹 상세 수정 API")
     void updateRetrospectiveGroupTest() {
         // given
         User user = TestUtil.createUser();
@@ -149,6 +149,37 @@ public class RetrospectiveGroupServiceTest {
         ReflectionTestUtils.setField(dto, "status", ProjectStatus.IN_PROGRESS);
         ReflectionTestUtils.setField(dto, "thumbnail", UUID.randomUUID());
         ReflectionTestUtils.setField(dto, "description", "New Description");
+
+        when(retrospectiveGroupRepository.findById(retrospectiveGroup.getId())).thenReturn(
+            Optional.of(retrospectiveGroup));
+
+        // when
+        RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroup(user,
+            1L,
+            dto);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(retrospectiveGroup.getId());
+        assertThat(response.getThumbnail()).isEqualTo(retrospectiveGroup.getThumbnail());
+    }
+
+    private RetrospectiveGroup createRetrospectiveGroup(User loginedUser) {
+        return RetrospectiveGroup.builder().user(loginedUser).title("title").description("description").status(ProjectStatus.IN_PROGRESS).thumbnail(null).build();
+    }
+
+    @Test
+    @DisplayName("회고 그룹 보드 수정 API")
+    void updateRetrospectiveGroupBoardsTest() {
+        // given
+        User user = TestUtil.createUser();
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        RetrospectiveGroup retrospectiveGroup = TestUtil.createRetrospectiveGroup(user);
+        ReflectionTestUtils.setField(retrospectiveGroup, "id", 1L);
+        ReflectionTestUtils.setField(retrospectiveGroup, "user", user);
+
+        UpdateRetrospectiveGroupBoardsDto dto = new UpdateRetrospectiveGroupBoardsDto();
 
         // 새로운 회고 ID 리스트를 dto에 설정
         List<Long> retrospectiveIds = List.of(2L, 3L);
@@ -165,7 +196,7 @@ public class RetrospectiveGroupServiceTest {
         when(retrospectiveRepository.findAllById(retrospectiveIds)).thenReturn(List.of(retrospective1, retrospective2));
 
         // when
-        RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroup(user,
+        RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroupBoards(user,
             1L,
             dto);
 
@@ -177,10 +208,6 @@ public class RetrospectiveGroupServiceTest {
         assertThat(retrospectiveGroup.getRetrospectives()).hasSize(2);
         // 회고 그룹에 새로 추가된 회고들의 ID가 설정한 ID와 동일한지 확인
         assertThat(retrospectiveGroup.getRetrospectives()).extracting("id").containsExactlyInAnyOrder(2L, 3L);
-    }
-
-    private RetrospectiveGroup createRetrospectiveGroup(User loginedUser) {
-        return RetrospectiveGroup.builder().user(loginedUser).title("title").description("description").status(ProjectStatus.IN_PROGRESS).thumbnail(null).build();
     }
 
     @Test
