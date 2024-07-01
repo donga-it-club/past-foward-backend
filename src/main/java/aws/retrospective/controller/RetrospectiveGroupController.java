@@ -8,6 +8,7 @@ import aws.retrospective.dto.GetRetrospectiveGroupResponseDto;
 import aws.retrospective.dto.GetRetrospectiveGroupsDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveGroupResponseDto;
+import aws.retrospective.dto.UpdateRetrospectiveGroupBoardsDto;
 import aws.retrospective.dto.UpdateRetrospectiveGroupDto;
 import aws.retrospective.entity.User;
 import aws.retrospective.service.RetrospectiveGroupService;
@@ -63,6 +64,20 @@ public class RetrospectiveGroupController {
             user, retrospectiveGroupId, dto);
 
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    }
+
+    @Operation(summary = "Update an existing retrospective group boards", responses = {
+        @ApiResponse(responseCode = "200", description = "Retrospective Group updated successfully"),
+        @ApiResponse(responseCode = "404", description = "Retrospective Group not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/{retrospectiveGroupId}")
+    public CommonApiResponse<RetrospectiveGroupResponseDto> updateRetrospectiveGroup(
+    @CurrentUser User user, @PathVariable Long retrospectiveGroupId, @Valid @RequestBody UpdateRetrospectiveGroupBoardsDto dto) {
+    RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroupBoards(
+    user, retrospectiveGroupId, dto);
+
+    return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     @Operation(summary = "Read all retrospective groups", responses = {

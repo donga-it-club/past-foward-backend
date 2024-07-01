@@ -6,6 +6,7 @@ import aws.retrospective.dto.GetRetrospectiveGroupResponseDto;
 import aws.retrospective.dto.GetRetrospectiveGroupsDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveGroupResponseDto;
+import aws.retrospective.dto.UpdateRetrospectiveGroupBoardsDto;
 import aws.retrospective.dto.UpdateRetrospectiveGroupDto;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveGroup;
@@ -99,16 +100,12 @@ public class RetrospectiveGroupService {
             findRetrospectiveGroup.getThumbnail(), findRetrospectiveGroup.getStatus().name());
     }
 
-
-    // 회고 그룹 수정
+    // 회고 그룹 보드 수정
     @Transactional
-    public RetrospectiveGroupResponseDto updateRetrospectiveGroup(User user, Long retrospectiveGroupId,
-        UpdateRetrospectiveGroupDto dto) {
+    public RetrospectiveGroupResponseDto updateRetrospectiveGroupBoards(User user, Long retrospectiveGroupId,
+        UpdateRetrospectiveGroupBoardsDto dto) {
         RetrospectiveGroup retrospectiveGroup = retrospectiveGroupRepository.findById(retrospectiveGroupId).orElseThrow(
             () -> new NoSuchElementException("Not found retrospective group: " + retrospectiveGroupId));
-
-        retrospectiveGroup.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail(),
-            dto.getDescription());
 
         // 기존 회고 제거
         retrospectiveGroup.getRetrospectives().clear();
@@ -120,6 +117,24 @@ public class RetrospectiveGroupService {
                 retrospectiveGroup.addRetrospective(retrospective);
             }
         }
+
+        // 회고 그룹 저장
+        retrospectiveGroupRepository.save(retrospectiveGroup);
+
+        boolean hasBookmarksByUser = hasBookmarksByUser(retrospectiveGroup, user.getId());
+
+        return RetrospectiveGroupResponseDto.of(retrospectiveGroup, hasBookmarksByUser);
+    }
+
+    //회고 그룹 상세 수정
+    @Transactional
+    public RetrospectiveGroupResponseDto updateRetrospectiveGroup(User user, Long retrospectiveGroupId,
+        UpdateRetrospectiveGroupDto dto) {
+        RetrospectiveGroup retrospectiveGroup = retrospectiveGroupRepository.findById(retrospectiveGroupId).orElseThrow(
+            () -> new NoSuchElementException("Not found retrospective group: " + retrospectiveGroupId));
+
+        retrospectiveGroup.update(dto.getTitle(), dto.getStatus(), dto.getThumbnail(),
+            dto.getDescription());
 
         // 회고 그룹 저장
         retrospectiveGroupRepository.save(retrospectiveGroup);

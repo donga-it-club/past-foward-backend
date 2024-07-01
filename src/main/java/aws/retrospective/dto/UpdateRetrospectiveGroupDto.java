@@ -12,16 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateRetrospectiveGroupDto {
 
-    @NotEmpty(message = "Retrospective Group title is required")
     private String title;
 
-    @NotEmpty(message = "Retrospective Group description is required")
     private String description;
 
-    @NotNull(message = "Retrospective Group status is required")
     private ProjectStatus status = ProjectStatus.IN_PROGRESS;
 
     private UUID thumbnail;
-
-    private List<Long> retrospectiveIds;
 }
