@@ -3,6 +3,7 @@ package aws.retrospective.service;
 import aws.retrospective.dto.NoticeBoardWritingRequestDto;
 import aws.retrospective.dto.NoticeBoardWritingResponseDto;
 import aws.retrospective.entity.NoticeBoardWriting;
+import aws.retrospective.entity.SaveStatus;
 import aws.retrospective.repository.NoticeBoardWritingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,7 +41,7 @@ public class NoticeBoardWritingServiceTest {
         noticeBoardWriting = NoticeBoardWriting.builder()
                 .title("Test Title")
                 .content("Test Content")
-                .status("PUBLISHED")
+                .status(SaveStatus.PUBLISHED)
                 .build();
     }
 
@@ -62,7 +64,7 @@ public class NoticeBoardWritingServiceTest {
     public void testSaveTempPost() {
         NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content");
 
-        noticeBoardWriting.updateStatus("TEMP");
+        noticeBoardWriting.updateStatus(SaveStatus.TEMP);
         when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenReturn(noticeBoardWriting);
 
         NoticeBoardWritingResponseDto responseDto = noticeBoardWritingService.saveTempPost(requestDto);
@@ -76,9 +78,7 @@ public class NoticeBoardWritingServiceTest {
 
     @Test
     public void testUploadFile() throws IOException {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.isEmpty()).thenReturn(false);
-        when(file.getOriginalFilename()).thenReturn("test.txt");
+        MultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "Test content".getBytes());
 
         Path uploadPath = Paths.get("uploads/");
         if (!Files.exists(uploadPath)) {
@@ -88,7 +88,9 @@ public class NoticeBoardWritingServiceTest {
         String fileUrl = noticeBoardWritingService.uploadFile(file);
 
         assertTrue(fileUrl.endsWith("test.txt"));
-        verify(file, times(1)).transferTo(any(Path.class));
+        Path filePath = Paths.get(fileUrl);
+        assertTrue(Files.exists(filePath));
+        Files.delete(filePath); // Clean up after test
     }
 
     @Test

@@ -3,6 +3,7 @@ package aws.retrospective.service;
 import aws.retrospective.dto.NoticeBoardWritingRequestDto;
 import aws.retrospective.dto.NoticeBoardWritingResponseDto;
 import aws.retrospective.entity.NoticeBoardWriting;
+import aws.retrospective.entity.SaveStatus;
 import aws.retrospective.repository.NoticeBoardWritingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,16 +30,10 @@ public class NoticeBoardWritingService {
         NoticeBoardWriting noticeBoardWriting = NoticeBoardWriting.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .status("PUBLISHED")
+                .status(SaveStatus.PUBLISHED) // 변경된 부분
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
-        return new NoticeBoardWritingResponseDto(
-                savedNoticeBoardWriting.getTitle(),
-                savedNoticeBoardWriting.getContent(),
-                savedNoticeBoardWriting.getStatus(),
-                savedNoticeBoardWriting.getCreatedDate(),
-                savedNoticeBoardWriting.getModifiedDate()
-        );
+        return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting);
     }
 
     @Transactional
@@ -47,19 +41,12 @@ public class NoticeBoardWritingService {
         NoticeBoardWriting noticeBoardWriting = NoticeBoardWriting.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .status("TEMP")
+                .status(SaveStatus.TEMP) // 변경된 부분
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
-        return new NoticeBoardWritingResponseDto(
-                savedNoticeBoardWriting.getTitle(),
-                savedNoticeBoardWriting.getContent(),
-                savedNoticeBoardWriting.getStatus(),
-                savedNoticeBoardWriting.getCreatedDate(),
-                savedNoticeBoardWriting.getModifiedDate()
-        );
+        return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting);
     }
 
-    @Transactional
     public String uploadFile(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new IOException("Empty file");
@@ -86,25 +73,14 @@ public class NoticeBoardWritingService {
     public List<NoticeBoardWritingResponseDto> getAllPosts() {
         List<NoticeBoardWriting> posts = noticeBoardWritingRepository.findAll();
         return posts.stream()
-                .map(post -> new NoticeBoardWritingResponseDto(
-                        post.getTitle(),
-                        post.getContent(),
-                        post.getStatus(),
-                        post.getCreatedDate(),
-                        post.getModifiedDate()
-                ))
+                .map(NoticeBoardWritingResponseDto::new) // 변경된 부분
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public Optional<NoticeBoardWritingResponseDto> getPostById(Long id) {
         Optional<NoticeBoardWriting> post = noticeBoardWritingRepository.findById(id);
-        return post.map(p -> new NoticeBoardWritingResponseDto(
-                p.getTitle(),
-                p.getContent(),
-                p.getStatus(),
-                p.getCreatedDate(),
-                p.getModifiedDate()
-        ));
+        return post.map(NoticeBoardWritingResponseDto::new); // 변경된 부분
     }
 }
+
