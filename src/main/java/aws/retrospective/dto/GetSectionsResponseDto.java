@@ -4,6 +4,7 @@ import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.KudosTarget;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 
@@ -58,7 +59,7 @@ public class GetSectionsResponseDto {
     }
 
     public void addComments(List<GetCommentDto> comments) {
-        this.comments = comments;
+        this.comments = comments == null ? new ArrayList<>() : comments;
     }
 
 }
