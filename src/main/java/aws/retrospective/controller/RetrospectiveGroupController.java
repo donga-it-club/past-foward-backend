@@ -86,7 +86,7 @@ public class RetrospectiveGroupController {
     })
     @GetMapping()
     public CommonApiResponse<PaginationResponseDto<RetrospectiveGroupResponseDto>> getRetrospectiveGroups(
-        @CurrentUser User user, @Valid GetRetrospectiveGroupsDto dto) 
+        @CurrentUser User user, @Valid GetRetrospectiveGroupsDto dto) {
         PaginationResponseDto<RetrospectiveGroupResponseDto> response = retrospectiveGroupService.getRetrospectiveGroups(user, dto);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
