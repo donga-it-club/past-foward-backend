@@ -36,7 +36,7 @@ public class GetSectionsResponseDto {
 
     private List<GetCommentDto> comments;
 
-    private GetActionItemsResponseDto actionItem;
+    private GetActionItemsResponseDto actionItems;
 
     private GetKudosTargetResponseDto kudosTarget;
 
@@ -53,7 +53,7 @@ public class GetSectionsResponseDto {
         this.sectionName = sectionName;
         this.createdDate = createdDate;
         this.thumbnail = thumbnail;
-        this.actionItem = actionItem == null ? null : GetActionItemsResponseDto.from(actionItem);
+        this.actionItems = actionItem == null ? null : GetActionItemsResponseDto.from(actionItem);
         this.kudosTarget = kudosTarget == null ? null : GetKudosTargetResponseDto.from(kudosTarget);
     }
 
