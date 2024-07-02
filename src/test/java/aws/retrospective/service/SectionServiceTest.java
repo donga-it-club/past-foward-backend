@@ -16,6 +16,7 @@ import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
@@ -273,14 +274,22 @@ class SectionServiceTest {
         createdSection.getComments().add(comment1);
         createdSection.getComments().add(comment2);
 
-        when(sectionRepository.getSectionsWithComments(retrospectiveId)).thenReturn(
-            List.of(createdSection));
+        GetSectionsResponseDto dto = new GetSectionsResponseDto(
+            sectionId, createdUser.getId(), createdUser.getUsername(), createdSection.getContent(),
+            createdSection.getLikeCnt(), createdSection.getTemplateSection().getSectionName(),
+            createdSection.getCreatedDate(), createdSection.getUser().getThumbnail(),
+            null, null
+        );
+        dto.addComments(List.of(GetCommentDto.from(comment1), GetCommentDto.from(comment2)));
+
+        when(sectionRepository.getSectionsAll(retrospectiveId)).thenReturn(List.of(dto));
 
         //when
         GetSectionsRequestDto request = new GetSectionsRequestDto();
         ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
         ReflectionTestUtils.setField(request, "teamId", teamId);
         List<GetSectionsResponseDto> results = sectionService.getSections(request);
+
 
         //then
         assertThat(results.size()).isEqualTo(1);

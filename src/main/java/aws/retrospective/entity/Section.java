@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -48,10 +47,6 @@ public class Section extends BaseEntity {
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "action_item")
-    private ActionItem actionItem;
 
     @Builder
     public Section(String content, Retrospective retrospective, User user,
@@ -91,11 +86,6 @@ public class Section extends BaseEntity {
 
     public boolean isNotActionItemsSection() {
         return !isActionItemsSection();
-    }
-
-    // Action Items 지정
-    public void updateActionItems(ActionItem actionItem) {
-        this.actionItem = actionItem;
     }
 
     public boolean isNotKudosTemplate() {
