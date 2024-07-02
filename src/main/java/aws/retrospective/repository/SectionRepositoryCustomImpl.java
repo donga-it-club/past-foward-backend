@@ -73,10 +73,10 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
             .select(Projections.constructor(GetSectionsResponseDto.class,
                 section.id, section.user.id, section.user.username, section.content,
                 section.likeCnt, section.templateSection.sectionName, section.createdDate,
-                section.user.thumbnail, section.actionItem, kudosTarget
+                section.user.thumbnail, actionItem, kudosTarget
             ))
             .from(section)
-            .leftJoin(section.actionItem, actionItem)
+            .leftJoin(actionItem).on(actionItem.section.eq(section))
             .leftJoin(kudosTarget).on(kudosTarget.section.eq(section))
             .leftJoin(section.comments, comment)
             .where(section.retrospective.id.eq(retrospectiveId))

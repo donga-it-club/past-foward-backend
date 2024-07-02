@@ -142,10 +142,10 @@ public class SectionService {
         // Action Items 유형인지 확인한다.
         validateActionItems(section);
 
-        // Action Item을 가져온다.
-        ActionItem actionItem = section.getActionItem();
         // Action Item에 지정할 사용자를 조회한다.
         User assignUser = getAssignUser(request);
+
+        ActionItem actionItem = getActionItem(section);
 
         /**
          * Action Item이 없을 때는 새로 생성하고, 있을 때는 사용자를 지정한다.
@@ -157,6 +157,10 @@ public class SectionService {
             // 기존에 등록된 Action Item에 새로운 사용자를 지정한다.
             actionItem.assignUser(assignUser);
         }
+    }
+
+    private ActionItem getActionItem(Section section) {
+        return actionItemRepository.findBySectionId(section.getId()).orElse(null);
     }
 
     // 회고카드 삭제
@@ -336,9 +340,7 @@ public class SectionService {
     private void assignActionItem(User user, Team team, Section section,
         Retrospective retrospective) {
         // Action Item 생성
-        ActionItem savedActionItem = actionItemRepository.save(
-            createActionItem(user, team, section, retrospective));
-        section.updateActionItems(savedActionItem); // 생성된 Action Item을 Section에 지정한다.
+        actionItemRepository.save(createActionItem(user, team, section, retrospective));
     }
 
     private AssignKudosResponseDto convertAssignKudosResponse(KudosTarget kudosTarget) {
