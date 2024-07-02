@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RetrospectiveGroupRepository extends JpaRepository<RetrospectiveGroup, Long>,
-        JpaSpecificationExecutor<RetrospectiveGroup> {
+    JpaSpecificationExecutor<RetrospectiveGroup> {
 
     Optional<RetrospectiveGroup> findRetrospectiveGroupById(@Param("retrospectiveGroupId") Long retrospectiveGroupId);
 }

@@ -86,9 +86,11 @@ public class Retrospective extends BaseEntity {
         this.thumbnail = thumbnail;
         this.description = description;
     }
+
     public boolean isSameTemplate(RetrospectiveTemplate template) {
         return this.getTemplate().getName().equals(template.getName());
     }
+
     public boolean isNotSameTemplate(RetrospectiveTemplate template) {
         return !isSameTemplate(template);
     }
@@ -103,6 +105,7 @@ public class Retrospective extends BaseEntity {
     public boolean isNotSameTeam(Team team) {
         return !isSameTeam(team);
     }
+
     /**
      * 개인 회고인지 팀 회고인지 확인한다. true : 개인 회고 false : 팀 회고
      */

@@ -49,17 +49,17 @@ public class RetrospectiveGroupServiceTest {
     @DisplayName("회고 그룹 등록 API")
     void createRetrospectiveGroupTest() {
         // given
-        User user = new User("user1@example.com", "test", "123-456-7890", "tenant123", false);
+        User user = new User("user1", "test", "test", "test",false);
         ReflectionTestUtils.setField(user, "id", 1L);
 
         RetrospectiveGroup retrospectiveGroup = new RetrospectiveGroup("New Retro Group",
-                null,
-                "description",
-                user,
-                ProjectStatus.IN_PROGRESS);
+            null,
+            "description",
+            user,
+            ProjectStatus.IN_PROGRESS);
         ReflectionTestUtils.setField(retrospectiveGroup, "id", 1L);
         given(retrospectiveGroupRepository.save(any(RetrospectiveGroup.class)))
-                .willReturn(retrospectiveGroup);
+            .willReturn(retrospectiveGroup);
 
         CreateRetrospectiveGroupDto dto = new CreateRetrospectiveGroupDto();
         ReflectionTestUtils.setField(dto, "title", "New Retro Group");
@@ -90,34 +90,35 @@ public class RetrospectiveGroupServiceTest {
         PageRequest pageable = PageRequest.of(dto.getPage(), dto.getSize(), sort);
 
         Long userId = 1L;
-        User user = new User("user1@example.com", "test", "123-456-7890", "tenant123", false);
+      
+        User user = new User("user1", "test", "test", "test",false);
         ReflectionTestUtils.setField(user, "id", userId);
 
         Specification<RetrospectiveGroup> spec = Specification.where(
-                        RetrospectiveGroupSpecification.withKeyword(dto.getKeyword()))
-                .and(RetrospectiveGroupSpecification.withUserId(userId))
-                .and(RetrospectiveGroupSpecification.withStatus(dto.getStatus()))
-                .and(RetrospectiveGroupSpecification.withBookmark(dto.getIsBookmarked(), userId));
+                RetrospectiveGroupSpecification.withKeyword(dto.getKeyword()))
+            .and(RetrospectiveGroupSpecification.withUserId(userId))
+            .and(RetrospectiveGroupSpecification.withStatus(dto.getStatus()))
+            .and(RetrospectiveGroupSpecification.withBookmark(dto.getIsBookmarked(), userId));
 
         List<RetrospectiveGroup> retrospectiveGroupList = new ArrayList<>();
         RetrospectiveGroup retrospectiveGroup = new RetrospectiveGroup("New Retro",
-                null,
-                "some description",
-                user,
-                ProjectStatus.IN_PROGRESS);
+            null,
+            "some description",
+            user,
+            ProjectStatus.IN_PROGRESS);
         ReflectionTestUtils.setField(retrospectiveGroup, "id", 1L);
         retrospectiveGroupList.add(retrospectiveGroup);
         Page<RetrospectiveGroup> retrospectiveGroupPage = new PageImpl<>(retrospectiveGroupList, pageable,
-                retrospectiveGroupList.size());
+            retrospectiveGroupList.size());
 
         // ArgumentCaptor를 사용하여 Specification을 캡처
         ArgumentCaptor<Specification> specCaptor = ArgumentCaptor.forClass(Specification.class);
         given(retrospectiveGroupRepository.findAll(specCaptor.capture(), eq(pageable)))
-                .willReturn(retrospectiveGroupPage);
+            .willReturn(retrospectiveGroupPage);
 
         // when
         PaginationResponseDto<RetrospectiveGroupResponseDto> result = retrospectiveGroupService.getRetrospectiveGroups(
-                user, dto);
+            user, dto);
 
         // then
         assertThat(result).isNotNull();
@@ -144,12 +145,12 @@ public class RetrospectiveGroupServiceTest {
         ReflectionTestUtils.setField(dto, "description", "New Description");
 
         when(retrospectiveGroupRepository.findById(retrospectiveGroup.getId())).thenReturn(
-                Optional.of(retrospectiveGroup));
+            Optional.of(retrospectiveGroup));
 
         // when
         RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroup(user,
-                1L,
-                dto);
+            1L,
+            dto);
 
         // then
         assertThat(response).isNotNull();
@@ -186,8 +187,8 @@ public class RetrospectiveGroupServiceTest {
 
         // when
         RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroupBoards(user,
-                1L,
-                dto);
+            1L,
+            dto);
 
         // then
         assertThat(response).isNotNull();
@@ -202,7 +203,7 @@ public class RetrospectiveGroupServiceTest {
     @Test
     void updateRetrospectiveGroup_Fails_WhenGroupNotFound() {
         // given
-        User user = new User("user1@example.com", "test", "123-456-7890", "tenant123", false);
+        User user = new User("user1", "test", "test", "test",false);
         when(retrospectiveGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // when / then
@@ -232,6 +233,7 @@ public class RetrospectiveGroupServiceTest {
         verify(retrospectiveGroupRepository, times(1)).deleteById(1L);
     }
 
+
     @Test
     @DisplayName("회고 그룹 삭제 실패 API")
     void deleteRetrospectiveGroup_Failure_UserNotAuthorized() {
@@ -244,16 +246,16 @@ public class RetrospectiveGroupServiceTest {
         ReflectionTestUtils.setField(unauthorizedUser, "id", 123L);
 
         RetrospectiveGroup unauthorizedRetrospectiveGroup = TestUtil.createRetrospectiveGroup(
-                unauthorizedUser);
+            unauthorizedUser);
         ReflectionTestUtils.setField(unauthorizedRetrospectiveGroup, "id", 1L);
         ReflectionTestUtils.setField(unauthorizedRetrospectiveGroup, "user", authorizedUser);
 
         when(retrospectiveGroupRepository.findById(1L)).thenReturn(
-                Optional.of(unauthorizedRetrospectiveGroup));
+            Optional.of(unauthorizedRetrospectiveGroup));
 
         // Act & Assert
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> retrospectiveGroupService.deleteRetrospectiveGroup(1L, unauthorizedUser));
+            () -> retrospectiveGroupService.deleteRetrospectiveGroup(1L, unauthorizedUser));
 
         assertTrue(!thrown.getMessage().contains("Not allowed to delete retrospective group"));
     }
@@ -261,7 +263,7 @@ public class RetrospectiveGroupServiceTest {
     @Test
     void deleteRetrospectiveGroup_Fails_WhenGroupNotFound() {
         // given
-        User user = new User("user1@example.com", "test", "123-456-7890", "tenant123", false);
+        User user = new User("user1", "test", "test", "test",false);
         when(retrospectiveGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // when / then
@@ -269,4 +271,5 @@ public class RetrospectiveGroupServiceTest {
 
         assertThat(thrown.getMessage()).contains("Not found retrospective group: 1");
     }
+
 }

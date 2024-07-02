@@ -39,82 +39,82 @@ public class RetrospectiveGroupController {
     private final RetrospectiveGroupService retrospectiveGroupService;
 
     @Operation(summary = "Create a new retrospective group", responses = {
-            @ApiResponse(responseCode = "201", description = "Retrospective Group created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request body"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "201", description = "Retrospective Group created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request body"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public CommonApiResponse<CreateRetrospectiveGroupResponseDto> createRetrospectiveGroup(
-            @CurrentUser User user, @Valid @RequestBody CreateRetrospectiveGroupDto createRetrospectiveGroupDto) {
+        @CurrentUser User user, @Valid @RequestBody CreateRetrospectiveGroupDto createRetrospectiveGroupDto) {
         CreateRetrospectiveGroupResponseDto response = retrospectiveGroupService.createRetrospectiveGroup(user, createRetrospectiveGroupDto);
 
         return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
     @Operation(summary = "Update an existing retrospective group", responses = {
-            @ApiResponse(responseCode = "200", description = "Retrospective Group updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Retrospective Group not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "200", description = "Retrospective Group updated successfully"),
+        @ApiResponse(responseCode = "404", description = "Retrospective Group not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{retrospectiveGroupId}")
     public CommonApiResponse<RetrospectiveGroupResponseDto> updateRetrospectiveGroup(
-            @CurrentUser User user, @PathVariable Long retrospectiveGroupId, @Valid @RequestBody UpdateRetrospectiveGroupDto dto) {
+        @CurrentUser User user, @PathVariable Long retrospectiveGroupId, @Valid @RequestBody UpdateRetrospectiveGroupDto dto) {
         RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroup(
-                user, retrospectiveGroupId, dto);
+            user, retrospectiveGroupId, dto);
 
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     @Operation(summary = "Update an existing retrospective group boards", responses = {
-            @ApiResponse(responseCode = "200", description = "Retrospective Group updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Retrospective Group not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "200", description = "Retrospective Group updated successfully"),
+        @ApiResponse(responseCode = "404", description = "Retrospective Group not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{retrospectiveGroupId}/boards")
     public CommonApiResponse<RetrospectiveGroupResponseDto> updateRetrospectiveGroupBoards(
-            @CurrentUser User user, @PathVariable Long retrospectiveGroupId, @Valid @RequestBody UpdateRetrospectiveGroupBoardsDto dto) {
-        RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroupBoards(
-                user, retrospectiveGroupId, dto);
+    @CurrentUser User user, @PathVariable Long retrospectiveGroupId, @Valid @RequestBody UpdateRetrospectiveGroupBoardsDto dto) {
+    RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroupBoards(
+    user, retrospectiveGroupId, dto);
 
-        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+    return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     @Operation(summary = "Read all retrospective groups", responses = {
-            @ApiResponse(responseCode = "200", description = "Retrospective Groups read successfully"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "200", description = "Retrospective Groups read successfully"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping()
     public CommonApiResponse<PaginationResponseDto<RetrospectiveGroupResponseDto>> getRetrospectiveGroups(
-            @CurrentUser User user, @Valid GetRetrospectiveGroupsDto dto) {
+        @CurrentUser User user, @Valid GetRetrospectiveGroupsDto dto) 
         PaginationResponseDto<RetrospectiveGroupResponseDto> response = retrospectiveGroupService.getRetrospectiveGroups(user, dto);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     @Operation(summary = "Read a retrospective group", responses = {
-            @ApiResponse(responseCode = "200", description = "Retrospective Group read successfully"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "200", description = "Retrospective Group read successfully"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{retrospectiveGroupId}")
     public CommonApiResponse<GetRetrospectiveGroupResponseDto> getRetrospectiveGroup(
-            @CurrentUser User user,
-            @PathVariable Long retrospectiveGroupId) {
+        @CurrentUser User user,
+        @PathVariable Long retrospectiveGroupId) {
         GetRetrospectiveGroupResponseDto response = retrospectiveGroupService.getRetrospectiveGroup(
-                user, retrospectiveGroupId);
+            user, retrospectiveGroupId);
 
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
     @Operation(summary = "Delete a retrospective group", responses = {
-            @ApiResponse(responseCode = "204", description = "Retrospective group deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Retrospective group not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "204", description = "Retrospective group deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Retrospective group not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{retrospectiveGroupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteRetrospectiveGroup(
-            @CurrentUser User user,
-            @PathVariable("retrospectiveGroupId") Long retrospectiveGroupId) {
+        @CurrentUser User user,
+        @PathVariable("retrospectiveGroupId") Long retrospectiveGroupId) {
         retrospectiveGroupService.deleteRetrospectiveGroup(retrospectiveGroupId, user);
 
     }

@@ -22,15 +22,15 @@ public class RetrospectiveGroupResponseDto {
     private LocalDateTime updateDate;
 
     public RetrospectiveGroupResponseDto(
-            Long id,
-            String title,
-            Long userId,
-            String userName,
-            String status,
-            Boolean isBookmarked,
-            UUID thumbnail,
-            String description,
-            LocalDateTime updateDate
+        Long id,
+        String title,
+        Long userId,
+        String userName,
+        String status,
+        Boolean isBookmarked,
+        UUID thumbnail,
+        String description,
+        LocalDateTime updateDate
     ) {
         this.id = id;
         this.title = title;
@@ -44,17 +44,17 @@ public class RetrospectiveGroupResponseDto {
     }
 
     public static RetrospectiveGroupResponseDto of(RetrospectiveGroup retrospectiveGroup,
-                                                   boolean hasBookmarksByUser) {
+        boolean hasBookmarksByUser) {
         return new RetrospectiveGroupResponseDto(
-                retrospectiveGroup.getId(),
-                retrospectiveGroup.getTitle(),
-                retrospectiveGroup.getUser().getId(),
-                retrospectiveGroup.getUser().getUsername(),
-                retrospectiveGroup.getStatus().name(),
-                hasBookmarksByUser,
-                retrospectiveGroup.getThumbnail(),
-                retrospectiveGroup.getDescription(),
-                retrospectiveGroup.getUpdatedDate()
+            retrospectiveGroup.getId(),
+            retrospectiveGroup.getTitle(),
+            retrospectiveGroup.getUser().getId(),
+            retrospectiveGroup.getUser().getUsername(),
+            retrospectiveGroup.getStatus().name(),
+            hasBookmarksByUser,
+            retrospectiveGroup.getThumbnail(),
+            retrospectiveGroup.getDescription(),
+            retrospectiveGroup.getUpdatedDate()
         );
 
     }

@@ -61,64 +61,54 @@ public class SectionService {
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
 
-        // 개인 회고 조회 시에 teamId 필요 X
-        if (findRetrospective.getTeam() == null) {
-            if (request.getTeamId() != null) {
-                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
-            }
-        }
-
+        // 개인 회고 조회 시에 팀 정보가 필요 없다.
+        validatePersonalRetrospective(findRetrospective, request.getTeamId());
         // 다른 팀의 회고 보드를 조회 할 수 없다
-        if (request.getTeamId() != null) {
-            Team findTeam = getTeam(request.getTeamId());
-            if (!findRetrospective.isSameTeam(findTeam)) {
-                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
-            }
-        }
+        validateTeamAccess(request.getTeamId(), findRetrospective);
 
-        List<GetSectionsResponseDto> response = new ArrayList<>();
+        // 회고 카드 전체 조회
         List<Section> sections = sectionRepository.getSectionsWithComments(
             request.getRetrospectiveId());
-        convertDto(sections, response);
 
-        return response;
+        return convertSectionToResponse(sections);
     }
 
-    // 회고 카드 등록
+    // 회고 카드 생성 API
     @Transactional
     public CreateSectionResponseDto createSection(User user, CreateSectionDto request) {
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
         TemplateSection findTemplateSection = getTemplateSection(request.getTemplateSectionId());
 
-        // 회고 템플릿 정보가 일치하는지 확인한다.
-        if (!findRetrospective.isSameTemplate(findTemplateSection)) {
-            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
-        }
+        /**
+         * 회고 템플릿이 일치하는지 확인한다.
+         * 회고 템플릿이 일치하지 않으면 예외를 발생시킨다.
+         */
+        validateTemplateMatch(findRetrospective, findTemplateSection);
 
-        // 회고 카드 등록
+        // 회고 카드 생성
         Section createSection = createSection(request.getSectionContent(), findTemplateSection,
             findRetrospective, user);
         sectionRepository.save(createSection);
 
-        return new CreateSectionResponseDto(createSection.getId(), createSection.getUser().getId(),
-            request.getRetrospectiveId(), request.getSectionContent());
+        // Entity를 Dto로 변환하여 반환한다.
+        return convertCreateSectionResponseDto(request, createSection);
     }
 
-    // 회고 카드 수정
+    // 회고 카드 수정 API
     @Transactional
     public EditSectionResponseDto updateSectionContent(User user, Long sectionId,
         EditSectionRequestDto request) {
         Section findSection = getSection(sectionId);
 
-        // 회고 카드 수정은 작성자만 가능하다.
-        if (!findSection.isSameUser(user)) {
-            throw new ForbiddenAccessException("회고 카드를 수정할 권한이 없습니다.");
-        }
+        /**
+         * 회고 카드 작성자와 현재 사용자가 일치하는지 확인한다.
+         * 일치하지 않으면 예외를 발생시킨다.
+         */
+        validateSameUser(findSection, user);
 
-        // 회고 카드 수정
-        findSection.updateSection(request.getSectionContent());
-
-        return new EditSectionResponseDto(sectionId, request.getSectionContent());
+        // 회고 카드 내용 수정
+        findSection.updateSectionContent(request.getSectionContent());
+        return convertUpdateSectionResponseDto(findSection.getId(), findSection.getContent());
     }
 
     // 회고 카드 좋아요 API
@@ -131,23 +121,22 @@ public class SectionService {
 
         // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
         if (findLikes.isEmpty()) {
-            Likes createLikes = Likes.builder().section(findSection).user(user).build();
+            Likes createLikes = createLikes(findSection, user);
             likesRepository.save(createLikes);
-            findSection.increaseSectionLikes();
+            findSection.increaseSectionLikes(); // 좋아요 기록 저장
 
-            Notification notification = Notification.of(findSection,
-                findSection.getRetrospective(),
-                user, findSection.getUser(), null, createLikes, NotificationType.LIKE);
+            // 댓글 알림 생성
+            Notification notification = createNotification(findSection, findSection.getRetrospective(),
+                user, findSection.getUser(), createLikes);
             notificationRepository.save(notification);
         } else {
             Likes likes = findLikes.get();
-            notificationRepository.findNotificationByLikesId(likes.getId())
-                .ifPresent(notificationRepository::delete);
-            likesRepository.delete(likes);
-            findSection.cancelSectionLikes();
+            deleteNotification(likes); // 기존의 알림을 삭제
+            likesRepository.delete(likes); // 좋아요 기록 삭제
+            findSection.cancelSectionLikes(); // 좋아요 취소
         }
 
-        return new IncreaseSectionLikesResponseDto(findSection.getId(), findSection.getLikeCnt());
+        return convertIncreaseSectionLikesResponseDto(findSection);
     }
 
     // Action Items 사용자 지정
@@ -157,19 +146,22 @@ public class SectionService {
         Retrospective retrospective = getRetrospective(request.getRetrospectiveId());
         Section section = getSection(request.getSectionId());
 
-        if (!section.isActionItemsSection()) {
-            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
-        }
+        // Action Items 유형인지 확인한다.
+        validateActionItems(section);
 
-        ActionItem actionItem = actionItemRepository.findBySectionId(section.getId()).orElse(null);
+        // Action Item을 가져온다.
+        ActionItem actionItem = section.getActionItem();
+        // Action Item에 지정할 사용자를 조회한다.
         User assignUser = getAssignUser(request);
 
+        /**
+         * Action Item이 없을 때는 새로 생성하고, 있을 때는 사용자를 지정한다.
+         */
         if (actionItem == null) {
-            ActionItem savedActionItem = actionItemRepository.save(
-                createActionItem(assignUser, team, section, retrospective));
-            section.updateActionItems(savedActionItem);
-
+            // Action Item 사용자 지정
+            assignActionItem(assignUser, team, section, retrospective);
         } else {
+            // 기존에 등록된 Action Item에 새로운 사용자를 지정한다.
             actionItem.assignUser(assignUser);
         }
     }
@@ -179,17 +171,13 @@ public class SectionService {
     public void deleteSection(Long sectionId, User user) {
         Section findSection = getSection(sectionId);
 
-        // 작성자만 회고 카드를 삭제할 수 있다.
-        if (!findSection.isSameUser(user)) {
-            throw new ForbiddenAccessException("작성자만 회고 카드를 삭제할 수 있습니다.");
-        }
+        /**
+         * 회고 카드 작성자와 현재 사용자가 일치하는지 확인한다.
+         * 일치하지 않으면 예외를 발생시킨다.
+         */
+        validateSameUser(findSection, user);
 
-        // 연관관계에 있는 Kudos 테이블의 row를 먼저 삭제한다.
-        if (findSection.isKudosTemplate()) {
-            kudosRepository.deleteBySectionId(sectionId);
-        }
-
-        sectionRepository.delete(findSection);
+        deleteSection(findSection);
     }
 
     @Transactional
@@ -200,19 +188,13 @@ public class SectionService {
         validateKudosTemplate(sectionId, section);
 
         User targetUser = getUser(request); // 칭찬 대상 조회
-        /**
-         * 이전에 해당 Section에 다른 사람을 칭창할 사람으로 지정한 적이 있는지 조회
-         * 조회O : DB 값만 변경하면 된다.
-         * 조회X : DB에 새로운 row 삽입
-         */
-        KudosTarget kudosSection = kudosRepository.findBySectionId(section.getId());
+        KudosTarget kudosSection = getKudosSection(section); // DB에 저장된 Kudos 정보 조회
 
-        if (kudosSection == null) {
-            return AssignKudosResponseDto.convertResponse(assignKudos(section, targetUser));
-        } else {
-            kudosSection.assignUser(targetUser);
-            return AssignKudosResponseDto.convertResponse(kudosSection);
-        }
+        /**
+         * Kudos 정보가 없을 때는 새로 생성하고, 있을 때는 사용자를 지정(변경)한다.
+         */
+        return convertAssignKudosResponse(
+            kudosSection == null ? assignKudos(section, targetUser) : kudosSection);
     }
 
     private static void validateKudosTemplate(Long sectionId, Section section) {
@@ -237,19 +219,28 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
     }
 
-    // 회고 카드 등록
-    private Section createSection(String sectionContent, TemplateSection findTemplateSection,
-        Retrospective findRetrospective, User findUser) {
-        return Section.builder().templateSection(findTemplateSection)
-            .retrospective(findRetrospective).user(findUser).likeCnt(0).content(sectionContent)
+    /**
+     * Section 생성
+     * @param sectionContent 회고 카드 내용
+     * @param templateSection 회고 카드의 템플릿 (ex. Keep, Problem, Try)
+     * @param retrospective 회고 카드가 속한 회고 보드
+     * @param user 회고 카드를 작성한 사용자
+     * @return
+     */
+    private Section createSection(String sectionContent, TemplateSection templateSection,
+        Retrospective retrospective, User user) {
+        return Section.builder().templateSection(templateSection)
+            .retrospective(retrospective).user(user).content(sectionContent)
             .build();
     }
 
-    private void convertDto(List<Section> sections, List<GetSectionsResponseDto> response) {
+    private List<GetSectionsResponseDto> convertSectionToResponse(List<Section> sections) {
+        List<GetSectionsResponseDto> response = new ArrayList<>();
         for (Section section : sections) {
             response.add(
                 GetSectionsResponseDto.of(section, getKudosTarget(section), getComments(section)));
         }
+        return response;
     }
 
     private Team getTeam(Long teamId) {
@@ -257,9 +248,9 @@ public class SectionService {
             .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
     }
 
-    private static ActionItem createActionItem(User findUser, Team findTeam, Section section,
+    private static ActionItem createActionItem(User user, Team team, Section section,
         Retrospective retrospective) {
-        return ActionItem.builder().user(findUser).team(findTeam).section(section)
+        return ActionItem.builder().user(user).team(team).section(section)
             .retrospective(retrospective).build();
     }
 
@@ -274,8 +265,14 @@ public class SectionService {
                 () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
     }
 
-    private KudosTarget assignKudos(Section section, User targetUser) {
-        return kudosRepository.save(KudosTarget.createKudosTarget(section, targetUser));
+    /**
+     * 칭찬 대상을 지정한다.
+     * @param section 칭찬 대상을 지정할 Section
+     * @param user 칭찬 대상
+     * @return
+     */
+    private KudosTarget assignKudos(Section section, User user) {
+        return kudosRepository.save(KudosTarget.createKudosTarget(section, user));
     }
 
     private KudosTarget getKudosTarget(Section section) {
@@ -286,5 +283,118 @@ public class SectionService {
         return section.getComments().stream()
             .map(GetCommentDto::from)
             .collect(Collectors.toList());
+    }
+
+    private void validateTemplateMatch(Retrospective retrospective, TemplateSection templateSection) {
+        if(retrospective.isNotSameTemplate(templateSection.getTemplate())) {
+            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
+        }
+    }
+
+    private static CreateSectionResponseDto convertCreateSectionResponseDto(CreateSectionDto request,
+        Section createSection) {
+        return CreateSectionResponseDto.builder()
+            .id(createSection.getId())
+            .userId(createSection.getUser().getId())
+            .retrospectiveId(request.getRetrospectiveId())
+            .sectionContent(request.getSectionContent())
+            .build();
+    }
+
+    private boolean validateSameUser(Section section, User user) {
+        return section.isNotSameUser(user);
+    }
+
+    /**
+     * 회고 카드 수정 응답 Dto 변환
+     * @param sectionId 수정된 회고 카드 ID
+     * @param sectionContent 수정된 회고 카드 내용
+     */
+    private static EditSectionResponseDto convertUpdateSectionResponseDto(Long sectionId,
+        String sectionContent) {
+        return EditSectionResponseDto.builder().sectionId(sectionId)
+            .content(sectionContent).build();
+    }
+
+    /**
+     * Section 삭제
+     * @param section 삭제할 회고 카드
+     */
+    public void deleteSection(Section section) {
+        // 연관관계에 있는 Kudos 테이블의 row를 먼저 삭제한다.
+        if (section.isKudosTemplate()) {
+            kudosRepository.deleteBySectionId(section.getId());
+        }
+        // Section 삭제
+        sectionRepository.delete(section);
+    }
+
+    private void validateTeamAccess(Long teamId, Retrospective retrospective) {
+        if (teamId != null) {
+            if (retrospective.isNotSameTeam(getTeam(teamId))) {
+                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
+            }
+        }
+    }
+
+    private void validatePersonalRetrospective(Retrospective retrospective, Long teamId) {
+        if (retrospective.isPersonalRetrospective()) {
+            // 개인 회고시에 팀 ID 정보는 필요하지 않다.
+            if (teamId != null) {
+                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
+            }
+        }
+    }
+
+    private static void validateActionItems(Section section) {
+        if (section.isNotActionItemsSection()) {
+            throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
+        }
+    }
+
+    /**
+     * Action Item 생성 및 사용자 지정
+     * @param user Action Item에 지정할 사용자
+     * @param team 팀 정보 (개인 : null)
+     * @param section Action Item을 지정할 회고 카드
+     * @param retrospective Action Item을 지정할 회고 보드
+     */
+    private void assignActionItem(User user, Team team, Section section,
+        Retrospective retrospective) {
+        // Action Item 생성
+        ActionItem savedActionItem = actionItemRepository.save(
+            createActionItem(user, team, section, retrospective));
+        section.updateActionItems(savedActionItem); // 생성된 Action Item을 Section에 지정한다.
+    }
+
+    private AssignKudosResponseDto convertAssignKudosResponse(KudosTarget kudosTarget) {
+        return AssignKudosResponseDto.builder()
+            .kudosId(kudosTarget.getId())
+            .sectionId(kudosTarget.getSection().getId())
+            .userId(kudosTarget.getUser().getId()).build();
+    }
+
+    private KudosTarget getKudosSection(Section section) {
+        return kudosRepository.findBySectionId(section.getId());
+    }
+
+    private IncreaseSectionLikesResponseDto convertIncreaseSectionLikesResponseDto(Section section) {
+        return new IncreaseSectionLikesResponseDto(section.getId(), section.getLikeCnt());
+    }
+
+    private Notification createNotification(Section section, Retrospective retrospective,
+        User sender, User receiver, Likes likes) {
+        return Notification.builder().section(section).retrospective(retrospective)
+            .sender(sender).receiver(receiver).comment(null).likes(likes)
+            .notificationType(NotificationType.LIKE).build();
+    }
+
+    private Likes createLikes(Section section, User user) {
+        return Likes.builder().user(user).section(section).build();
+    }
+
+    private void deleteNotification(Likes likes) {
+        notificationRepository.findNotificationByLikesId(likes.getId())
+            .ifPresent(notificationRepository::delete);
     }
 }

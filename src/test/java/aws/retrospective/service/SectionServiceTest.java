@@ -511,7 +511,7 @@ class SectionServiceTest {
     private static Section createSection(User user, TemplateSection templateSection,
         Retrospective retrospective) {
         return Section.builder().user(user).content("test").templateSection(templateSection)
-            .likeCnt(0).retrospective(retrospective).build();
+            .retrospective(retrospective).build();
     }
 
     private static TemplateSection createTemplateSection(RetrospectiveTemplate kptTemplate) {
@@ -520,7 +520,7 @@ class SectionServiceTest {
     }
 
     private static Section createSection(User loginedUser) {
-        return Section.builder().user(loginedUser).content("test").likeCnt(0).build();
+        return Section.builder().user(loginedUser).content("test").build();
     }
 
     private static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,

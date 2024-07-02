@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +36,12 @@ public class NotificationController {
     @PostMapping("/{notificationId}")
     public CommonApiResponse<Void> readNotification(@PathVariable Long notificationId) {
         notificationService.readNotification(notificationId);
+        return CommonApiResponse.successResponse(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{userId}")
+    public CommonApiResponse<Void> deleteNotificationAll(@PathVariable("userId") Long userId) {
+        notificationService.deleteNotificationAll(userId);
         return CommonApiResponse.successResponse(HttpStatus.OK);
     }
 }

@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -49,11 +50,12 @@ public class Notification extends BaseEntity {
     private Likes likes;
 
     @Enumerated(EnumType.STRING)
-    private NotificationStatus isRead; // 0: unread, 1: read
+    private NotificationStatus isRead; // UNREAD, READ
 
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType; // COMMENT, LIKE
 
+    @Builder
     private Notification(Section section, Retrospective retrospective, User sender, User receiver,
         Comment comment,
         Likes likes, NotificationType notificationType) {

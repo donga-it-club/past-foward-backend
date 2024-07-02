@@ -16,9 +16,9 @@ public class TestUtil {
     }
     public static Section createSection(User loginedUser) {
         return Section.builder()
-                .user(loginedUser)
-                .content("test")
-                .build();
+            .user(loginedUser)
+            .content("test")
+            .build();
     }
     public static Retrospective createRetrospective(RetrospectiveTemplate retrospectiveTemplate,
                                                     User user,
@@ -66,11 +66,11 @@ public class TestUtil {
 
     public static RetrospectiveGroup createRetrospectiveGroup(User user) {
         return RetrospectiveGroup.builder()
-                .status(ProjectStatus.IN_PROGRESS)
-                .title("test")
-                .description("test")
-                .user(user)
-                .thumbnail(UUID.randomUUID())
-                .build();
+            .status(ProjectStatus.IN_PROGRESS)
+            .title("test")
+            .description("test")
+            .user(user)
+            .thumbnail(UUID.randomUUID())
+            .build();
     }
 }

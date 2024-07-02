@@ -72,7 +72,7 @@ class NotificationServiceTest {
             .template(template).build();
         retrospectiveRepository.save(retrospective);
 
-        Section section = Section.builder().likeCnt(0).user(user).retrospective(retrospective)
+        Section section = Section.builder().user(user).retrospective(retrospective)
             .build();
         Section savedSection = sectionRepository.save(section);
 
@@ -114,7 +114,7 @@ class NotificationServiceTest {
             .template(template).build();
         retrospectiveRepository.save(retrospective);
 
-        Section section = Section.builder().likeCnt(0).user(user).retrospective(retrospective)
+        Section section = Section.builder().user(user).retrospective(retrospective)
             .build();
         Section savedSection = sectionRepository.save(section);
 
@@ -154,7 +154,7 @@ class NotificationServiceTest {
             .template(template).build();
         retrospectiveRepository.save(retrospective);
 
-        Section section = Section.builder().likeCnt(0).user(user).retrospective(retrospective)
+        Section section = Section.builder().user(user).retrospective(retrospective)
             .build();
         Section savedSection = sectionRepository.save(section);
 
