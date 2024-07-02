@@ -1,5 +1,4 @@
 package aws.retrospective.entity;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,20 +10,16 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Bookmark extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "retrospective_id")
     private Retrospective retrospective;
@@ -38,14 +33,10 @@ public class Bookmark extends BaseEntity {
         this.user = user;
         this.retrospective = retrospective;
     }
-
     public void addBookmark() {
         this.retrospective.getBookmarks().add(this);
     }
-
     public void removeBookmark() {
         this.retrospective.getBookmarks().remove(this);
     }
 }
-
-

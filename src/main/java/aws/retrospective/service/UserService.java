@@ -1,5 +1,6 @@
 package aws.retrospective.service;
 
+import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
 import aws.retrospective.dto.UpdateUserProfileResponseDto;
@@ -33,9 +34,21 @@ public class UserService {
             currentUser.getCreatedDate(), currentUser.getUpdatedDate());
     }
 
+    @Transactional
+    public void updateAdminStatus(User user, AdminRoleDtO adminRoleDTO) {
+        user.updateAdministrator(adminRoleDTO.isAdmin());
+    }
+
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("사용자를 조회할 수 없습니다. id = " + userId));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isAdmin(String email) {
+        return userRepository.findByEmail(email)
+                .map(User::isAdministrator)
+                .orElse(false);
     }
 }

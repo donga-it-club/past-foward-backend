@@ -12,3 +12,4 @@ public class UpdateRetrospectiveGroupBoardsDto {
     @NotNull(message = "existed retrospective id is required")
     private List<Long> retrospectiveIds;
 }
+
