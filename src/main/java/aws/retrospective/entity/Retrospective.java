@@ -67,6 +67,10 @@ public class Retrospective extends BaseEntity {
     @OneToMany(mappedBy = "retrospective")
     private List<Bookmark> bookmarks = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "retrospectiveGroup_id")
+    private RetrospectiveGroup retrospectiveGroup;
+
     @Builder
     public Retrospective(String title, UUID thumbnail,
         String description,
@@ -110,6 +114,10 @@ public class Retrospective extends BaseEntity {
         return this.team.getId().equals(team.getId());
     }
 
+    public void setRetrospectiveGroup(RetrospectiveGroup retrospectiveGroup) {
+        this.retrospectiveGroup = retrospectiveGroup;
+    }
+
     public boolean isNotSameTeam(Team team) {
         return !isSameTeam(team);
     }
@@ -119,5 +127,6 @@ public class Retrospective extends BaseEntity {
      */
     public boolean isPersonalRetrospective() {
         return this.team == null;
+
     }
 }
