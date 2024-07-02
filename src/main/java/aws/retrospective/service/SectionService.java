@@ -7,7 +7,6 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
@@ -31,11 +30,9 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -66,11 +63,7 @@ public class SectionService {
         // 다른 팀의 회고 보드를 조회 할 수 없다
         validateTeamAccess(request.getTeamId(), findRetrospective);
 
-        // 회고 카드 전체 조회
-        List<Section> sections = sectionRepository.getSectionsWithComments(
-            request.getRetrospectiveId());
-
-        return convertSectionToResponse(sections);
+        return sectionRepository.getSectionsAll(request.getRetrospectiveId());
     }
 
     // 회고 카드 생성 API
@@ -234,15 +227,6 @@ public class SectionService {
             .build();
     }
 
-    private List<GetSectionsResponseDto> convertSectionToResponse(List<Section> sections) {
-        List<GetSectionsResponseDto> response = new ArrayList<>();
-        for (Section section : sections) {
-            response.add(
-                GetSectionsResponseDto.of(section, getKudosTarget(section), getComments(section)));
-        }
-        return response;
-    }
-
     private Team getTeam(Long teamId) {
         return teamRepository.findById(teamId)
             .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
@@ -273,16 +257,6 @@ public class SectionService {
      */
     private KudosTarget assignKudos(Section section, User user) {
         return kudosRepository.save(KudosTarget.createKudosTarget(section, user));
-    }
-
-    private KudosTarget getKudosTarget(Section section) {
-        return kudosRepository.findBySection(section).orElse(null);
-    }
-
-    private static List<GetCommentDto> getComments(Section section) {
-        return section.getComments().stream()
-            .map(GetCommentDto::from)
-            .collect(Collectors.toList());
     }
 
     private void validateTemplateMatch(Retrospective retrospective, TemplateSection templateSection) {
