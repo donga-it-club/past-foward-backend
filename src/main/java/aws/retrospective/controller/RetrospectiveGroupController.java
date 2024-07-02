@@ -71,8 +71,8 @@ public class RetrospectiveGroupController {
         @ApiResponse(responseCode = "404", description = "Retrospective Group not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{retrospectiveGroupId}")
-    public CommonApiResponse<RetrospectiveGroupResponseDto> updateRetrospectiveGroup(
+    @PutMapping("/{retrospectiveGroupId}/boards")
+    public CommonApiResponse<RetrospectiveGroupResponseDto> updateRetrospectiveGroupBoards(
     @CurrentUser User user, @PathVariable Long retrospectiveGroupId, @Valid @RequestBody UpdateRetrospectiveGroupBoardsDto dto) {
     RetrospectiveGroupResponseDto response = retrospectiveGroupService.updateRetrospectiveGroupBoards(
     user, retrospectiveGroupId, dto);
