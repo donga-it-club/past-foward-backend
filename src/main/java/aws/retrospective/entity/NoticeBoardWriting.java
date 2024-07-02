@@ -21,13 +21,13 @@ public class NoticeBoardWriting extends BaseEntity {
     private String title;
     private String content;
 
-    @Enumerated(EnumType.STRING) // JPA가 enum 타입을 데이터베이스에 매핑하는 방식을 지정 -> 문자열로 저장할 것임 
-    private Status status; // 'PUBLISHED', 'TEMP'
+    @Enumerated(EnumType.STRING) // JPA가 enum 타입을 데이터베이스에 매핑하는 방식을 지정 -> 문자열로 저장할 것임
+    private SaveStatus status; // 'PUBLISHED', 'TEMP'
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
     @Builder
-    public NoticeBoardWriting(String title,String content, Status status) {
+    public NoticeBoardWriting(String title,String content, SaveStatus status) {
         this.title = title;
         this.content = content;
         this.status = status;
@@ -44,7 +44,7 @@ public class NoticeBoardWriting extends BaseEntity {
     }
 
     // 상태 업데이트 메서드
-    public void updateStatus(Status status) {
+    public void updateStatus(SaveStatus status) {
         this.status = status;
     }
 }
