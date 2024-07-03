@@ -44,6 +44,7 @@ public class SurveyServiceTest {
             .region("Korea")
             .source("internet")
             .purposes(purposes)
+            .emailConsent(false)
             .build();
 
         // When
