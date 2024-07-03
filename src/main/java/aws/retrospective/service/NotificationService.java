@@ -11,8 +11,14 @@ import aws.retrospective.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +30,10 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationRedisRepository redisRepository;
     private final UserRepository userRepository;
+    private final JavaMailSender mailSender;
+
+    @Autowired
+    private final EmailNotificationService emailNotificationService;
 
     private static final String NOTIFICATION = "notification";
 
@@ -81,5 +91,21 @@ public class NotificationService {
     private Notification getNotification(Long notificationId) {
         return notificationRepository.findById(notificationId)
             .orElseThrow(() -> new NoSuchElementException("알림을 조회할 수 없습니다. ID: " + notificationId));
+    }
+
+
+    public void sendEmailNotification() {
+        // NotificationRedis로부터 알림 정보 조회
+        Notification latestNotification = notificationRepository.findFirstByOrderByCreatedDateDesc();
+
+        if (latestNotification == null) {
+            throw new RuntimeException("No notifications found");
+        }
+
+        try {
+            emailNotificationService.sendNotificationEmail(latestNotification);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email notification");
+        }
     }
 }
