@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @Transactional
     public void testUpdateAdminStatus() {
         AdminRoleDtO adminRoleDTO = new AdminRoleDtO("test@example.com", true);
 
@@ -51,6 +53,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @Transactional
     public void testIsAdmin() {
         // userRepository에서 이메일로 사용자 검색 시 user 반환
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
@@ -63,6 +66,7 @@ public class UserServiceTest {
         AdminRoleDtO adminRoleDTO = new AdminRoleDtO("test@example.com", true);
         userService.updateAdminStatus(user, adminRoleDTO);
 
+        // 업데이트 후 영속성 컨텍스트가 변경된 상태를 반환하도록 설정
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         isAdmin = userService.isAdmin(user.getEmail());
         assertTrue(isAdmin);
