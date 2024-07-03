@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import aws.retrospective.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,43 @@ public class SurveyService {
             .collect(Collectors.toList());
     }
 
+    // 성별, 연령대 (기본 정보) 데이터를 가져오는 메서드
+    public List<SurveyDto> getGenderAndAgeSurveys() {
+        List<Survey> surveys = surveyRepository.findAll();
+
+        return surveys.stream()
+                .map(survey -> SurveyDto.builder()
+                        .age(survey.getAge())
+                        .gender(String.valueOf(survey.getGender()))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // 직업, 지역 데이터를 가져오는 메서드
+    public List<SurveyDto> getOccupationAndRegionSurveys() {
+        List<Survey> surveys = surveyRepository.findAll();
+
+        return surveys.stream()
+                .map(survey -> SurveyDto.builder()
+                        .occupation(survey.getOccupation())
+                        .region(survey.getRegion())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // 서비스를 알게된 경로 및 서비스 사용목적, 이메일 수신동의 여부를 가져오는 메서드
+    public List<SurveyDto> getSourceAndPurposeSurveys() {
+        List<Survey> surveys = surveyRepository.findAll();
+
+        return surveys.stream()
+                .map(survey -> SurveyDto.builder()
+                        .source(survey.getSource())
+                        .purposes(survey.getPurposes())
+                        .emailConsent(survey.getUser().isEmailConsent())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     private void checkIfAlreadySubmitted(User user) {
         if (surveyRepository.existsByUser(user)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 설문조사를 제출하셨습니다.");
@@ -66,6 +104,7 @@ public class SurveyService {
             .region(survey.getRegion())
             .source(survey.getSource())
             .purposes(survey.getPurposes())
+            .emailConsent(survey.getUser().isEmailConsent())
             .build();
     }
 }
