@@ -53,15 +53,17 @@ public class UserServiceTest {
     @Test
     public void testIsAdmin() {
         // userRepository에서 이메일로 사용자 검색 시 user 반환
-        when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
         // 테스트 대상 메서드 호출 및 결과 검증
         boolean isAdmin = userService.isAdmin(user.getEmail());
         assertFalse(isAdmin);
 
         // 관리자 권한 업데이트 및 결과 검증
-        user.updateAdministrator(true);
-        when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(user));
+        AdminRoleDtO adminRoleDTO = new AdminRoleDtO("test@example.com", true);
+        userService.updateAdminStatus(user, adminRoleDTO);
+
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         isAdmin = userService.isAdmin(user.getEmail());
         assertTrue(isAdmin);
     }
