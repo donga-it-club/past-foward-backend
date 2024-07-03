@@ -5,6 +5,7 @@ import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.User;
 import aws.retrospective.service.SurveyService;
+import aws.retrospective.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -14,12 +15,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/surveys")
@@ -29,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SurveyController {
 
     private final SurveyService surveyService;
+    private final UserService userService;
 
     @PostMapping("/responses")
     @Operation(summary = "설문조사 저장", description = "설문조사 결과를 DB에 저장하는 API")
