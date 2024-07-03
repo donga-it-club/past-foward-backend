@@ -85,7 +85,7 @@ public class RetrospectiveServiceTest {
 
         Retrospective retrospective = new Retrospective("New Retro", null, "some description", null,
             ProjectStatus.IN_PROGRESS, new Team("Team Name"),
-            new User("user1", "test", "test", "test"), new RetrospectiveTemplate("Template Name"),
+            new User("user1", "test", "test", "test", true), new RetrospectiveTemplate("Template Name"),
             LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
@@ -103,7 +103,7 @@ public class RetrospectiveServiceTest {
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
-            new User("user1", "test", "test", "test"), dto);
+            new User("user1", "test", "test", "test", true), dto);
 
         // then
         assertThat(result).isNotNull();
@@ -121,7 +121,7 @@ public class RetrospectiveServiceTest {
     @Test
     void createRetrospective_ReturnsResponseDto_WhenCalledWithValidDto() {
         // given
-        User user = new User("user1", "test", "test", "test");
+        User user = new User("user1", "test", "test", "test", true);
         ReflectionTestUtils.setField(user, "id", 1L);
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
@@ -320,5 +320,97 @@ public class RetrospectiveServiceTest {
 
     }
 
+<<<<<<< Updated upstream
+=======
+    @Test
+    @DisplayName("리더가 아닌 경우, 리더 권한 전환 불가")
+    void testTransferRetrospectiveLeadership_CurrentUserNotLeader() {
+        // given (변수 설정)
+        User currentUser = new User("user1", "test", "test", "test", true);
+        User newLeader = new User("user2", "test", "test", "test", true);
+        Team team = new Team("Team Name");
+
+        // 리더가 아닌 역할로 설정된 UserTeam 객체 생성
+        UserTeam currentUserTeam = UserTeam.builder()
+                .user(currentUser)
+                .team(team)
+                .role(UserTeamRole.MEMBER)
+                .build();
+
+        Retrospective retrospective = new Retrospective("New Retro",
+                null,
+                "some description",
+                null,
+                ProjectStatus.IN_PROGRESS,
+                team, currentUser,
+                new RetrospectiveTemplate("Template Name"),
+                LocalDateTime.now());
+
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(java.util.Optional.of(retrospective));
+
+        // 리더가 아닌 역할로 설정
+        currentUserTeam.updateMember();
+
+        // 사용자가 인증되지 않은 상태를 시뮬레이트하기 위해 SecurityContextHolder에 null 값을 설정
+        SecurityContextHolder.getContext().setAuthentication(null);
+
+        //when
+        assertThrows(NullPointerException.class, () -> {
+            retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, 2L);
+        });
+
+        //then
+        verify(userTeamRepository, never()).save(any(UserTeam.class));
+        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
+    }
+
+    @Test
+    @DisplayName("리더인 경우, 다른 멤버에게 리더 권한 양도")
+    void testTransferRetrospectiveLeadership_CurrentUserLeader() {
+        // given (변수 설정)
+        User currentUser = new User("user1", "test", "test", "test", true);
+        User newLeader = new User("user2", "test", "test", "test", true);
+        Team team = new Team("Team Name");
+
+        // 리더로 설정된 UserTeam 객체 생성
+        UserTeam currentUserTeam = UserTeam.builder()
+                .user(currentUser)
+                .team(team)
+                .role(UserTeamRole.LEADER)
+                .build();
+
+        Retrospective retrospective = new Retrospective("New Retro",
+                null,
+                "some description",
+                null,
+                ProjectStatus.IN_PROGRESS,
+                team, currentUser,
+                new RetrospectiveTemplate("Template Name"),
+                LocalDateTime.now());
+
+        UserTeam newLeaderTeam = UserTeam.builder()
+                .user(newLeader)
+                .team(team)
+                .role(UserTeamRole.MEMBER) // 새로운 리더를 멤버로 설정
+                .build();
+
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(Optional.of(retrospective));
+
+
+        // 사용자가 인증된 상태를 시뮬레이트하기 위해 SecurityContextHolder에 인증정보 설정
+        Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        //when
+        assertThrows(NullPointerException.class, () -> {
+            retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, newLeader.getId());
+        });
+
+        //then
+        verify(userTeamRepository, never()).save(any(UserTeam.class)); // 현재 리더의 권한 변경
+        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
+    }
+
+>>>>>>> Stashed changes
 
 }
