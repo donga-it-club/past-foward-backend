@@ -29,5 +29,8 @@ public class SurveyDto {
     @NotEmpty
     private List<String> purposes;
 
+    // 이메일 수신동의 여부
+    @NotNull
+    private Boolean emailConsent;
 
 }
