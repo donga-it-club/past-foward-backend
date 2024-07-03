@@ -6,6 +6,8 @@ import aws.retrospective.entity.User;
 import aws.retrospective.repository.SurveyRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import aws.retrospective.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SurveyService {
 
     private final SurveyRepository surveyRepository;
+    private final UserRepository userRepository;
 
     // 설문지 결과 등록
     @Transactional
@@ -35,6 +38,10 @@ public class SurveyService {
             .build();
 
         surveyRepository.save(survey);
+
+        // 이메일 수신 동의 여부 업데이트
+        user.setEmailConsent(dto.getEmailConsent());
+        userRepository.save(user);
     }
 
     public List<SurveyDto> getAllSurveys() {
