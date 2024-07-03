@@ -64,7 +64,13 @@ public class NoticeBoardWritingServiceTest {
     public void testSaveTempPost() {
         NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content");
 
-        when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenReturn(noticeBoardWriting);
+        NoticeBoardWriting tempNoticeBoardWriting = NoticeBoardWriting.builder()
+                .title("Test Title")
+                .content("Test Content")
+                .status(SaveStatus.TEMP)
+                .build();
+
+        when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenReturn(tempNoticeBoardWriting);
 
         NoticeBoardWritingResponseDto responseDto = noticeBoardWritingService.saveTempPost(requestDto);
 
