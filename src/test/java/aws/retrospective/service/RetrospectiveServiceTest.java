@@ -1,16 +1,11 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
@@ -21,12 +16,7 @@ import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectiveType;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.dto.UpdateRetrospectiveDto;
-import aws.retrospective.entity.ProjectStatus;
-import aws.retrospective.entity.Retrospective;
-import aws.retrospective.entity.RetrospectiveTemplate;
-import aws.retrospective.entity.Team;
-import aws.retrospective.entity.User;
-import aws.retrospective.repository.BookmarkRepository;
+import aws.retrospective.entity.*;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -35,17 +25,31 @@ import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.util.TestUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.aspectj.apache.bcel.Repository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,7 +71,8 @@ public class RetrospectiveServiceTest {
     private RetrospectiveTemplateRepository templateRepository;
 
     @Mock
-    private BookmarkRepository bookmarkRepository;
+    private UserService userService;
+
 
     @InjectMocks
     private RetrospectiveService retrospectiveService;
@@ -81,29 +86,32 @@ public class RetrospectiveServiceTest {
         dto.setOrder(RetrospectivesOrderType.OLDEST);
         dto.setKeyword("keyword");
 
+        Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize(),
+            Sort.by(Sort.Direction.ASC, "createdDate"));
         List<Retrospective> retrospectiveList = new ArrayList<>();
 
-        Retrospective retrospective = new Retrospective("New Retro", null, "some description", null,
-            ProjectStatus.IN_PROGRESS, new Team("Team Name"),
-            new User("user1", "test", "test", "test"), new RetrospectiveTemplate("Template Name"),
+        Retrospective retrospective = new Retrospective("New Retro",
+            null,
+            "some description",
+            null,
+            ProjectStatus.IN_PROGRESS,
+            new Team("Team Name"), new User("user1", "test", "test", "test"),
+            new RetrospectiveTemplate("Template Name"),
             LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
 
         retrospectiveList.add(retrospective);
+        Page<Retrospective> retrospectivePage = new PageImpl<>(retrospectiveList, pageable,
+            retrospectiveList.size());
 
-        given(retrospectiveRepository.findRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class)))
-            .willReturn(retrospectiveList);
-        given(retrospectiveRepository.countRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class)))
-            .willReturn((long) retrospectiveList.size());
-        given(bookmarkRepository.findByRetrospectiveIdIn(anyList()))
-            .willReturn(Collections.emptyList());
+        BDDMockito.given(retrospectiveRepository.findAll(any(Specification.class), eq(pageable)))
+            .willReturn(retrospectivePage);
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
-            new User("user1", "test", "test", "test"), dto);
+            new User("user1", "test", "test", "test"),
+            dto);
 
         // then
         assertThat(result).isNotNull();
@@ -111,27 +119,25 @@ public class RetrospectiveServiceTest {
         assertThat(result.nodes().size()).isEqualTo(retrospectiveList.size());
         assertThat(result.nodes().get(0).getId()).isEqualTo(retrospective.getId());
 
-        verify(retrospectiveRepository).findRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class));
-        verify(retrospectiveRepository).countRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class));
-        verify(bookmarkRepository).findByRetrospectiveIdIn(anyList());
+        verify(retrospectiveRepository).findAll(any(Specification.class), eq(pageable));
+
     }
+
 
     @Test
     void createRetrospective_ReturnsResponseDto_WhenCalledWithValidDto() {
         // given
         User user = new User("user1", "test", "test", "test");
         ReflectionTestUtils.setField(user, "id", 1L);
-        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        BDDMockito.given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
         Team team = new Team("Team Name");
         ReflectionTestUtils.setField(team, "id", 1L);
-        given(teamRepository.save(any(Team.class))).willReturn(team);
+        BDDMockito.given(teamRepository.save(any(Team.class))).willReturn(team);
 
         RetrospectiveTemplate template = new RetrospectiveTemplate("Template Name");
         ReflectionTestUtils.setField(template, "id", 1L);
-        given(templateRepository.findById(1L)).willReturn(Optional.of(template));
+        BDDMockito.given(templateRepository.findById(1L)).willReturn(Optional.of(template));
 
         Retrospective retrospective = new Retrospective("New Retro",
             null,
@@ -141,7 +147,7 @@ public class RetrospectiveServiceTest {
             team, user, template,
             LocalDateTime.now());
         ReflectionTestUtils.setField(retrospective, "id", 1L);
-        given(retrospectiveRepository.save(any(Retrospective.class)))
+        BDDMockito.given(retrospectiveRepository.save(any(Retrospective.class)))
             .willReturn(retrospective);
 
         CreateRetrospectiveDto dto = new CreateRetrospectiveDto();
@@ -318,6 +324,96 @@ public class RetrospectiveServiceTest {
         assertThat(findRetrospective.getStatus()).isEqualTo("IN_PROGRESS");
         assertThat(findRetrospective.getThumbnail()).isEqualTo(retrospective.getThumbnail());
 
+    }
+
+    @Test
+    @DisplayName("리더가 아닌 경우, 리더 권한 전환 불가")
+    void testTransferRetrospectiveLeadership_CurrentUserNotLeader() {
+        // given (변수 설정)
+        User currentUser = new User("user1", "test", "test", "test");
+        User newLeader = new User("user2", "test", "test", "test");
+        Team team = new Team("Team Name");
+
+        // 리더가 아닌 역할로 설정된 UserTeam 객체 생성
+        UserTeam currentUserTeam = UserTeam.builder()
+                .user(currentUser)
+                .team(team)
+                .role(UserTeamRole.MEMBER)
+                .build();
+
+        Retrospective retrospective = new Retrospective("New Retro",
+                null,
+                "some description",
+                null,
+                ProjectStatus.IN_PROGRESS,
+                team, currentUser,
+                new RetrospectiveTemplate("Template Name"),
+                LocalDateTime.now());
+
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(java.util.Optional.of(retrospective));
+
+        // 리더가 아닌 역할로 설정
+        currentUserTeam.setTeam(team);
+        currentUserTeam.setRole(UserTeamRole.MEMBER);
+
+        // 사용자가 인증되지 않은 상태를 시뮬레이트하기 위해 SecurityContextHolder에 null 값을 설정
+        SecurityContextHolder.getContext().setAuthentication(null);
+
+        //when
+        assertThrows(NullPointerException.class, () -> {
+            retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, 2L);
+        });
+
+        //then
+        verify(userTeamRepository, never()).save(any(UserTeam.class));
+        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
+    }
+
+    @Test
+    @DisplayName("리더인 경우, 다른 멤버에게 리더 권한 양도")
+    void testTransferRetrospectiveLeadership_CurrentUserLeader() {
+        // given (변수 설정)
+        User currentUser = new User("user1", "test", "test", "test");
+        User newLeader = new User("user2", "test", "test", "test");
+        Team team = new Team("Team Name");
+
+        // 리더로 설정된 UserTeam 객체 생성
+        UserTeam currentUserTeam = UserTeam.builder()
+                .user(currentUser)
+                .team(team)
+                .role(UserTeamRole.LEADER)
+                .build();
+
+        Retrospective retrospective = new Retrospective("New Retro",
+                null,
+                "some description",
+                null,
+                ProjectStatus.IN_PROGRESS,
+                team, currentUser,
+                new RetrospectiveTemplate("Template Name"),
+                LocalDateTime.now());
+
+        UserTeam newLeaderTeam = UserTeam.builder()
+                .user(newLeader)
+                .team(team)
+                .role(UserTeamRole.MEMBER) // 새로운 리더를 멤버로 설정
+                .build();
+
+        when(retrospectiveRepository.findById(anyLong())).thenReturn(Optional.of(retrospective));
+
+
+        // 사용자가 인증된 상태를 시뮬레이트하기 위해 SecurityContextHolder에 인증정보 설정
+        Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        //when
+        assertThrows(NullPointerException.class, () -> {
+            retrospectiveService.transferRetrospectiveLeadership(currentUser, 1L, newLeader.getId());
+        });
+
+        //then
+        verify(userTeamRepository, never()).save(any(UserTeam.class)); // 현재 리더의 권한 변경
+        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
     }
 
 

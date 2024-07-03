@@ -10,28 +10,28 @@ import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectiveType;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.dto.UpdateRetrospectiveDto;
-import aws.retrospective.entity.Bookmark;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.UserTeam;
 import aws.retrospective.entity.UserTeamRole;
-import aws.retrospective.repository.BookmarkRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.repository.UserTeamRepository;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import aws.retrospective.specification.RetrospectiveSpecification;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,35 +42,31 @@ public class RetrospectiveService {
     private final RetrospectiveRepository retrospectiveRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
-    private final BookmarkRepository bookmarkRepository;
     private final RetrospectiveTemplateRepository templateRepository;
     private final BookmarkService bookmarkService;
     private final UserTeamRepository userTeamRepository;
+    private final UserService userService;
 
     @Transactional(readOnly = true)
     public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(User user,
         GetRetrospectivesDto dto) {
-        List<Retrospective> retrospectives = retrospectiveRepository.findRetrospectives(user, dto);
-        long totalElements = retrospectiveRepository.countRetrospectives(user, dto);
+        Sort sort = getSort(dto.getOrder());
+        PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), sort);
 
-        List<Long> retrospectiveIds = retrospectives.stream()
-            .map(Retrospective::getId)
-            .collect(Collectors.toList());
+        Long userId = user.getId();
 
-        List<Bookmark> bookmarks = bookmarkRepository.findByRetrospectiveIdIn(retrospectiveIds);
-        Map<Long, List<Bookmark>> retrospectiveBookmarks = bookmarks.stream()
-            .collect(Collectors.groupingBy(bookmark -> bookmark.getRetrospective().getId()));
+        Specification<Retrospective> spec = Specification.where(
+                RetrospectiveSpecification.withKeyword(dto.getKeyword()))
+            .and(RetrospectiveSpecification.withUserId(userId))
+            .and(RetrospectiveSpecification.withStatus(dto.getStatus()))
+            .and(RetrospectiveSpecification.withBookmark(dto.getIsBookmarked(), userId));
 
-        List<RetrospectiveResponseDto> responseDtos = retrospectives.stream()
-            .map(retrospective -> RetrospectiveResponseDto.of(retrospective,
-                retrospectiveBookmarks.getOrDefault(retrospective.getId(), Collections.emptyList())
-                    .stream()
-                    .anyMatch(bookmark -> bookmark.getUser().getId().equals(user.getId()))))
-            .collect(Collectors.toList());
+        Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
 
-        return new PaginationResponseDto<>(totalElements, responseDtos);
+        return PaginationResponseDto.fromPage(page,
+            retrospective -> RetrospectiveResponseDto.of(retrospective,
+                hasBookmarksByUser(retrospective, userId)));
     }
-
 
     @Transactional(readOnly = true)
     public GetRetrospectiveResponseDto getRetrospective(User user, Long retrospectiveId) {
@@ -113,12 +109,11 @@ public class RetrospectiveService {
 
     private Sort getSort(RetrospectivesOrderType orderType) {
         if (orderType == RetrospectivesOrderType.OLDEST) {
-            return Sort.by(Direction.ASC, "createdDate").and(Sort.by(Direction.ASC, "id"));
+            return Sort.by(Direction.ASC, "createdDate");
         }
 
-        return Sort.by(Direction.DESC, "createdDate").and(Sort.by(Direction.DESC, "id"));
+        return Sort.by(Direction.DESC, "createdDate");
     }
-
 
     @Transactional
     public CreateRetrospectiveResponseDto createRetrospective(User user,
@@ -129,12 +124,48 @@ public class RetrospectiveService {
         Team team = null;
         if (retrospectiveType == RetrospectiveType.TEAM) {
             team = createTeamWithUserId(user.getId());
+
+            //생성자를 회고 리더로 설정
+            userTeamRepository.save(new UserTeam(user, team, UserTeamRole.LEADER));
         }
 
         Retrospective retrospective = Retrospective.builder().title(dto.getTitle())
             .status(dto.getStatus()).team(team).user(user).template(template)
             .thumbnail(dto.getThumbnail()).startDate(dto.getStartDate())
             .description(dto.getDescription()).build();
+
+        Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
+
+        return toResponseDto(savedRetrospective);
+    }
+
+    //회고 권한 양도 메서드
+    @Transactional
+    public CreateRetrospectiveResponseDto transferRetrospectiveLeadership(User user, Long retrospectiveId, Long newLeaderId) {
+        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
+                .orElseThrow(() -> new ResourceNotFoundException("Retrospective not found"));
+
+        // 현재 사용자와 리더가 동일한지 확인
+        User currentUser = userService.getCurrentUser();
+        UserTeam currentUserTeam = userTeamRepository.findByTeamIdAndUserId(retrospective.getTeam().getId(), currentUser.getId())
+                .orElseThrow(() -> new NoSuchElementException("Current user is not part of the team"));
+
+        if(!currentUserTeam.getRole().equals(UserTeamRole.LEADER)) {
+            throw new NoSuchElementException("You do not have permission to transfer leadership");
+        }
+
+        // 새로운 리더 조회
+        User newLeader = userRepository.findById(newLeaderId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserTeam newLeaderTeam = userTeamRepository.findByTeamIdAndUserId(retrospective.getTeam().getId(), newLeader.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("New leader is not part of the team"));
+
+        // 현재 리더 역할 변경
+        currentUserTeam.setRole(UserTeamRole.MEMBER);
+        userTeamRepository.save(currentUserTeam);
+
+        // 새로운 리더 역할 변경
+        newLeaderTeam.setRole(UserTeamRole.LEADER);
+        userTeamRepository.save(currentUserTeam);
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
 
