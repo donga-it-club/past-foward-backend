@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,9 +42,6 @@ public class UserServiceTest {
     @Test
     public void testUpdateAdminStatus() {
         AdminRoleDtO adminRoleDTO = new AdminRoleDtO("test@example.com", true);
-
-        // userRepository에서 사용자 검색 시 user 반환
-        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
 
         // 테스트 대상 메서드 호출
         userService.updateAdminStatus(user, adminRoleDTO);
