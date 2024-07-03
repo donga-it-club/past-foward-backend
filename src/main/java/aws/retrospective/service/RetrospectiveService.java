@@ -10,28 +10,28 @@ import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectiveType;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.dto.UpdateRetrospectiveDto;
+import aws.retrospective.entity.Bookmark;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.UserTeam;
 import aws.retrospective.entity.UserTeamRole;
+import aws.retrospective.repository.BookmarkRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.repository.UserTeamRepository;
-import aws.retrospective.specification.RetrospectiveSpecification;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-
-import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +42,7 @@ public class RetrospectiveService {
     private final RetrospectiveRepository retrospectiveRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final RetrospectiveTemplateRepository templateRepository;
     private final BookmarkService bookmarkService;
     private final UserTeamRepository userTeamRepository;
@@ -50,23 +51,27 @@ public class RetrospectiveService {
     @Transactional(readOnly = true)
     public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(User user,
         GetRetrospectivesDto dto) {
-        Sort sort = getSort(dto.getOrder());
-        PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), sort);
+        List<Retrospective> retrospectives = retrospectiveRepository.findRetrospectives(user, dto);
+        long totalElements = retrospectiveRepository.countRetrospectives(user, dto);
 
-        Long userId = user.getId();
+        List<Long> retrospectiveIds = retrospectives.stream()
+            .map(Retrospective::getId)
+            .collect(Collectors.toList());
 
-        Specification<Retrospective> spec = Specification.where(
-                RetrospectiveSpecification.withKeyword(dto.getKeyword()))
-            .and(RetrospectiveSpecification.withUserId(userId))
-            .and(RetrospectiveSpecification.withStatus(dto.getStatus()))
-            .and(RetrospectiveSpecification.withBookmark(dto.getIsBookmarked(), userId));
+        List<Bookmark> bookmarks = bookmarkRepository.findByRetrospectiveIdIn(retrospectiveIds);
+        Map<Long, List<Bookmark>> retrospectiveBookmarks = bookmarks.stream()
+            .collect(Collectors.groupingBy(bookmark -> bookmark.getRetrospective().getId()));
 
-        Page<Retrospective> page = retrospectiveRepository.findAll(spec, pageRequest);
+        List<RetrospectiveResponseDto> responseDtos = retrospectives.stream()
+            .map(retrospective -> RetrospectiveResponseDto.of(retrospective,
+                retrospectiveBookmarks.getOrDefault(retrospective.getId(), Collections.emptyList())
+                    .stream()
+                    .anyMatch(bookmark -> bookmark.getUser().getId().equals(user.getId()))))
+            .collect(Collectors.toList());
 
-        return PaginationResponseDto.fromPage(page,
-            retrospective -> RetrospectiveResponseDto.of(retrospective,
-                hasBookmarksByUser(retrospective, userId)));
+        return new PaginationResponseDto<>(totalElements, responseDtos);
     }
+
 
     @Transactional(readOnly = true)
     public GetRetrospectiveResponseDto getRetrospective(User user, Long retrospectiveId) {
@@ -109,11 +114,12 @@ public class RetrospectiveService {
 
     private Sort getSort(RetrospectivesOrderType orderType) {
         if (orderType == RetrospectivesOrderType.OLDEST) {
-            return Sort.by(Direction.ASC, "createdDate");
+            return Sort.by(Direction.ASC, "createdDate").and(Sort.by(Direction.ASC, "id"));
         }
 
-        return Sort.by(Direction.DESC, "createdDate");
+        return Sort.by(Direction.DESC, "createdDate").and(Sort.by(Direction.DESC, "id"));
     }
+
 
     @Transactional
     public CreateRetrospectiveResponseDto createRetrospective(User user,
