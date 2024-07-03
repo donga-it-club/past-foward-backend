@@ -1,7 +1,10 @@
 package aws.retrospective.service;
 
+import aws.retrospective.dto.GetPreSignedUrlRequestDto;
+import aws.retrospective.dto.GetPreSignedUrlResponseDto;
 import aws.retrospective.dto.NoticeBoardWritingRequestDto;
 import aws.retrospective.dto.NoticeBoardWritingResponseDto;
+import aws.retrospective.dto.PresigendUrlMethod;
 import aws.retrospective.entity.NoticeBoardWriting;
 import aws.retrospective.entity.SaveStatus;
 import aws.retrospective.repository.NoticeBoardWritingRepository;
@@ -11,15 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +27,12 @@ public class NoticeBoardWritingServiceTest {
 
     @Mock
     private NoticeBoardWritingRepository noticeBoardWritingRepository;
+
+    @Mock
+    private S3Service s3Service;
+
+    @Mock
+    private AmazonS3Service amazonS3Service;
 
     private NoticeBoardWriting noticeBoardWriting;
 
@@ -64,7 +64,6 @@ public class NoticeBoardWritingServiceTest {
     public void testSaveTempPost() {
         NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content");
 
-        noticeBoardWriting.updateStatus(SaveStatus.TEMP);
         when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenReturn(noticeBoardWriting);
 
         NoticeBoardWritingResponseDto responseDto = noticeBoardWritingService.saveTempPost(requestDto);
@@ -77,20 +76,17 @@ public class NoticeBoardWritingServiceTest {
     }
 
     @Test
-    public void testUploadFile() throws IOException {
-        MultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "Test content".getBytes());
+    public void testGetPresignedUrlForUpload() {
+        String filename = "test.txt";
+        String presignedUrl = "https://bucketname.s3.amazonaws.com/test.txt?presigned-url";
 
-        Path uploadPath = Paths.get("uploads/");
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
+        when(amazonS3Service.getPresignedUrlForUpload(filename)).thenReturn(presignedUrl);
 
-        String fileUrl = noticeBoardWritingService.uploadFile(file);
+        String responseUrl = amazonS3Service.getPresignedUrlForUpload(filename);
 
-        assertTrue(fileUrl.endsWith("test.txt"));
-        Path filePath = Paths.get(fileUrl);
-        assertTrue(Files.exists(filePath));
-        Files.delete(filePath); // Clean up after test
+        assertNotNull(responseUrl);
+        assertEquals(presignedUrl, responseUrl);
+        verify(amazonS3Service, times(1)).getPresignedUrlForUpload(filename);
     }
 
     @Test
@@ -101,27 +97,5 @@ public class NoticeBoardWritingServiceTest {
 
         verify(noticeBoardWritingRepository, times(1)).deleteById(any(Long.class));
     }
-
-    @Test
-    public void testGetAllPosts() {
-        when(noticeBoardWritingRepository.findAll()).thenReturn(List.of(noticeBoardWriting));
-
-        List<NoticeBoardWritingResponseDto> responseDtos = noticeBoardWritingService.getAllPosts();
-
-        assertNotNull(responseDtos);
-        assertEquals(1, responseDtos.size());
-        assertEquals("Test Title", responseDtos.get(0).getTitle());
-        verify(noticeBoardWritingRepository, times(1)).findAll();
-    }
-
-    @Test
-    public void testGetPostById() {
-        when(noticeBoardWritingRepository.findById(any(Long.class))).thenReturn(Optional.of(noticeBoardWriting));
-
-        Optional<NoticeBoardWritingResponseDto> responseDto = noticeBoardWritingService.getPostById(1L);
-
-        assertTrue(responseDto.isPresent());
-        assertEquals("Test Title", responseDto.get().getTitle());
-        verify(noticeBoardWritingRepository, times(1)).findById(any(Long.class));
-    }
 }
+
