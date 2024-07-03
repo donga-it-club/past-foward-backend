@@ -346,8 +346,7 @@ public class RetrospectiveServiceTest {
         when(retrospectiveRepository.findById(anyLong())).thenReturn(java.util.Optional.of(retrospective));
 
         // 리더가 아닌 역할로 설정
-        currentUserTeam.setTeam(team);
-        currentUserTeam.setRole(UserTeamRole.MEMBER);
+        currentUserTeam.updateMember();
 
         // 사용자가 인증되지 않은 상태를 시뮬레이트하기 위해 SecurityContextHolder에 null 값을 설정
         SecurityContextHolder.getContext().setAuthentication(null);
