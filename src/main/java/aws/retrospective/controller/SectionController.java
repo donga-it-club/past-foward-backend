@@ -58,14 +58,15 @@ public class SectionController {
         return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 
-    // 특정 회고 카드 수정
-    @Operation(summary = "회고 카드 수정", description = "등록 된 회고 카드의 내용을 수정하는 API")
+    // 회고 카드 수정
+    @Operation(summary = "회고 카드 내용 수정", description = "등록 된 회고 카드의 내용을 수정하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @PatchMapping("/{sectionId}")
     public CommonApiResponse<EditSectionResponseDto> editSectionContent(@CurrentUser User user,
         @PathVariable Long sectionId, @Valid @RequestBody EditSectionRequestDto request) {
         EditSectionResponseDto response = sectionService.updateSectionContent(user, sectionId,
             request);
+
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 

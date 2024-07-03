@@ -29,6 +29,10 @@ public class Bookmark extends BaseEntity {
     @JoinColumn(name = "retrospective_id")
     private Retrospective retrospective;
 
+    @ManyToOne
+    @JoinColumn(name = "retrospectiveGroup_id")
+    private RetrospectiveGroup retrospectiveGroup;
+
     @Builder
     public Bookmark(User user, Retrospective retrospective) {
         this.user = user;

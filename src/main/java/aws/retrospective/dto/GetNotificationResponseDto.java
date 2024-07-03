@@ -43,7 +43,7 @@ public class GetNotificationResponseDto {
     public static GetNotificationResponseDto of(Notification notification) {
         return new GetNotificationResponseDto(notification.getId(),
             notification.getSection().getId(),
-            notification.getRetrospective().getTitle(), notification.getSender().getId(),
+            notification.getRetrospective().getTitle(), notification.getReceiver().getId(),
             notification.getReceiver().getUsername(), notification.getSender().getThumbnail(),
             notification.getNotificationType(), notification.getCreatedDate());
     }

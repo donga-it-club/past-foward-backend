@@ -3,9 +3,13 @@ package aws.retrospective.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
@@ -16,7 +20,12 @@ import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectiveType;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.dto.UpdateRetrospectiveDto;
-import aws.retrospective.entity.*;
+import aws.retrospective.entity.ProjectStatus;
+import aws.retrospective.entity.Retrospective;
+import aws.retrospective.entity.RetrospectiveTemplate;
+import aws.retrospective.entity.Team;
+import aws.retrospective.entity.User;
+import aws.retrospective.repository.BookmarkRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -25,6 +34,7 @@ import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.util.TestUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -35,21 +45,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,8 +70,7 @@ public class RetrospectiveServiceTest {
     private RetrospectiveTemplateRepository templateRepository;
 
     @Mock
-    private UserService userService;
-
+    private BookmarkRepository bookmarkRepository;
 
     @InjectMocks
     private RetrospectiveService retrospectiveService;
@@ -86,32 +84,29 @@ public class RetrospectiveServiceTest {
         dto.setOrder(RetrospectivesOrderType.OLDEST);
         dto.setKeyword("keyword");
 
-        Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize(),
-            Sort.by(Sort.Direction.ASC, "createdDate"));
         List<Retrospective> retrospectiveList = new ArrayList<>();
 
-        Retrospective retrospective = new Retrospective("New Retro",
-            null,
-            "some description",
-            null,
-            ProjectStatus.IN_PROGRESS,
-            new Team("Team Name"), new User("user1", "test", "test", "test"),
-            new RetrospectiveTemplate("Template Name"),
+        Retrospective retrospective = new Retrospective("New Retro", null, "some description", null,
+            ProjectStatus.IN_PROGRESS, new Team("Team Name"),
+            new User("user1", "test", "test", "test"), new RetrospectiveTemplate("Template Name"),
             LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
 
         retrospectiveList.add(retrospective);
-        Page<Retrospective> retrospectivePage = new PageImpl<>(retrospectiveList, pageable,
-            retrospectiveList.size());
 
-        BDDMockito.given(retrospectiveRepository.findAll(any(Specification.class), eq(pageable)))
-            .willReturn(retrospectivePage);
+        given(retrospectiveRepository.findRetrospectives(any(User.class),
+            any(GetRetrospectivesDto.class)))
+            .willReturn(retrospectiveList);
+        given(retrospectiveRepository.countRetrospectives(any(User.class),
+            any(GetRetrospectivesDto.class)))
+            .willReturn((long) retrospectiveList.size());
+        given(bookmarkRepository.findByRetrospectiveIdIn(anyList()))
+            .willReturn(Collections.emptyList());
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
-            new User("user1", "test", "test", "test"),
-            dto);
+            new User("user1", "test", "test", "test"), dto);
 
         // then
         assertThat(result).isNotNull();
@@ -119,25 +114,27 @@ public class RetrospectiveServiceTest {
         assertThat(result.nodes().size()).isEqualTo(retrospectiveList.size());
         assertThat(result.nodes().get(0).getId()).isEqualTo(retrospective.getId());
 
-        verify(retrospectiveRepository).findAll(any(Specification.class), eq(pageable));
-
+        verify(retrospectiveRepository).findRetrospectives(any(User.class),
+            any(GetRetrospectivesDto.class));
+        verify(retrospectiveRepository).countRetrospectives(any(User.class),
+            any(GetRetrospectivesDto.class));
+        verify(bookmarkRepository).findByRetrospectiveIdIn(anyList());
     }
-
 
     @Test
     void createRetrospective_ReturnsResponseDto_WhenCalledWithValidDto() {
         // given
         User user = new User("user1", "test", "test", "test");
         ReflectionTestUtils.setField(user, "id", 1L);
-        BDDMockito.given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
         Team team = new Team("Team Name");
         ReflectionTestUtils.setField(team, "id", 1L);
-        BDDMockito.given(teamRepository.save(any(Team.class))).willReturn(team);
+        given(teamRepository.save(any(Team.class))).willReturn(team);
 
         RetrospectiveTemplate template = new RetrospectiveTemplate("Template Name");
         ReflectionTestUtils.setField(template, "id", 1L);
-        BDDMockito.given(templateRepository.findById(1L)).willReturn(Optional.of(template));
+        given(templateRepository.findById(1L)).willReturn(Optional.of(template));
 
         Retrospective retrospective = new Retrospective("New Retro",
             null,
@@ -147,7 +144,7 @@ public class RetrospectiveServiceTest {
             team, user, template,
             LocalDateTime.now());
         ReflectionTestUtils.setField(retrospective, "id", 1L);
-        BDDMockito.given(retrospectiveRepository.save(any(Retrospective.class)))
+        given(retrospectiveRepository.save(any(Retrospective.class)))
             .willReturn(retrospective);
 
         CreateRetrospectiveDto dto = new CreateRetrospectiveDto();

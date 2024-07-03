@@ -4,6 +4,7 @@ import aws.retrospective.dto.CreateCommentDto;
 import aws.retrospective.entity.Bookmark;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
+import aws.retrospective.entity.RetrospectiveGroup;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
@@ -21,7 +22,6 @@ public class TestUtil {
         return Section.builder()
             .user(loginedUser)
             .content("test")
-            .likeCnt(0)
             .build();
     }
 
@@ -74,4 +74,13 @@ public class TestUtil {
         return request;
     }
 
+    public static RetrospectiveGroup createRetrospectiveGroup(User user) {
+        return RetrospectiveGroup.builder()
+            .status(ProjectStatus.IN_PROGRESS)
+            .title("test")
+            .description("test")
+            .user(user)
+            .thumbnail(UUID.randomUUID())
+            .build();
+    }
 }
