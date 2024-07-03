@@ -53,5 +53,4 @@ public class UserTeam {
     public void updateMember() {
         this.role = UserTeamRole.MEMBER;
     }
-
 }
