@@ -46,5 +46,14 @@ public class UserTeam {
         this.role = role;
     }
 
+    // 리더 역할로 변경
+    public void updateLeader() {
+        this.role = UserTeamRole.LEADER;
+    }
+
+    // 멤버 역할로 변경
+    public void updateMember() {
+        this.role = UserTeamRole.MEMBER;
+    }
 
 }
