@@ -44,11 +44,4 @@ public class UserService {
         return userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("사용자를 조회할 수 없습니다. id = " + userId));
     }
-
-    @Transactional(readOnly = true)
-    public boolean isAdmin(String email) {
-        return userRepository.findByEmail(email)
-                .map(User::isAdministrator)
-                .orElse(false);
-    }
 }

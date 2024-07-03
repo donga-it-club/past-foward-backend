@@ -30,7 +30,6 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         user = User.builder()
                 .email("test@example.com")
                 .username("testuser")
@@ -57,18 +56,18 @@ public class UserServiceTest {
     public void testIsAdmin() {
         // userRepository에서 이메일로 사용자 검색 시 user 반환
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-
-        // 테스트 대상 메서드 호출 및 결과 검증
-        boolean isAdmin = userService.isAdmin(user.getEmail());
-        assertFalse(isAdmin);
+        assertFalse(user.isAdministrator());
 
         // 관리자 권한 업데이트 및 결과 검증
         AdminRoleDtO adminRoleDTO = new AdminRoleDtO("test@example.com", true);
         userService.updateAdminStatus(user, adminRoleDTO);
 
-        // 업데이트 후 영속성 컨텍스트가 변경된 상태를 반환하도록 설정
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        isAdmin = userService.isAdmin(user.getEmail());
-        assertTrue(isAdmin);
+        // 관리자 권한 상태를 검증
+        assertTrue(user.isAdministrator());
+
+        // userRepository.findByEmail 호출이 중복되지 않도록 함
+        Optional<User> updatedUser = userRepository.findByEmail(user.getEmail());
+        assertTrue(updatedUser.isPresent());
+        assertTrue(updatedUser.get().isAdministrator());
     }
 }
