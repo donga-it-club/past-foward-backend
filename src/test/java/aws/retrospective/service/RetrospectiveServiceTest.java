@@ -407,6 +407,4 @@ public class RetrospectiveServiceTest {
         verify(userTeamRepository, never()).save(any(UserTeam.class)); // 현재 리더의 권한 변경
         verify(retrospectiveRepository, never()).save(any(Retrospective.class));
     }
-
-
 }
