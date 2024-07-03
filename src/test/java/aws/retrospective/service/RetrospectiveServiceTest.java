@@ -7,10 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import aws.retrospective.dto.CreateRetrospectiveDto;
 import aws.retrospective.dto.CreateRetrospectiveResponseDto;
@@ -21,11 +18,7 @@ import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.RetrospectiveType;
 import aws.retrospective.dto.RetrospectivesOrderType;
 import aws.retrospective.dto.UpdateRetrospectiveDto;
-import aws.retrospective.entity.ProjectStatus;
-import aws.retrospective.entity.Retrospective;
-import aws.retrospective.entity.RetrospectiveTemplate;
-import aws.retrospective.entity.Team;
-import aws.retrospective.entity.User;
+import aws.retrospective.entity.*;
 import aws.retrospective.repository.BookmarkRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
@@ -46,6 +39,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
