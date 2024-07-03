@@ -168,11 +168,11 @@ public class RetrospectiveService {
                 .orElseThrow(() -> new ResourceNotFoundException("New leader is not part of the team"));
 
         // 현재 리더 역할 변경
-        currentUserTeam.setRole(UserTeamRole.MEMBER);
+        currentUserTeam.updateMember();
         userTeamRepository.save(currentUserTeam);
 
         // 새로운 리더 역할 변경
-        newLeaderTeam.setRole(UserTeamRole.LEADER);
+        newLeaderTeam.updateLeader();
         userTeamRepository.save(currentUserTeam);
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
