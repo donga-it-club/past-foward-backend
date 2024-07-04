@@ -43,16 +43,18 @@ public class User extends BaseEntity {
     private List<Likes> likes = new ArrayList<>();
 
     private String thumbnail; // 프로필 이미지
+    private boolean isAdministrator; // 관리자 여부
 
     // 이메일 수신 동의 상태 업데이트
     private boolean emailConsent; // 이메일 수신동의 여부
 
     @Builder
-    public User(String email, String username, String phone, String tenantId, boolean emailConsent) {
+    public User(String email, String username, String phone, String tenantId, boolean isAdministrator, boolean emailConsent) {
         this.email = email;
         this.username = username;
         this.phone = phone;
         this.tenantId = tenantId;
+        this.isAdministrator = isAdministrator;
         this.emailConsent = emailConsent;
     }
 
@@ -65,5 +67,9 @@ public class User extends BaseEntity {
     // 이메일 수신 동의 상태 업데이트
     public void setEmailConsent(boolean consent) {
         this.emailConsent = consent;
+    }
+  
+    public void updateAdministrator(boolean isAdministrator) {
+        this.isAdministrator = isAdministrator;
     }
 }

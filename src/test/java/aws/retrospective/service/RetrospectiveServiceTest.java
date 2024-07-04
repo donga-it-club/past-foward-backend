@@ -81,7 +81,7 @@ public class RetrospectiveServiceTest {
 
         Retrospective retrospective = new Retrospective("New Retro", null, "some description", null,
             ProjectStatus.IN_PROGRESS, new Team("Team Name"),
-            new User("user1", "test", "test", "test", true), new RetrospectiveTemplate("Template Name"),
+            new User("user1", "test", "test", "test",false, true), new RetrospectiveTemplate("Template Name"),
             LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
@@ -99,7 +99,7 @@ public class RetrospectiveServiceTest {
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
-            new User("user1", "test", "test", "test", true), dto);
+            new User("user1", "test", "test", "test",false, true), dto);
 
         // then
         assertThat(result).isNotNull();
@@ -117,7 +117,7 @@ public class RetrospectiveServiceTest {
     @Test
     void createRetrospective_ReturnsResponseDto_WhenCalledWithValidDto() {
         // given
-        User user = new User("user1", "test", "test", "test", true);
+        User user = new User("user1", "test", "test", "test",false, true);
         ReflectionTestUtils.setField(user, "id", 1L);
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
@@ -320,8 +320,8 @@ public class RetrospectiveServiceTest {
     @DisplayName("리더가 아닌 경우, 리더 권한 전환 불가")
     void testTransferRetrospectiveLeadership_CurrentUserNotLeader() {
         // given (변수 설정)
-        User currentUser = new User("user1", "test", "test", "test", true);
-        User newLeader = new User("user2", "test", "test", "test", true);
+        User currentUser = new User("user1", "test", "test", "test", false, true);
+        User newLeader = new User("user2", "test", "test", "test", false, true);
         Team team = new Team("Team Name");
 
         // 리더가 아닌 역할로 설정된 UserTeam 객체 생성
@@ -362,8 +362,8 @@ public class RetrospectiveServiceTest {
     @DisplayName("리더인 경우, 다른 멤버에게 리더 권한 양도")
     void testTransferRetrospectiveLeadership_CurrentUserLeader() {
         // given (변수 설정)
-        User currentUser = new User("user1", "test", "test", "test", true);
-        User newLeader = new User("user2", "test", "test", "test", true);
+        User currentUser = new User("user1", "test", "test", "test", false, true);
+        User newLeader = new User("user2", "test", "test", "test", false, true);
         Team team = new Team("Team Name");
 
         // 리더로 설정된 UserTeam 객체 생성
