@@ -1,6 +1,5 @@
 package aws.retrospective.service;
 
-import aws.retrospective.common.CurrentUser;
 import aws.retrospective.common.CustomUserDetails;
 import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
