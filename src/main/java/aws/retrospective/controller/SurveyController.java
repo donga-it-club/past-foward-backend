@@ -36,15 +36,17 @@ public class SurveyController {
         surveyService.addSurvey(user, surveyDto);
     }
 
+    /*
     @Operation(summary = "설문조사 조회", description = "설문조사 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "설문조사가 성공적으로 조회됨")
-    @GetMapping
+    @GetMapping()
     public CommonApiResponse<List<SurveyDto>> getAllSurveys() {
         List<SurveyDto> surveys = surveyService.getAllSurveys();
 
         // 정상적으로 데이터를 조회한 경우 successResponse 메서드로 응답을 구성
         return CommonApiResponse.successResponse(HttpStatus.OK, surveys);
     }
+     */
 
     @Operation(summary = "성별 및 연령 조회", description = "설문조사에서 성별 및 연령 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "성별 및 연령 데이터가 성공적으로 조회됨")
