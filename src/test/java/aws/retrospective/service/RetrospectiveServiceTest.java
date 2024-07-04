@@ -84,7 +84,7 @@ public class RetrospectiveServiceTest {
 
         Retrospective retrospective = new Retrospective("New Retro", null, "some description", null,
             ProjectStatus.IN_PROGRESS, new Team("Team Name"),
-            new User("user1", "test", "test", "test"), new RetrospectiveTemplate("Template Name"),
+            new User("user1", "test", "test", "test",false), new RetrospectiveTemplate("Template Name"),
             LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
@@ -102,7 +102,7 @@ public class RetrospectiveServiceTest {
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
-            new User("user1", "test", "test", "test"), dto);
+            new User("user1", "test", "test", "test",false), dto);
 
         // then
         assertThat(result).isNotNull();
@@ -120,7 +120,7 @@ public class RetrospectiveServiceTest {
     @Test
     void createRetrospective_ReturnsResponseDto_WhenCalledWithValidDto() {
         // given
-        User user = new User("user1", "test", "test", "test");
+        User user = new User("user1", "test", "test", "test",false);
         ReflectionTestUtils.setField(user, "id", 1L);
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
