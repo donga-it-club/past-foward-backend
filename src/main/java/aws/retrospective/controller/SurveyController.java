@@ -5,7 +5,6 @@ import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.User;
 import aws.retrospective.service.SurveyService;
-import aws.retrospective.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 public class SurveyController {
 
     private final SurveyService surveyService;
-    private final UserService userService;
 
     @PostMapping("/responses")
     @Operation(summary = "설문조사 저장", description = "설문조사 결과를 DB에 저장하는 API")
@@ -36,7 +34,6 @@ public class SurveyController {
         surveyService.addSurvey(user, surveyDto);
     }
 
-    /*
     @Operation(summary = "설문조사 조회", description = "설문조사 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "설문조사가 성공적으로 조회됨")
     @GetMapping()
@@ -46,7 +43,6 @@ public class SurveyController {
         // 정상적으로 데이터를 조회한 경우 successResponse 메서드로 응답을 구성
         return CommonApiResponse.successResponse(HttpStatus.OK, surveys);
     }
-     */
 
     @Operation(summary = "성별 및 연령 조회", description = "설문조사에서 성별 및 연령 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "성별 및 연령 데이터가 성공적으로 조회됨")
@@ -71,7 +67,7 @@ public class SurveyController {
     @Operation(summary = "서비스를 알게된 경로, 서비스 사용 목적, 이메일 수신 여부 조회", description = "설문조사에서 서비스 관련 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "서비스 관련 데이터가 성공적으로 조회됨")
     @GetMapping("/serviceInfo")
-    public CommonApiResponse<List<SurveyDto>> getGetSourceAndPurposeSurveys() {
+    public CommonApiResponse<List<SurveyDto>> getSourceAndPurposeSurveys() {
         List<SurveyDto> surveys = surveyService.getSourceAndPurposeSurveys();
 
         // 정상적으로 데이터를 조회한 경우 successResponse 메서드로 응답 구성
