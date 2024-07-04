@@ -1,10 +1,6 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.GetPreSignedUrlRequestDto;
-import aws.retrospective.dto.GetPreSignedUrlResponseDto;
-import aws.retrospective.dto.NoticeBoardWritingRequestDto;
-import aws.retrospective.dto.NoticeBoardWritingResponseDto;
-import aws.retrospective.dto.PresigendUrlMethod;
+import aws.retrospective.dto.*;
 import aws.retrospective.entity.NoticeBoardWriting;
 import aws.retrospective.entity.SaveStatus;
 import aws.retrospective.repository.NoticeBoardWritingRepository;
@@ -14,6 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,6 +105,36 @@ public class NoticeBoardWritingServiceTest {
         noticeBoardWritingService.deletePost(1L);
 
         verify(noticeBoardWritingRepository, times(1)).deleteById(any(Long.class));
+    }
+
+    @Test
+    public void testGetAllPosts() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<NoticeBoardWriting> page = new PageImpl<>(Collections.singletonList(noticeBoardWriting), pageable, 1);
+
+        when(noticeBoardWritingRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        PagedResponseDto<NoticeBoardListDto> responseDto = noticeBoardWritingService.getAllPosts(1, 10);
+
+        assertNotNull(responseDto);
+        assertEquals(1, responseDto.getPosts().size());
+        assertEquals("Test Title", responseDto.getPosts().get(0).getTitle());
+        assertEquals(1, responseDto.getTotalPages());
+        verify(noticeBoardWritingRepository, times(1)).findAll(any(Pageable.class));
+    }
+
+    @Test
+    public void testGetPostById() {
+        when(noticeBoardWritingRepository.findById(any(Long.class))).thenReturn(Optional.of(noticeBoardWriting));
+
+        NoticeBoardWritingResponseDto responseDto = noticeBoardWritingService.getPostById(1L);
+
+        assertNotNull(responseDto);
+        assertEquals("Test Title", responseDto.getTitle());
+        assertEquals("Test Content", responseDto.getContent());
+        assertEquals("PUBLISHED", responseDto.getStatus());
+        verify(noticeBoardWritingRepository, times(1)).findById(any(Long.class));
+        verify(noticeBoardWritingRepository, times(1)).save(any(NoticeBoardWriting.class)); // 조회수 증가 저장 확인
     }
 }
 
