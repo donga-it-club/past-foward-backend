@@ -13,7 +13,7 @@ public enum ErrorCode {
     EMPTY_DATA_ACCESS(404, "EMPTY DATA ACCESS"),
     CONFILCT(409, "CONFLICT_409"),
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR_500"),
-    UNAUTHORIZED(401, "권한이 없습니다.");
+    UNAUTHORIZED(401, "인증 실패");
 
     private int code;
     private String message;
