@@ -1,6 +1,9 @@
 package aws.retrospective.service;
 
+
 import aws.retrospective.common.CustomUserDetails;
+import aws.retrospective.dto.AdminRoleDtO;
+
 import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
 import aws.retrospective.dto.UpdateUserProfileResponseDto;
@@ -35,6 +38,11 @@ public class UserService {
         return new GetUserInfoDto(currentUser.getId(), currentUser.getUsername(),
             currentUser.getEmail(), currentUser.getThumbnail(), currentUser.getPhone(),
             currentUser.getCreatedDate(), currentUser.getUpdatedDate());
+    }
+
+    @Transactional
+    public void updateAdminStatus(User user, AdminRoleDtO adminRoleDTO) {
+        user.updateAdministrator(adminRoleDTO.isAdmin());
     }
 
 
