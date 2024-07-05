@@ -61,9 +61,9 @@ public class SurveyServiceTest {
                 .region("Korea")
                 .source("internet")
                 .purposes(purposes)
-                .emailConsent(false) // 추가된 필드
+                .emailConsent(true) // 추가된 필드
                 .build();
-        
+
         // When
         surveyService.addSurvey(user, surveyDto);
 
