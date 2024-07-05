@@ -31,6 +31,6 @@ public class SurveyDto {
 
     // 이메일 수신동의 여부
     @NotNull
-    private Boolean emailConsent;
+    private Boolean emailConsents;
 
 }
