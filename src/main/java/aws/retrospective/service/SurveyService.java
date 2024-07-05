@@ -40,7 +40,7 @@ public class SurveyService {
         surveyRepository.save(survey);
 
         // 이메일 수신 동의 여부 업데이트
-        user.isEmailConsent(dto.getEmailConsent());
+        user.isEmailConsent(dto.getEmailConsents());
         userRepository.save(user);
     }
 
@@ -83,7 +83,7 @@ public class SurveyService {
                 .map(survey -> SurveyDto.builder()
                         .source(survey.getSource())
                         .purposes(survey.getPurposes())
-                        .emailConsent(survey.getUser().isEmailConsent())
+                        .emailConsents(survey.getUser().isEmailConsent())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -103,7 +103,7 @@ public class SurveyService {
             .region(survey.getRegion())
             .source(survey.getSource())
             .purposes(survey.getPurposes())
-            .emailConsent(survey.getUser().isEmailConsent())
+            .emailConsents(survey.getUser().isEmailConsent())
             .build();
     }
 }
