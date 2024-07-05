@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import aws.retrospective.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,7 @@ public class SurveyService {
         surveyRepository.save(survey);
 
         // 이메일 수신 동의 여부 업데이트
-        user.setEmailConsent(dto.getEmailConsent());
+        user.isEmailConsent(dto.getEmailConsent());
         userRepository.save(user);
     }
 
