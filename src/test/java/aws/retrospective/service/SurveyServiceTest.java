@@ -61,7 +61,7 @@ public class SurveyServiceTest {
                 .region("Korea")
                 .source("internet")
                 .purposes(purposes)
-                .emailConsent(true) // 추가된 필드
+                .emailConsents(true) // 추가된 필드
                 .build();
 
         // When
@@ -83,7 +83,7 @@ public class SurveyServiceTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertThat(savedUser.isEmailConsent()).isEqualTo(surveyDto.getEmailConsent());
+        assertThat(savedUser.isEmailConsent()).isEqualTo(surveyDto.getEmailConsents());
     }
 
     @Test
@@ -210,7 +210,7 @@ public class SurveyServiceTest {
         SurveyDto surveyDto = surveyDtos.get(0);
         assertEquals("Internet", surveyDto.getSource());
         assertEquals(purposes, surveyDto.getPurposes());
-        assertEquals(true, surveyDto.getEmailConsent());
+        assertEquals(true, surveyDto.getEmailConsents());
 
         // findAll 메서드가 한 번 호출되었는지 검증
         verify(surveyRepository, times(1)).findAll();
