@@ -32,8 +32,6 @@ public class SurveyServiceTest {
     @InjectMocks
     private SurveyService surveyService;
 
-    private User user;
-
     @Mock
     private SurveyRepository surveyRepository;
 
