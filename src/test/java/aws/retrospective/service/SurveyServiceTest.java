@@ -111,7 +111,16 @@ public class SurveyServiceTest {
 
         // 결과 확인
         assertEquals(surveys.size(), response.size());
-        // 추가적인 검증을 원하는 경우 surveyDtos 내용을 검사할 수 있음
+
+        // 추가적인 검증
+        SurveyDto surveyDto = response.get(0);
+        assertEquals(30, surveyDto.getAge());
+        assertEquals("MALE", surveyDto.getGender());
+        assertEquals("Engineer", surveyDto.getOccupation());
+        assertEquals("Seoul", surveyDto.getRegion());
+        assertEquals("Internet", surveyDto.getSource());
+        assertEquals(purposes, surveyDto.getPurposes());
+        assertTrue(surveyDto.getEmailConsents());
     }
 
     @Test
