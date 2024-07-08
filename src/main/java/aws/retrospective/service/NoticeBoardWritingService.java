@@ -64,5 +64,16 @@ public class NoticeBoardWritingService {
         noticeBoardWritingRepository.save(post); // 조회수 증가한 내용 저장
         return new NoticeBoardWritingResponseDto(post);
     }
+
+    @Transactional
+    public NoticeBoardWritingResponseDto updatePost(Long id, NoticeBoardWritingRequestDto requestDto) {
+        NoticeBoardWriting post = noticeBoardWritingRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid post ID"));
+
+        post.updateBoard(requestDto.getTitle(), requestDto.getContent());
+
+        NoticeBoardWriting updatedPost = noticeBoardWritingRepository.save(post);
+        return new NoticeBoardWritingResponseDto(updatedPost);
+    }
 }
 

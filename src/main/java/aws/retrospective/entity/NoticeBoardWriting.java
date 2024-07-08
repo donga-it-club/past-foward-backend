@@ -53,4 +53,9 @@ public class NoticeBoardWriting extends BaseEntity {
     public void incrementViews() {
         this.views++;
     }
+
+    public void updateBoard(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

@@ -40,7 +40,7 @@ public class NoticeBoardWritingAdminController {
         return CommonApiResponse.successResponse(HttpStatus.OK, responseDto);
     }
 
-    @Operation(summary = "임시 게시글 저장", description = "임시 게시글을 저장하는 API")
+    @Operation(summary = "임시 게시글 작성", description = "임시 게시글을 저장하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "임시 게시글 저장 성공")})
     @PostMapping("/temp-posts")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -49,7 +49,7 @@ public class NoticeBoardWritingAdminController {
         return CommonApiResponse.successResponse(HttpStatus.OK, responseDto);
     }
 
-    @Operation(summary = "Presigned URL 발급", description = "파일 업로드를 위한 presigned URL을 발급하는 API")
+    @Operation(summary = "Presigned URL 발급", description = "사진 및 파일 업로드를 위한 presigned URL을 발급하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Presigned URL 발급 성공")})
     @PostMapping("/files/presigned-url")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -69,4 +69,14 @@ public class NoticeBoardWritingAdminController {
     public void deletePost(@CurrentUser User user, @PathVariable Long id) {
         noticeBoardWritingService.deletePost(id);
     }
+
+    @Operation(summary = "게시글 수정", description = "기존 게시글을 수정하는 API")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "게시글 수정 성공")})
+    @PutMapping("/posts/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public CommonApiResponse<NoticeBoardWritingResponseDto> updatePost(@CurrentUser User user, @PathVariable Long id, @RequestBody @Valid NoticeBoardWritingRequestDto requestDto) {
+        NoticeBoardWritingResponseDto responseDto = noticeBoardWritingService.updatePost(id, requestDto);
+        return CommonApiResponse.successResponse(HttpStatus.OK, responseDto);
+    }
+
 }

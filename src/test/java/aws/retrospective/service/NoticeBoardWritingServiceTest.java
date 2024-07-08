@@ -136,5 +136,21 @@ public class NoticeBoardWritingServiceTest {
         verify(noticeBoardWritingRepository, times(1)).findById(any(Long.class));
         verify(noticeBoardWritingRepository, times(1)).save(any(NoticeBoardWriting.class)); // 조회수 증가 저장 확인
     }
+
+    @Test
+    public void testUpdatePost() {
+        Long postId = 1L;
+        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Updated Title", "Updated Content");
+
+        when(noticeBoardWritingRepository.findById(postId)).thenReturn(Optional.of(noticeBoardWriting));
+        when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenReturn(noticeBoardWriting);
+
+        NoticeBoardWritingResponseDto responseDto = noticeBoardWritingService.updatePost(postId, requestDto);
+
+        assertNotNull(responseDto);
+        assertEquals("Updated Title", responseDto.getTitle());
+        assertEquals("Updated Content", responseDto.getContent());
+        verify(noticeBoardWritingRepository, times(1)).findById(postId);
+    }
 }
 
