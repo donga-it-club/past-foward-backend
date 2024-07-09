@@ -80,9 +80,9 @@ public class RetrospectiveServiceTest {
         List<Retrospective> retrospectiveList = new ArrayList<>();
 
         Retrospective retrospective = new Retrospective("New Retro", null, "some description", null,
-                ProjectStatus.IN_PROGRESS, new Team("Team Name"),
-                new User("user1", "test", "test", "test",false, true), new RetrospectiveTemplate("Template Name"),
-                LocalDateTime.now());
+            ProjectStatus.IN_PROGRESS, new Team("Team Name"),
+            new User("user1", "test", "test", "test",false, true), new RetrospectiveTemplate("Template Name"),
+            LocalDateTime.now());
 
         ReflectionTestUtils.setField(retrospective, "id", 1L);
 
@@ -99,7 +99,7 @@ public class RetrospectiveServiceTest {
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
-                new User("user1", "test", "test", "test",false, true), dto);
+            new User("user1", "test", "test", "test",false, true), dto);
 
         // then
         assertThat(result).isNotNull();
