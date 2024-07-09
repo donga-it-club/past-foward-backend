@@ -1,7 +1,9 @@
 package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
+import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.GetNotificationResponseDto;
+import aws.retrospective.entity.User;
 import aws.retrospective.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,7 +28,7 @@ public class NotificationController {
     @Operation(summary = "알림 조회", description = "알림 조회 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @GetMapping()
-    public CommonApiResponse<List<GetNotificationResponseDto>> getNewNotifications() {
+    public CommonApiResponse<List<GetNotificationResponseDto>> getNewNotifications(@CurrentUser User user) {
         List<GetNotificationResponseDto> notifications = notificationService.getNotifications();
         return CommonApiResponse.successResponse(HttpStatus.OK, notifications);
     }
@@ -34,13 +36,13 @@ public class NotificationController {
     @Operation(summary = "알림 읽기", description = "알림 읽음 처리 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @PostMapping("/{notificationId}")
-    public CommonApiResponse<Void> readNotification(@PathVariable Long notificationId) {
+    public CommonApiResponse<Void> readNotification(@CurrentUser User user, @PathVariable Long notificationId) {
         notificationService.readNotification(notificationId);
         return CommonApiResponse.successResponse(HttpStatus.OK);
     }
 
     @DeleteMapping("/{userId}")
-    public CommonApiResponse<Void> deleteNotificationAll(@PathVariable("userId") Long userId) {
+    public CommonApiResponse<Void> deleteNotificationAll(@CurrentUser User user, @PathVariable("userId") Long userId) {
         notificationService.deleteNotificationAll(userId);
         return CommonApiResponse.successResponse(HttpStatus.OK);
     }

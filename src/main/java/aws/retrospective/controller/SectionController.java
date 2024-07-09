@@ -96,7 +96,7 @@ public class SectionController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @GetMapping
     public CommonApiResponse<List<GetSectionsResponseDto>> getSections(
-        @Valid GetSectionsRequestDto request) {
+        @Valid GetSectionsRequestDto request, @CurrentUser User user) {
         List<GetSectionsResponseDto> response = sectionService.getSections(request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
@@ -129,7 +129,7 @@ public class SectionController {
         @ApiResponse(responseCode = "200")
     })
     @PutMapping("/{sectionId}/kudos-target")
-    public CommonApiResponse<AssignKudosResponseDto> assignKudosPerson(@PathVariable Long sectionId, @Valid @RequestBody AssignKudosRequestDto request) {
+    public CommonApiResponse<AssignKudosResponseDto> assignKudosPerson(@CurrentUser User user, @PathVariable Long sectionId, @Valid @RequestBody AssignKudosRequestDto request) {
         AssignKudosResponseDto response = sectionService.assignKudos(sectionId, request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
