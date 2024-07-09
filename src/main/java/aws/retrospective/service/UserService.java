@@ -70,7 +70,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("No authenticated user found"));
 
-        user.isEmailConsent(consent);
+        user.updateEmailConsent(consent);
         userRepository.save(user);
     }
 }
