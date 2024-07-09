@@ -1,6 +1,7 @@
 package aws.retrospective.dto;
 
 import aws.retrospective.entity.NoticeBoardWriting;
+import aws.retrospective.entity.SaveStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ public class NoticeBoardListDto {
     private Long id;
     private String title;
     private String content;
-    private String status;
+    private SaveStatus status;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private int views;
@@ -23,7 +24,7 @@ public class NoticeBoardListDto {
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();
-        this.status = entity.getStatus().name();
+        this.status = entity.getStatus();
         this.createdDate = entity.getCreatedDate();
         this.modifiedDate = entity.getModifiedDate();
         this.views = 0; // 기본 조회수 초기화
@@ -33,7 +34,7 @@ public class NoticeBoardListDto {
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();
-        this.status = entity.getStatus().name();
+        this.status = entity.getStatus();
         this.createdDate = entity.getCreatedDate();
         this.modifiedDate = entity.getModifiedDate();
         this.views = views;
