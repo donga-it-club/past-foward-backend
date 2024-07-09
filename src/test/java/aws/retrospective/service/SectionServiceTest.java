@@ -19,12 +19,9 @@ import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.IncreaseSectionLikesRequestDto;
-import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.KudosTarget;
-import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.ProjectStatus;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
@@ -35,8 +32,6 @@ import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.KudosTargetRepository;
-import aws.retrospective.repository.LikesRepository;
-import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -66,8 +61,6 @@ class SectionServiceTest {
     @Mock
     TemplateSectionRepository templateSectionRepository;
     @Mock
-    LikesRepository likesRepository;
-    @Mock
     TeamRepository teamRepository;
     @Mock
     ActionItemRepository actionItemRepository;
@@ -75,8 +68,6 @@ class SectionServiceTest {
     UserRepository userRepository;
     @Mock
     KudosTargetRepository kudosRepository;
-    @Mock
-    NotificationRepository notificationRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -158,62 +149,6 @@ class SectionServiceTest {
     }
 
     @Test
-    @DisplayName("사용자가 좋아요를 누른 적이 없다면 좋아요 횟수 1이 증가한다")
-    void increaseLikesCnt() {
-        //given
-        Long userId = 1L;
-        User user = createUser();
-        ReflectionTestUtils.setField(user, "id", userId);
-
-        Long sectionId = 1L;
-        Section section = createSection(user);
-        ReflectionTestUtils.setField(section, "id", sectionId);
-        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
-
-        when(likesRepository.findByUserAndSection(user, section)).thenReturn(Optional.empty());
-
-        IncreaseSectionLikesRequestDto request = new IncreaseSectionLikesRequestDto();
-        ReflectionTestUtils.setField(request, "userId", userId);
-
-        //when
-        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(sectionId,
-            user);
-
-        //then
-        assertThat(response.getSectionId()).isEqualTo(sectionId);
-        assertThat(response.getLikeCnt()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("사용자는 좋아요를 취소할 수 있다.")
-    void decreaseLikesCnt() {
-        //given
-        Long userId = 1L;
-        User user = createUser();
-        ReflectionTestUtils.setField(user, "id", userId);
-
-        Long sectionId = 1L;
-        Section section = createSection(user);
-        ReflectionTestUtils.setField(section, "id", sectionId);
-        ReflectionTestUtils.setField(section, "likeCnt", 2);
-        when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
-
-        Likes likes = createLikes(section, user);
-        when(likesRepository.findByUserAndSection(user, section)).thenReturn(Optional.of(likes));
-
-        IncreaseSectionLikesRequestDto request = new IncreaseSectionLikesRequestDto();
-        ReflectionTestUtils.setField(request, "userId", userId);
-
-        //when
-        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(sectionId,
-            user);
-
-        //then
-        assertThat(response.getSectionId()).isEqualTo(sectionId);
-        assertThat(response.getLikeCnt()).isEqualTo(1);
-    }
-
-    @Test
     @DisplayName("특정 섹션 내용 수정")
     void updateSectionContentTest() {
         //given
@@ -276,7 +211,7 @@ class SectionServiceTest {
 
         GetSectionsResponseDto dto = new GetSectionsResponseDto(
             sectionId, createdUser.getId(), createdUser.getUsername(), createdSection.getContent(),
-            createdSection.getLikeCnt(), createdSection.getTemplateSection().getSectionName(),
+            0, createdSection.getTemplateSection().getSectionName(),
             createdSection.getCreatedDate(), createdSection.getUser().getThumbnail(),
             null, null
         );
@@ -299,7 +234,7 @@ class SectionServiceTest {
         assertThat(result.getCreatedDate()).isEqualTo(createdSection.getCreatedDate());
         assertThat(result.getContent()).isEqualTo(createdSection.getContent());
         assertThat(result.getUsername()).isEqualTo(createdUser.getUsername());
-        assertThat(result.getLikeCnt()).isEqualTo(createdSection.getLikeCnt());
+        assertThat(result.getLikeCnt()).isEqualTo(0);
         assertThat(result.getComments().size()).isEqualTo(2);
         assertThat(result.getComments().get(0).getContent()).isEqualTo(comment1.getContent());
         assertThat(result.getComments().get(1).getContent()).isEqualTo(comment2.getContent());
@@ -511,10 +446,6 @@ class SectionServiceTest {
         //then
         assertThrows(IllegalArgumentException.class,
             () -> sectionService.assignKudos(sectionId, any()));
-    }
-
-    private static Likes createLikes(Section section, User user) {
-        return Likes.builder().section(section).user(user).build();
     }
 
     private static Section createSection(User user, TemplateSection templateSection,

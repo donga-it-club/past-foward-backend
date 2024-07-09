@@ -123,7 +123,7 @@ class NotificationServiceTest {
         notificationRedisRepository.save(redis);
 
         //when
-        sectionService.increaseSectionLikes(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
+        sectionService.clickLikeSection(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
         // 레디스에 저장된 시간 이후의 알림 조회
         List<GetNotificationResponseDto> notifications = notificationService.getNotifications();
 
@@ -165,7 +165,7 @@ class NotificationServiceTest {
         CreateCommentDto request = TestUtil.createCommentDto(section.getId());
         commentService.createComment(savedUser, request); // 댓글 작성
 
-        sectionService.increaseSectionLikes(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
+        sectionService.clickLikeSection(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
 
         //when
         List<GetNotificationResponseDto> unreadNotifications = notificationService.getNotifications();
