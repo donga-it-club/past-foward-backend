@@ -3,6 +3,7 @@ package aws.retrospective.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.StatusResultMatchersExtensionsKt.isEqualTo;
 
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
@@ -48,7 +49,7 @@ public class SurveyServiceTest {
                 .phone("123-456-7890")
                 .tenantId("tenant1")
                 .isAdministrator(false)
-                .emailConsent(true)
+                .isEmailConsent(true)
                 .build();
 
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
@@ -81,7 +82,7 @@ public class SurveyServiceTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertThat(savedUser.isEmailConsent()).isEqualTo(surveyDto.getEmailConsents());
+        assertThat(savedUser.isIsemailConsent()).isEqualTo(surveyDto.getEmailConsents());
     }
 
     @Test
@@ -89,7 +90,7 @@ public class SurveyServiceTest {
         // 가짜 데이터 생성
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         User user = User.builder()
-                .emailConsent(true)
+                .isEmailConsent(true)
                 .build();
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
@@ -157,7 +158,7 @@ public class SurveyServiceTest {
         // 가짜 데이터 생성
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         User user = User.builder()
-                .emailConsent(true)
+                .isEmailConsent(true)
                 .build();
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
@@ -192,7 +193,7 @@ public class SurveyServiceTest {
         // 가짜 데이터 생성
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         User user = User.builder()
-                .emailConsent(true)
+                .isEmailConsent(true)
                 .build();
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
