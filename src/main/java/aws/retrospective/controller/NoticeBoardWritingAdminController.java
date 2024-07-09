@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/notices")
-@Tag(name = "Admin Notice Board Writing")
+@Tag(name = "NoticeBoard")
 @SecurityRequirement(name = "JWT")
 public class NoticeBoardWritingAdminController {
 
