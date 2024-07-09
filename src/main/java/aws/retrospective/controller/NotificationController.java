@@ -44,16 +44,4 @@ public class NotificationController {
         notificationService.deleteNotificationAll(userId);
         return CommonApiResponse.successResponse(HttpStatus.OK);
     }
-
-    @Operation(summary = "이메일 전송", description = "최근 발생 알림을 이메일로 전송하는 API")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200")})
-    @GetMapping("/sendEmailNotification")
-    public String sendEmailNotification() {
-        try {
-            notificationService.sendEmailNotification();
-            return "Email notification sent successfully";
-        } catch (RuntimeException e) {
-            return "Failed to send email notification: " + e.getMessage();
-        }
-    }
 }
