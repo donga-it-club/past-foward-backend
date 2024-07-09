@@ -28,7 +28,6 @@ public class Section extends BaseEntity {
     private Long id;
 
     private String content; // 내용
-    private long likeCnt; // 좋아요 개수
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "retrospective_id")
@@ -43,16 +42,12 @@ public class Section extends BaseEntity {
     private TemplateSection templateSection; // 섹션 템플릿 정보
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.REMOVE)
-    private List<Likes> likes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "section", cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
     public Section(String content, Retrospective retrospective, User user,
         TemplateSection templateSection) {
         this.content = content;
-        this.likeCnt = 0;
         this.retrospective = retrospective;
         this.user = user;
         this.templateSection = templateSection;
@@ -61,15 +56,6 @@ public class Section extends BaseEntity {
     // 섹션 내용 update
     public void updateSectionContent(String content) {
         this.content = content;
-    }
-
-    // 좋아요 등록
-    public void increaseSectionLikes() {
-        this.likeCnt += 1;
-    }
-    // 좋아요 취소
-    public void cancelSectionLikes() {
-        this.likeCnt -= 1;
     }
 
     public boolean isSameUser(User user) {

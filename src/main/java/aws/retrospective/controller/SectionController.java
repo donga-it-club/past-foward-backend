@@ -12,7 +12,6 @@ import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetCommentsResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.User;
 import aws.retrospective.service.CommentService;
 import aws.retrospective.service.SectionService;
@@ -74,11 +73,10 @@ public class SectionController {
     @Operation(summary = "회고 카드 좋아요", description = "등록된 회고 카드의 좋아요 또는 취소 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "200")})
     @PostMapping("/{sectionId}/likes")
-    public CommonApiResponse<IncreaseSectionLikesResponseDto> increaseSectionLikes(
+    public CommonApiResponse<Void> increaseSectionLikes(
         @CurrentUser User user, @PathVariable Long sectionId) {
-        IncreaseSectionLikesResponseDto response = sectionService.increaseSectionLikes(sectionId,
-            user);
-        return CommonApiResponse.successResponse(HttpStatus.OK, response);
+        sectionService.clickLikeSection(sectionId, user);
+        return CommonApiResponse.successResponse(HttpStatus.OK);
     }
 
     // 특정 회고 카드 삭제
