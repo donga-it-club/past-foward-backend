@@ -39,7 +39,7 @@ public class UserServiceTest {
                 .phone("123-456-7890")
                 .tenantId("tenant1")
                 .isAdministrator(false)
-                .emailConsent(true)
+                .isEmailConsent(true)
                 .build();
     }
 
@@ -60,7 +60,7 @@ public class UserServiceTest {
         verify(userRepository).save(captor.capture());
         User savedUser = captor.getValue();
 
-        assertThat(savedUser.isEmailConsent()).isEqualTo(newEmailConsent);
+        assertThat(savedUser.isIsemailConsent()).isEqualTo(newEmailConsent);
     }
 
 
