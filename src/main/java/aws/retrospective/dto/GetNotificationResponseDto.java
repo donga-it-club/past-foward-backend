@@ -4,6 +4,7 @@ import aws.retrospective.entity.Notification;
 import aws.retrospective.entity.NotificationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.Getter;
 
 @Getter
@@ -37,7 +38,7 @@ public class GetNotificationResponseDto {
         this.senderName = senderName;
         this.thumbnail = thumbnail;
         this.notificationType = notificationType;
-        this.dateTime = dateTime;
+        this.dateTime = parseDateTime(dateTime.toString());
     }
 
     public static GetNotificationResponseDto of(Notification notification) {
@@ -47,4 +48,9 @@ public class GetNotificationResponseDto {
             notification.getReceiver().getUsername(), notification.getSender().getThumbnail(),
             notification.getNotificationType(), notification.getCreatedDate());
     }
+
+    private LocalDateTime parseDateTime(String dateTime) {
+        return LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }
+
 }
