@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -46,6 +48,7 @@ public class RetrospectiveService {
     private final RetrospectiveTemplateRepository templateRepository;
     private final BookmarkService bookmarkService;
     private final UserTeamRepository userTeamRepository;
+    private final UserService userService;
 
     @Transactional(readOnly = true)
     public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(User user,
@@ -192,6 +195,39 @@ public class RetrospectiveService {
             .status(retrospective.getStatus()).thumbnail(retrospective.getThumbnail())
             .description(retrospective.getDescription()).startDate(retrospective.getStartDate())
             .build();
+    }
+
+    //회고 권한 양도 메서드
+    @Transactional
+    public CreateRetrospectiveResponseDto transferRetrospectiveLeadership(User user, Long retrospectiveId, Long newLeaderId) {
+        Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
+                .orElseThrow(() -> new ResourceNotFoundException("Retrospective not found"));
+
+        // 현재 사용자와 리더가 동일한지 확인
+        User currentUser = userService.getCurrentUser();
+        UserTeam currentUserTeam = userTeamRepository.findByTeamIdAndUserId(retrospective.getTeam().getId(), currentUser.getId())
+                .orElseThrow(() -> new NoSuchElementException("Current user is not part of the team"));
+
+        if(!currentUserTeam.getRole().equals(UserTeamRole.LEADER)) {
+            throw new NoSuchElementException("You do not have permission to transfer leadership");
+        }
+
+        // 새로운 리더 조회
+        User newLeader = userRepository.findById(newLeaderId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        UserTeam newLeaderTeam = userTeamRepository.findByTeamIdAndUserId(retrospective.getTeam().getId(), newLeader.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("New leader is not part of the team"));
+
+        // 현재 리더 역할 변경
+        currentUserTeam.updateMember();
+        userTeamRepository.save(currentUserTeam);
+
+        // 새로운 리더 역할 변경
+        newLeaderTeam.updateLeader();
+        userTeamRepository.save(newLeaderTeam);
+
+        Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
+
+        return toResponseDto(savedRetrospective);
     }
 
 }

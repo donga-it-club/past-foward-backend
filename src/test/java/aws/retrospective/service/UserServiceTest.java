@@ -1,18 +1,21 @@
 package aws.retrospective.service;
 
-import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import aws.retrospective.dto.AdminRoleDtO;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -20,11 +23,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    @InjectMocks
-    private UserService userService;
-
     @Mock
     private UserRepository userRepository;
+
+    @InjectMocks
+    private UserService userService;
 
     private User user;
 
@@ -36,8 +39,30 @@ public class UserServiceTest {
                 .phone("123-456-7890")
                 .tenantId("tenant1")
                 .isAdministrator(false)
+                .isEmailConsent(true)
                 .build();
     }
+
+    @Test
+    @DisplayName("사용자가 이메일 수신 동의 상태를 업데이트 할 수 있다.")
+    void updateEmailConsent() {
+        // Given
+        Long userId = 1L;
+        boolean newEmailConsent = false; // 업데이트할 새로운 이메일 동의 상태
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // When
+        userService.updateEmailConsent(userId, newEmailConsent);
+
+        // Then
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        User savedUser = captor.getValue();
+
+        assertThat(savedUser.isIsemailConsent()).isEqualTo(newEmailConsent);
+    }
+
 
     @Test
     @Transactional
