@@ -13,6 +13,7 @@ public class NoticeBoardViewCounting {
 
     @Id
     private Long postId; // key
+    @Getter
     private Integer viewCount; // value
 
     public static NoticeBoardViewCounting of(Long postId, Integer viewCount) {
@@ -21,10 +22,6 @@ public class NoticeBoardViewCounting {
 
     public void incrementViewCount() {
         this.viewCount++;
-    }
-
-    public Integer getViewCount() {
-        return this.viewCount;
     }
 }
 
