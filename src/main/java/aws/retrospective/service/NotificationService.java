@@ -63,7 +63,7 @@ public class NotificationService {
 
     private NotificationRedis findNotification() {
         return redisRepository.findById(NOTIFICATION)
-            .orElseThrow(() -> new NoSuchElementException("알림을 조회할 수 없습니다. ID: " + NOTIFICATION));
+            .orElse(createNotification());
     }
 
     private static NotificationRedis createNotification() {
