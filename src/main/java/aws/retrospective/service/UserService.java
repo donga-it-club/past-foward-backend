@@ -25,19 +25,19 @@ public class UserService {
 
     @Transactional
     public UpdateUserProfileResponseDto updateProfile(User user,
-        UpdateUserProfileRequestDto request) {
+                                                      UpdateUserProfileRequestDto request) {
         User findUser = getUser(user.getId());
         findUser.updateUserInfo(request.getThumbnail(), request.getUsername());
         return new UpdateUserProfileResponseDto(findUser.getId(), findUser.getEmail(),
-            findUser.getThumbnail(), findUser.getUsername());
+                findUser.getThumbnail(), findUser.getUsername());
     }
 
     @Transactional(readOnly = true)
     public GetUserInfoDto getUserInfo(User user) {
         User currentUser = getUser(user.getId());
         return new GetUserInfoDto(currentUser.getId(), currentUser.getUsername(),
-            currentUser.getEmail(), currentUser.getThumbnail(), currentUser.getPhone(),
-            currentUser.getCreatedDate(), currentUser.getUpdatedDate());
+                currentUser.getEmail(), currentUser.getThumbnail(), currentUser.getPhone(),
+                currentUser.getCreatedDate(), currentUser.getUpdatedDate());
     }
 
     @Transactional
@@ -48,9 +48,8 @@ public class UserService {
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("사용자를 조회할 수 없습니다. id = " + userId));
+                .orElseThrow(() -> new NoSuchElementException("사용자를 조회할 수 없습니다. id = " + userId));
     }
-
     
     // 현재 사용자 조회
     @Transactional

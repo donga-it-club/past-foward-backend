@@ -1,7 +1,7 @@
 package aws.retrospective.dto;
 
-import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.KudosTarget;
+import aws.retrospective.entity.Section;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,16 +35,16 @@ public class GetSectionsResponseDto {
     @Schema(description = "프로필 이미지", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private String thumbnail;
 
-    private List<GetCommentDto> comments;
+    private List<GetCommentDto> comments = new ArrayList<>();
 
     private GetActionItemsResponseDto actionItems;
 
     private GetKudosTargetResponseDto kudosTarget;
 
-    public GetSectionsResponseDto(Long sectionId, Long userId, String username, String content,
+    private GetSectionsResponseDto(Long sectionId, Long userId, String username, String content,
         long likeCnt,
-        String sectionName, LocalDateTime createdDate,
-        String thumbnail, ActionItem actionItem,
+        String sectionName, LocalDateTime createdDate, List<GetCommentDto> comments,
+        String thumbnail, GetActionItemsResponseDto actionItems,
         KudosTarget kudosTarget) {
         this.sectionId = sectionId;
         this.userId = userId;
@@ -53,13 +53,23 @@ public class GetSectionsResponseDto {
         this.likeCnt = likeCnt;
         this.sectionName = sectionName;
         this.createdDate = createdDate;
+        this.comments = comments;
         this.thumbnail = thumbnail;
-        this.actionItems = actionItem == null ? null : GetActionItemsResponseDto.from(actionItem);
-        this.kudosTarget = kudosTarget == null ? null : GetKudosTargetResponseDto.from(kudosTarget);
+        this.actionItems = actionItems;
+        this.kudosTarget = kudosTarget != null ? GetKudosTargetResponseDto.from(kudosTarget) : null;
     }
 
-    public void addComments(List<GetCommentDto> comments) {
-        this.comments = comments == null ? new ArrayList<>() : comments;
+    public static GetSectionsResponseDto of(Section section, KudosTarget kudosTarget,
+        List<GetCommentDto> comments) {
+        return new GetSectionsResponseDto(section.getId(), section.getUser().getId(),
+            section.getUser().getUsername(),
+            section.getContent(), section.getLikeCnt(),
+            section.getTemplateSection().getSectionName(), section.getCreatedDate(), comments,
+            section.getUser().getThumbnail(),
+            section.getActionItem() != null ? new GetActionItemsResponseDto(
+                section.getActionItem().getUser().getId(),
+                section.getActionItem().getUser().getUsername(),
+                section.getActionItem().getUser().getThumbnail()
+            ) : null, kudosTarget);
     }
-
 }

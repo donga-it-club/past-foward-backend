@@ -89,13 +89,13 @@ public class RetrospectiveServiceTest {
         retrospectiveList.add(retrospective);
 
         given(retrospectiveRepository.findRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class)))
-            .willReturn(retrospectiveList);
+                any(GetRetrospectivesDto.class)))
+                .willReturn(retrospectiveList);
         given(retrospectiveRepository.countRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class)))
-            .willReturn((long) retrospectiveList.size());
+                any(GetRetrospectivesDto.class)))
+                .willReturn((long) retrospectiveList.size());
         given(bookmarkRepository.findByRetrospectiveIdIn(anyList()))
-            .willReturn(Collections.emptyList());
+                .willReturn(Collections.emptyList());
 
         // when
         PaginationResponseDto<RetrospectiveResponseDto> result = retrospectiveService.getRetrospectives(
@@ -108,9 +108,9 @@ public class RetrospectiveServiceTest {
         assertThat(result.nodes().get(0).getId()).isEqualTo(retrospective.getId());
 
         verify(retrospectiveRepository).findRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class));
+                any(GetRetrospectivesDto.class));
         verify(retrospectiveRepository).countRetrospectives(any(User.class),
-            any(GetRetrospectivesDto.class));
+                any(GetRetrospectivesDto.class));
         verify(bookmarkRepository).findByRetrospectiveIdIn(anyList());
     }
 
@@ -130,15 +130,15 @@ public class RetrospectiveServiceTest {
         given(templateRepository.findById(1L)).willReturn(Optional.of(template));
 
         Retrospective retrospective = new Retrospective("New Retro",
-            null,
-            "some description",
-            null,
-            ProjectStatus.IN_PROGRESS,
-            team, user, template,
-            LocalDateTime.now());
+                null,
+                "some description",
+                null,
+                ProjectStatus.IN_PROGRESS,
+                team, user, template,
+                LocalDateTime.now());
         ReflectionTestUtils.setField(retrospective, "id", 1L);
         given(retrospectiveRepository.save(any(Retrospective.class)))
-            .willReturn(retrospective);
+                .willReturn(retrospective);
 
         CreateRetrospectiveDto dto = new CreateRetrospectiveDto();
         ReflectionTestUtils.setField(dto, "title", "New Retro");
@@ -151,7 +151,7 @@ public class RetrospectiveServiceTest {
 
         // when
         CreateRetrospectiveResponseDto response = retrospectiveService.createRetrospective(user,
-            dto);
+                dto);
 
         // then
         assertThat(response).isNotNull();
@@ -169,7 +169,7 @@ public class RetrospectiveServiceTest {
         Team team = TestUtil.createTeam();
         RetrospectiveTemplate retrospectiveTemplate = TestUtil.createTemplate();
         Retrospective retrospective = TestUtil.createRetrospective(retrospectiveTemplate, user,
-            team);
+                team);
 
         ReflectionTestUtils.setField(user, "id", 1L);
         ReflectionTestUtils.setField(retrospective, "id", 1L);
@@ -197,13 +197,13 @@ public class RetrospectiveServiceTest {
         ReflectionTestUtils.setField(unauthorizedUser, "id", 123L);
 
         Retrospective unauthorizedRetrospective = TestUtil.createRetrospective(
-            retrospectiveTemplate, unauthorizedUser,
-            team);
+                retrospectiveTemplate, unauthorizedUser,
+                team);
         ReflectionTestUtils.setField(unauthorizedRetrospective, "id", 1L);
         ReflectionTestUtils.setField(unauthorizedRetrospective, "user", authorizedUser);
 
         when(retrospectiveRepository.findById(1L)).thenReturn(
-            Optional.of(unauthorizedRetrospective));
+                Optional.of(unauthorizedRetrospective));
 
         // Act & Assert
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
@@ -235,7 +235,7 @@ public class RetrospectiveServiceTest {
         Team team = TestUtil.createTeam();
         RetrospectiveTemplate retrospectiveTemplate = TestUtil.createTemplate();
         Retrospective retrospective = TestUtil.createRetrospective(retrospectiveTemplate, user,
-            team);
+                team);
 
         ReflectionTestUtils.setField(user, "id", 1L);
         ReflectionTestUtils.setField(retrospective, "id", 1L);
@@ -252,8 +252,8 @@ public class RetrospectiveServiceTest {
 
         // Act
         RetrospectiveResponseDto response = retrospectiveService.updateRetrospective(user,
-            1L,
-            dto);
+                1L,
+                dto);
 
         // Assert
         assertThat(response).isNotNull();
@@ -293,15 +293,15 @@ public class RetrospectiveServiceTest {
 
         Long retrospectiveId = 4L;
         Retrospective retrospective = TestUtil.createRetrospective(retrospectiveTemplate, user,
-            team);
+                team);
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
         when(retrospectiveRepository.findRetrospectiveById(retrospectiveId)).thenReturn(
-            Optional.of(retrospective));
+                Optional.of(retrospective));
 
         // when
         GetRetrospectiveResponseDto findRetrospective = retrospectiveService.getRetrospective(
-            user,
-            retrospectiveId);
+                user,
+                retrospectiveId);
 
         // then
         assertThat(findRetrospective.getRetrospectiveId()).isEqualTo(retrospectiveId);
