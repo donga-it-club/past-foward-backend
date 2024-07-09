@@ -30,10 +30,6 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationRedisRepository redisRepository;
     private final UserRepository userRepository;
-    private final JavaMailSender mailSender;
-
-    @Autowired
-    private final EmailNotificationService emailNotificationService;
 
     private static final String NOTIFICATION = "notification";
 
@@ -91,21 +87,5 @@ public class NotificationService {
     private Notification getNotification(Long notificationId) {
         return notificationRepository.findById(notificationId)
             .orElseThrow(() -> new NoSuchElementException("알림을 조회할 수 없습니다. ID: " + notificationId));
-    }
-
-
-    public void sendEmailNotification() {
-        // NotificationRedis로부터 알림 정보 조회
-        Notification latestNotification = notificationRepository.findFirstByOrderByCreatedDateDesc();
-
-        if (latestNotification == null) {
-            throw new RuntimeException("No notifications found");
-        }
-
-        try {
-            emailNotificationService.sendNotificationEmail(latestNotification);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email notification");
-        }
     }
 }
