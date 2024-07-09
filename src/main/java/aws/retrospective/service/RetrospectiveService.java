@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -206,9 +207,9 @@ public class RetrospectiveService {
     @Transactional
     public CreateRetrospectiveResponseDto transferRetrospectiveLeadership(User user, Long retrospectiveId, Long newLeaderId) {
         Retrospective retrospective = retrospectiveRepository.findById(retrospectiveId)
-                .orElseThrow(() -> new ResourceNotFoundException("Retrospective not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Retrospective Not Found"));
 
-        // 현재 사용자와 리더가 동일한지 확인
+                        // 현재 사용자와 리더가 동일한지 확인
         User currentUser = userService.getCurrentUser();
         UserTeam currentUserTeam = userTeamRepository.findByTeamIdAndUserId(retrospective.getTeam().getId(), currentUser.getId())
                 .orElseThrow(() -> new NoSuchElementException("Current user is not part of the team"));
@@ -224,11 +225,9 @@ public class RetrospectiveService {
 
         // 현재 리더 역할 변경
         currentUserTeam.updateMember();
-        userTeamRepository.save(currentUserTeam);
 
         // 새로운 리더 역할 변경
         newLeaderTeam.updateLeader();
-        userTeamRepository.save(newLeaderTeam);
 
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
 
