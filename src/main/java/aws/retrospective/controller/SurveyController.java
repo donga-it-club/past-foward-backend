@@ -36,7 +36,7 @@ public class SurveyController {
 
     @Operation(summary = "설문조사 조회", description = "설문조사 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "설문조사가 성공적으로 조회됨")
-    @GetMapping()
+    @GetMapping
     public CommonApiResponse<List<SurveyDto>> getAllSurveys() {
         List<SurveyDto> surveys = surveyService.getAllSurveys();
 
@@ -46,7 +46,7 @@ public class SurveyController {
 
     @Operation(summary = "성별 및 연령 조회", description = "설문조사에서 성별 및 연령 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "성별 및 연령 데이터가 성공적으로 조회됨")
-    @GetMapping("/basicInfo")
+    @GetMapping("/basic")
     public CommonApiResponse<List<SurveyDto>> getGenderAndAgeSurveys() {
         List<SurveyDto> surveys = surveyService.getGenderAndAgeSurveys();
 
@@ -56,7 +56,7 @@ public class SurveyController {
 
     @Operation(summary = "직업 및 지역 조회", description = "설문조사에서 직업 및 지역 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "직업 및 지역 데이터가 성공적으로 조회됨")
-    @GetMapping("/workingInfo")
+    @GetMapping("/working")
     public CommonApiResponse<List<SurveyDto>> getOccupationAndRegionSurveys() {
         List<SurveyDto> surveys = surveyService.getOccupationAndRegionSurveys();
 
@@ -66,7 +66,7 @@ public class SurveyController {
 
     @Operation(summary = "서비스를 알게된 경로, 서비스 사용 목적, 이메일 수신 여부 조회", description = "설문조사에서 서비스 관련 데이터를 조회하는 API")
     @ApiResponse(responseCode = "200", description = "서비스 관련 데이터가 성공적으로 조회됨")
-    @GetMapping("/serviceInfo")
+    @GetMapping("/service")
     public CommonApiResponse<List<SurveyDto>> getSourceAndPurposeSurveys() {
         List<SurveyDto> surveys = surveyService.getSourceAndPurposeSurveys();
 
