@@ -1,6 +1,7 @@
 package aws.retrospective.dto;
 
 import aws.retrospective.entity.NoticeBoardWriting;
+import aws.retrospective.entity.SaveStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -10,28 +11,30 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoticeBoardWritingResponseDto {
+public class NoticeBoardListDto {
+    private Long id;
     private String title;
     private String content;
-    private String status;
+    private SaveStatus status;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private int views;
 
-    // NoticeBoardWriting 엔티티를 받아서 초기화하는 생성자 추가
-    public NoticeBoardWritingResponseDto(NoticeBoardWriting entity) {
+    public NoticeBoardListDto(NoticeBoardWriting entity) {
+        this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();
-        this.status = entity.getStatus().name(); // Enum to String
+        this.status = entity.getStatus();
         this.createdDate = entity.getCreatedDate();
         this.modifiedDate = entity.getModifiedDate();
-        this.views = entity.getViews();
+        this.views = 0; // 기본 조회수 초기화
     }
-    // 조회수를 추가로 받는 생성자
-    public NoticeBoardWritingResponseDto(NoticeBoardWriting entity, int views) {
+
+    public NoticeBoardListDto(NoticeBoardWriting entity, int views) {
+        this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();
-        this.status = entity.getStatus().name(); // Enum to String
+        this.status = entity.getStatus();
         this.createdDate = entity.getCreatedDate();
         this.modifiedDate = entity.getModifiedDate();
         this.views = views;

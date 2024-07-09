@@ -25,6 +25,7 @@ public class NoticeBoardWriting extends BaseEntity {
     private SaveStatus status; // 'PUBLISHED', 'TEMP'
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
+    private int views;
 
     @Builder
     public NoticeBoardWriting(String title,String content, SaveStatus status) {
@@ -43,8 +44,9 @@ public class NoticeBoardWriting extends BaseEntity {
         modifiedDate = LocalDateTime.now();
     }
 
-    // 상태 업데이트 메서드
-    public void updateStatus(SaveStatus status) {
-        this.status = status;
+
+    public void updateBoard(String title, String content) {
+        this.title = title;
+        this.content = content;
     }
 }
