@@ -51,6 +51,7 @@ public class RetrospectiveService {
     private final RetrospectiveTemplateRepository templateRepository;
     private final BookmarkService bookmarkService;
     private final UserTeamRepository userTeamRepository;
+    private final UserService userService;
 
     @Transactional(readOnly = true)
     public PaginationResponseDto<RetrospectiveResponseDto> getRetrospectives(User user,
@@ -134,6 +135,9 @@ public class RetrospectiveService {
         Team team = null;
         if (retrospectiveType == RetrospectiveType.TEAM) {
             team = createTeamWithUserId(user.getId());
+
+            //생성자를 회고 리더로 설정
+            userTeamRepository.save(new UserTeam(user, team, UserTeamRole.LEADER));
         }
 
         Retrospective retrospective = Retrospective.builder().title(dto.getTitle())

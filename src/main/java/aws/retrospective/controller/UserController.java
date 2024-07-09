@@ -2,7 +2,6 @@ package aws.retrospective.controller;
 
 import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.common.CurrentUser;
-import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.dto.GetUserInfoDto;
 import aws.retrospective.dto.UpdateUserProfileRequestDto;
 import aws.retrospective.dto.UpdateUserProfileResponseDto;
@@ -16,7 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,14 +47,5 @@ public class UserController {
     public CommonApiResponse<GetUserInfoDto> getUserInfo(@CurrentUser User user) {
         GetUserInfoDto response = userService.getUserInfo(user);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
-    }
-
-    // 관리자 권한 설정
-    @PostMapping("/me/admin-status")
-    @Operation(summary = "관리자 권한 설정")
-    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "관리자 권한 설정 성공"),})
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateAdminStatus(@CurrentUser User user, @RequestBody @Valid AdminRoleDtO adminRoleDtO) {
-        userService.updateAdminStatus(user, adminRoleDtO);
     }
 }

@@ -49,7 +49,7 @@ public class RetrospectiveGroupServiceTest {
     @DisplayName("회고 그룹 등록 API")
     void createRetrospectiveGroupTest() {
         // given
-        User user = new User("user1", "test", "test", "test",false);
+        User user = new User("user1", "test", "test", "test");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         RetrospectiveGroup retrospectiveGroup = new RetrospectiveGroup("New Retro Group",
@@ -90,8 +90,7 @@ public class RetrospectiveGroupServiceTest {
         PageRequest pageable = PageRequest.of(dto.getPage(), dto.getSize(), sort);
 
         Long userId = 1L;
-      
-        User user = new User("user1", "test", "test", "test",false);
+        User user = new User("user1", "test", "test", "test");
         ReflectionTestUtils.setField(user, "id", userId);
 
         Specification<RetrospectiveGroup> spec = Specification.where(
@@ -203,7 +202,7 @@ public class RetrospectiveGroupServiceTest {
     @Test
     void updateRetrospectiveGroup_Fails_WhenGroupNotFound() {
         // given
-        User user = new User("user1", "test", "test", "test",false);
+        User user = new User("user1", "test", "test", "test");
         when(retrospectiveGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // when / then
@@ -263,7 +262,7 @@ public class RetrospectiveGroupServiceTest {
     @Test
     void deleteRetrospectiveGroup_Fails_WhenGroupNotFound() {
         // given
-        User user = new User("user1", "test", "test", "test",false);
+        User user = new User("user1", "test", "test", "test");
         when(retrospectiveGroupRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // when / then
@@ -271,5 +270,4 @@ public class RetrospectiveGroupServiceTest {
 
         assertThat(thrown.getMessage()).contains("Not found retrospective group: 1");
     }
-
 }
