@@ -10,10 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 
 @Entity
@@ -46,17 +44,33 @@ public class User extends BaseEntity {
 
     private String thumbnail; // 프로필 이미지
 
+    private boolean isAdministrator; // 관리자 여부
+
+    // 이메일 수신 동의 상태 업데이트
+    private boolean isemailConsent; // 이메일 수신동의 여부
+
     @Builder
-    public User(String email, String username, String phone, String tenantId) {
+    public User(String email, String username, String phone, String tenantId, boolean isAdministrator, boolean isEmailConsent) {
         this.email = email;
         this.username = username;
         this.phone = phone;
         this.tenantId = tenantId;
+        this.isAdministrator = isAdministrator;
+        this.isemailConsent = isEmailConsent;
     }
 
     // 프로필 이미지 등록
     public void updateUserInfo(String thumbnail, String username) {
         this.thumbnail = thumbnail;
         this.username = username;
+    }
+
+    // 이메일 수신 동의 상태 업데이트
+    public void updateEmailConsent(boolean isemailConsent) {
+        this.isemailConsent = isemailConsent;
+    }
+
+    public void updateAdministrator(boolean isAdministrator) {
+        this.isAdministrator = isAdministrator;
     }
 }
