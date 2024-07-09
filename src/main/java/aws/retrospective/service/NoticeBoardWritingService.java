@@ -38,7 +38,7 @@ public class NoticeBoardWritingService {
         NoticeBoardViewCounting viewCountRedis = NoticeBoardViewCounting.of(savedNoticeBoardWriting.getId(), 0);
         noticeBoardViewCountingRepository.save(viewCountRedis);
 
-        return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting);
+        return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting, 0);
     }
 
     public NoticeBoardWritingResponseDto saveTempPost(NoticeBoardWritingRequestDto requestDto) {
@@ -48,11 +48,12 @@ public class NoticeBoardWritingService {
                 .status(SaveStatus.TEMP)
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
-        return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting);
+        return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting, 0);
     }
 
     public void deletePost(Long id) {
         noticeBoardWritingRepository.deleteById(id);
+        noticeBoardViewCountingRepository.deleteById(id); // Redis에서 조회수 삭제
     }
 
     @Transactional(readOnly = true)
@@ -60,7 +61,16 @@ public class NoticeBoardWritingService {
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         Page<NoticeBoardWriting> postsPage = noticeBoardWritingRepository.findAll(pageRequest);
         List<NoticeBoardListDto> posts = postsPage.stream()
-                .map(NoticeBoardListDto::new)
+                .map(post -> {
+                    Long postId = post.getId();
+                    if (postId == null) {
+                        postId = 0L;
+                    }
+                    Integer viewCount = noticeBoardViewCountingRepository.findById(postId)
+                            .map(NoticeBoardViewCounting::getViewCount)
+                            .orElse(0);
+                    return new NoticeBoardListDto(post, viewCount);
+                })
                 .collect(Collectors.toList());
         return new PagedResponseDto<>(posts, postsPage.getTotalPages());
     }
@@ -101,4 +111,3 @@ public class NoticeBoardWritingService {
         return new NoticeBoardWritingResponseDto(post, currentViewCount);
     }
 }
-
