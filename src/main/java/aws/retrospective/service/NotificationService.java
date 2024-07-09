@@ -35,8 +35,10 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public List<GetNotificationResponseDto> getNotifications() {
+        // 알림 조회
         NotificationRedis notificationRedis = findNotification();
 
+        // Redis에 현재 시간(마지막으로 조회한) 시간을 저장
         NotificationRedis notification = createNotification();
         redisRepository.save(notification);
 
@@ -67,8 +69,7 @@ public class NotificationService {
     }
 
     private static NotificationRedis createNotification() {
-        return NotificationRedis.of(NOTIFICATION,
-            LocalDateTime.now());
+        return NotificationRedis.of(NOTIFICATION, LocalDateTime.now());
     }
 
     private List<GetNotificationResponseDto> convertDto(NotificationRedis notificationRedis) {
