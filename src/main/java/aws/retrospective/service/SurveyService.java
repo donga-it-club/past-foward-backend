@@ -83,7 +83,7 @@ public class SurveyService {
                 .map(survey -> SurveyDto.builder()
                         .source(survey.getSource())
                         .purposes(survey.getPurposes())
-                        .emailConsents(survey.getUser().isEmailConsent())
+                        .emailConsents(survey.getUser().isIsemailConsent())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -103,7 +103,7 @@ public class SurveyService {
             .region(survey.getRegion())
             .source(survey.getSource())
             .purposes(survey.getPurposes())
-            .emailConsents(survey.getUser().isEmailConsent())
+            .emailConsents(survey.getUser().isIsemailConsent())
             .build();
     }
 }
