@@ -70,6 +70,7 @@ public class User extends BaseEntity {
         this.isemailConsent = isemailConsent;
     }
 
+
     public void updateAdministrator(boolean isAdministrator) {
         this.isAdministrator = isAdministrator;
     }

@@ -73,4 +73,27 @@ public class UserService {
         user.updateEmailConsent(consent);
         userRepository.save(user);
     }
+
+    
+    // 현재 사용자 조회
+    @Transactional
+    public User getCurrentUser() {
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication != null && authentication.isAuthenticated())) {
+            throw new NoSuchElementException("No authenticated user found");
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        return userRepository.findById(userDetails.getUser().getId())
+                .orElseThrow(() -> new NoSuchElementException("No authenticated user found"));
+    }
+
+    // 이메일 수신동의 업데이트
+    @Transactional
+    public void updateEmailConsent(Long userId, boolean consent) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No authenticated user found"));
+
+        user.updateEmailConsent(consent);
+        userRepository.save(user);
+    }
 }

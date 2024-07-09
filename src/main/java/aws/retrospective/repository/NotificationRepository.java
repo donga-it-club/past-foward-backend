@@ -19,6 +19,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     Optional<Notification> findNotificationByLikesId(Long likesId);
 
+    Notification findFirstByOrderByCreatedDateDesc();
+
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Notification SET isRead = :readStatus WHERE isRead = :unReadStatus AND receiver.id = :userId")
     void readNotificationAll(@Param("readStatus") NotificationStatus readStatus,
