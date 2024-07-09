@@ -66,7 +66,7 @@ public class User extends BaseEntity {
     }
 
     // 이메일 수신 동의 상태 업데이트
-    public void isEmailConsent(boolean emailConsent) {
+    public void updateEmailConsent(boolean emailConsent) {
         this.emailConsent = emailConsent;
     }
   
