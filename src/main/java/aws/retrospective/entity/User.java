@@ -47,16 +47,16 @@ public class User extends BaseEntity {
     private boolean isAdministrator; // 관리자 여부
 
     // 이메일 수신 동의 상태 업데이트
-    private boolean emailConsent; // 이메일 수신동의 여부
+    private boolean isemailConsent; // 이메일 수신동의 여부
 
     @Builder
-    public User(String email, String username, String phone, String tenantId, boolean isAdministrator, boolean emailConsent) {
+    public User(String email, String username, String phone, String tenantId, boolean isAdministrator, boolean isEmailConsent) {
         this.email = email;
         this.username = username;
         this.phone = phone;
         this.tenantId = tenantId;
         this.isAdministrator = isAdministrator;
-        this.emailConsent = emailConsent;
+        this.isemailConsent = isEmailConsent;
     }
 
     // 프로필 이미지 등록
@@ -66,8 +66,8 @@ public class User extends BaseEntity {
     }
 
     // 이메일 수신 동의 상태 업데이트
-    public void updateEmailConsent(boolean emailConsent) {
-        this.emailConsent = emailConsent;
+    public void updateEmailConsent(boolean isemailConsent) {
+        this.isemailConsent = isemailConsent;
     }
   
     public void updateAdministrator(boolean isAdministrator) {
