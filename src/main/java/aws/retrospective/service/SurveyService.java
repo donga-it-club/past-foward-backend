@@ -40,7 +40,7 @@ public class SurveyService {
         surveyRepository.save(survey);
 
         // 이메일 수신 동의 여부 업데이트
-        user.isEmailConsent(dto.getEmailConsents());
+        user.updateEmailConsent(dto.getEmailConsents());
         userRepository.save(user);
     }
 
