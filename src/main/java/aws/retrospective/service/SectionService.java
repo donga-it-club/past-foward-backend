@@ -67,10 +67,7 @@ public class SectionService {
         validateTeamAccess(request.getTeamId(), findRetrospective);
 
         // 회고 카드 전체 조회
-        List<Section> sections = sectionRepository.getSectionsWithComments(
-            request.getRetrospectiveId());
-
-        return convertSectionToResponse(sections);
+        return sectionRepository.getSectionsAll(request.getRetrospectiveId());
     }
 
     // 회고 카드 생성 API
@@ -150,7 +147,7 @@ public class SectionService {
         validateActionItems(section);
 
         // Action Item을 가져온다.
-        ActionItem actionItem = section.getActionItem();
+        ActionItem actionItem = getActionItem(section);
         // Action Item에 지정할 사용자를 조회한다.
         User assignUser = getAssignUser(request);
 
@@ -234,15 +231,6 @@ public class SectionService {
             .build();
     }
 
-    private List<GetSectionsResponseDto> convertSectionToResponse(List<Section> sections) {
-        List<GetSectionsResponseDto> response = new ArrayList<>();
-        for (Section section : sections) {
-            response.add(
-                GetSectionsResponseDto.of(section, getKudosTarget(section), getComments(section)));
-        }
-        return response;
-    }
-
     private Team getTeam(Long teamId) {
         return teamRepository.findById(teamId)
             .orElseThrow(() -> new NoSuchElementException("Not Found Team id : " + teamId));
@@ -273,16 +261,6 @@ public class SectionService {
      */
     private KudosTarget assignKudos(Section section, User user) {
         return kudosRepository.save(KudosTarget.createKudosTarget(section, user));
-    }
-
-    private KudosTarget getKudosTarget(Section section) {
-        return kudosRepository.findBySection(section).orElse(null);
-    }
-
-    private static List<GetCommentDto> getComments(Section section) {
-        return section.getComments().stream()
-            .map(GetCommentDto::from)
-            .collect(Collectors.toList());
     }
 
     private void validateTemplateMatch(Retrospective retrospective, TemplateSection templateSection) {
@@ -361,10 +339,7 @@ public class SectionService {
      */
     private void assignActionItem(User user, Team team, Section section,
         Retrospective retrospective) {
-        // Action Item 생성
-        ActionItem savedActionItem = actionItemRepository.save(
-            createActionItem(user, team, section, retrospective));
-        section.updateActionItems(savedActionItem); // 생성된 Action Item을 Section에 지정한다.
+        actionItemRepository.save(createActionItem(user, team, section, retrospective));
     }
 
     private AssignKudosResponseDto convertAssignKudosResponse(KudosTarget kudosTarget) {
@@ -396,5 +371,9 @@ public class SectionService {
     private void deleteNotification(Likes likes) {
         notificationRepository.findNotificationByLikesId(likes.getId())
             .ifPresent(notificationRepository::delete);
+    }
+
+    private ActionItem getActionItem(Section section) {
+        return actionItemRepository.findBySectionId(section.getId()).orElse(null);
     }
 }
