@@ -10,8 +10,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
 @Entity
@@ -31,7 +33,15 @@ public class User extends BaseEntity {
     private String phone; // 전화번호
 
     @JsonIgnore
+    @Column(unique = true)
     private String tenantId;
+
+    private String thumbnail; // 프로필 이미지
+
+    private boolean isAdministrator; // 관리자 여부
+
+    // 이메일 수신 동의 상태 업데이트
+    private boolean isEmailConsent; // 이메일 수신동의 여부
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<UserTeam> teams = new ArrayList<>();
@@ -42,21 +52,16 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Likes> likes = new ArrayList<>();
 
-    private String thumbnail; // 프로필 이미지
-
-    private boolean isAdministrator; // 관리자 여부
-
-    // 이메일 수신 동의 상태 업데이트
-    private boolean isemailConsent; // 이메일 수신동의 여부
 
     @Builder
-    public User(String email, String username, String phone, String tenantId, boolean isAdministrator, boolean isEmailConsent) {
+    public User(String email, String username, String phone, String tenantId,
+        boolean isAdministrator, boolean isEmailConsent) {
         this.email = email;
         this.username = username;
         this.phone = phone;
         this.tenantId = tenantId;
         this.isAdministrator = isAdministrator;
-        this.isemailConsent = isEmailConsent;
+        this.isEmailConsent = isEmailConsent;
     }
 
     // 프로필 이미지 등록
@@ -67,7 +72,7 @@ public class User extends BaseEntity {
 
     // 이메일 수신 동의 상태 업데이트
     public void updateEmailConsent(boolean isemailConsent) {
-        this.isemailConsent = isemailConsent;
+        this.isEmailConsent = isemailConsent;
     }
 
 
