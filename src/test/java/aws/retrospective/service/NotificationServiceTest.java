@@ -172,7 +172,9 @@ class NotificationServiceTest {
         CreateCommentDto request = TestUtil.createCommentDto(section.getId());
         commentService.createComment(savedUser, request); // 댓글 작성
 
-        sectionService.clickLikeSection(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
+        sectionService.clickLikeSection(savedSection.getId(), user); // 회고 보드에 좋아요 클릭\
+
+        sectionService.saveLikes();
 
         //when
         List<GetNotificationResponseDto> unreadNotifications = notificationService.getNotifications();
