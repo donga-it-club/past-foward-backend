@@ -380,11 +380,13 @@ public class SectionService {
         return kudosRepository.findBySectionId(section.getId());
     }
 
-    private Notification createNotification(Section section, Retrospective retrospective,
+    private void createNotification(Section section, Retrospective retrospective,
         User sender, User receiver) {
-        return Notification.builder().section(section).retrospective(retrospective)
+        Notification notification = Notification.builder().section(section)
+            .retrospective(retrospective)
             .sender(sender).receiver(receiver).comment(null).notificationType(NotificationType.LIKE)
             .build();
+        notificationRepository.save(notification); // 새로운 알림 저장
     }
 
     private void deleteNotification(Likes likes) {
