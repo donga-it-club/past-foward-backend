@@ -1,9 +1,11 @@
 package aws.retrospective.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.StatusResultMatchersExtensionsKt.isEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
@@ -11,19 +13,15 @@ import aws.retrospective.entity.Survey.Gender;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.SurveyRepository;
 import aws.retrospective.repository.UserRepository;
-import aws.retrospective.util.TestUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,24 +42,24 @@ public class SurveyServiceTest {
     void addSurveyTest() {
         // Given
         User user = User.builder()
-                .email("test@example.com")
-                .username("testuser")
-                .phone("123-456-7890")
-                .tenantId("tenant1")
-                .isAdministrator(false)
-                .isEmailConsent(true)
-                .build();
+            .email("test@example.com")
+            .username("testuser")
+            .phone("123-456-7890")
+            .tenantId("tenant1")
+            .isAdministrator(false)
+            .isEmailConsent(true)
+            .build();
 
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         SurveyDto surveyDto = SurveyDto.builder()
-                .age(22)
-                .gender("FEMALE")
-                .occupation("student")
-                .region("Korea")
-                .source("internet")
-                .purposes(purposes)
-                .emailConsents(true) // 추가된 필드
-                .build();
+            .age(22)
+            .gender("FEMALE")
+            .occupation("student")
+            .region("Korea")
+            .source("internet")
+            .purposes(purposes)
+            .emailConsents(true) // 추가된 필드
+            .build();
 
         // When
         surveyService.addSurvey(user, surveyDto);
@@ -82,7 +80,7 @@ public class SurveyServiceTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertThat(savedUser.isIsemailConsent()).isEqualTo(surveyDto.getEmailConsents());
+        assertThat(savedUser.isEmailConsent()).isEqualTo(surveyDto.getEmailConsents());
     }
 
     @Test
@@ -90,8 +88,8 @@ public class SurveyServiceTest {
         // 가짜 데이터 생성
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         User user = User.builder()
-                .isEmailConsent(true)
-                .build();
+            .isEmailConsent(true)
+            .build();
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
             .age(30)
@@ -128,13 +126,13 @@ public class SurveyServiceTest {
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
-                .age(30)
-                .gender(String.valueOf(Gender.valueOf("MALE")))
-                .occupation("Engineer")
-                .region("Seoul")
-                .source("Internet")
-                .purposes(purposes)
-                .build());
+            .age(30)
+            .gender(String.valueOf(Gender.valueOf("MALE")))
+            .occupation("Engineer")
+            .region("Seoul")
+            .source("Internet")
+            .purposes(purposes)
+            .build());
 
         // Mock 객체 설정
         when(surveyRepository.findAll()).thenReturn(surveys);
@@ -158,18 +156,18 @@ public class SurveyServiceTest {
         // 가짜 데이터 생성
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         User user = User.builder()
-                .isEmailConsent(true)
-                .build();
+            .isEmailConsent(true)
+            .build();
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
-                .age(30)
-                .gender("MALE")
-                .occupation("Engineer")
-                .region("Seoul")
-                .source("Internet")
-                .purposes(purposes)
-                .user(user)
-                .build());
+            .age(30)
+            .gender("MALE")
+            .occupation("Engineer")
+            .region("Seoul")
+            .source("Internet")
+            .purposes(purposes)
+            .user(user)
+            .build());
 
         // Mock 객체 설정
         when(surveyRepository.findAll()).thenReturn(surveys);
@@ -193,18 +191,18 @@ public class SurveyServiceTest {
         // 가짜 데이터 생성
         List<String> purposes = Arrays.asList("purpose1", "purpose2", "purpose3");
         User user = User.builder()
-                .isEmailConsent(true)
-                .build();
+            .isEmailConsent(true)
+            .build();
         List<Survey> surveys = new ArrayList<>();
         surveys.add(Survey.builder()
-                .age(30)
-                .gender("MALE")
-                .occupation("Engineer")
-                .region("Seoul")
-                .source("Internet")
-                .purposes(purposes)
-                .user(user)
-                .build());
+            .age(30)
+            .gender("MALE")
+            .occupation("Engineer")
+            .region("Seoul")
+            .source("Internet")
+            .purposes(purposes)
+            .user(user)
+            .build());
 
         // Mock 객체 설정
         when(surveyRepository.findAll()).thenReturn(surveys);
