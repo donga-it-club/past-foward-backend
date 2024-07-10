@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,10 +52,13 @@ class NotificationServiceTest {
     SectionService sectionService;
     @Autowired
     NotificationRepository notificationRepository;
+    @Autowired
+    RedisTemplate<String, String> redisTemplate;
 
     @AfterEach
     public void tearDown() {
-        notificationRedisRepository.deleteAll();
+        // 레디스 초기화
+        redisTemplate.getConnectionFactory().getConnection().flushDb();
     }
 
     @Test
@@ -124,6 +128,9 @@ class NotificationServiceTest {
 
         //when
         sectionService.clickLikeSection(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
+
+        sectionService.saveLikes();
+
         // 레디스에 저장된 시간 이후의 알림 조회
         List<GetNotificationResponseDto> notifications = notificationService.getNotifications();
 
