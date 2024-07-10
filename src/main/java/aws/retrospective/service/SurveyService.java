@@ -4,10 +4,9 @@ import aws.retrospective.dto.SurveyDto;
 import aws.retrospective.entity.Survey;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.SurveyRepository;
+import aws.retrospective.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import aws.retrospective.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -56,11 +55,11 @@ public class SurveyService {
         List<Survey> surveys = surveyRepository.findAll();
 
         return surveys.stream()
-                .map(survey -> SurveyDto.builder()
-                        .age(survey.getAge())
-                        .gender(String.valueOf(survey.getGender()))
-                        .build())
-                .collect(Collectors.toList());
+            .map(survey -> SurveyDto.builder()
+                .age(survey.getAge())
+                .gender(String.valueOf(survey.getGender()))
+                .build())
+            .collect(Collectors.toList());
     }
 
     // 직업, 지역 데이터를 가져오는 메서드
@@ -68,11 +67,11 @@ public class SurveyService {
         List<Survey> surveys = surveyRepository.findAll();
 
         return surveys.stream()
-                .map(survey -> SurveyDto.builder()
-                        .occupation(survey.getOccupation())
-                        .region(survey.getRegion())
-                        .build())
-                .collect(Collectors.toList());
+            .map(survey -> SurveyDto.builder()
+                .occupation(survey.getOccupation())
+                .region(survey.getRegion())
+                .build())
+            .collect(Collectors.toList());
     }
 
     // 서비스를 알게된 경로 및 서비스 사용목적, 이메일 수신동의 여부를 가져오는 메서드
@@ -80,12 +79,12 @@ public class SurveyService {
         List<Survey> surveys = surveyRepository.findAll();
 
         return surveys.stream()
-                .map(survey -> SurveyDto.builder()
-                        .source(survey.getSource())
-                        .purposes(survey.getPurposes())
-                        .emailConsents(survey.getUser().isIsemailConsent())
-                        .build())
-                .collect(Collectors.toList());
+            .map(survey -> SurveyDto.builder()
+                .source(survey.getSource())
+                .purposes(survey.getPurposes())
+                .emailConsents(survey.getUser().isEmailConsent())
+                .build())
+            .collect(Collectors.toList());
     }
 
     private void checkIfAlreadySubmitted(User user) {
@@ -103,7 +102,7 @@ public class SurveyService {
             .region(survey.getRegion())
             .source(survey.getSource())
             .purposes(survey.getPurposes())
-            .emailConsents(survey.getUser().isIsemailConsent())
+            .emailConsents(survey.getUser().isEmailConsent())
             .build();
     }
 }

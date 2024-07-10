@@ -32,7 +32,7 @@ public class UserController {
     @Operation(summary = "유저 정보 수정")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "프로필 이미지 등록 성공"),})
     public CommonApiResponse<UpdateUserProfileResponseDto> updateProfile(@CurrentUser User user,
-        @RequestBody @Valid UpdateUserProfileRequestDto request) {
+                                                                         @RequestBody @Valid UpdateUserProfileRequestDto request) {
         UpdateUserProfileResponseDto response = userService.updateProfile(user, request);
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }

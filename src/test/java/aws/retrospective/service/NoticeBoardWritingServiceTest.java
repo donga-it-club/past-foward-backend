@@ -96,6 +96,7 @@ public class NoticeBoardWritingServiceTest {
         assertEquals("TEMP", responseDto.getStatus());
         assertEquals(0, responseDto.getViews());
         verify(noticeBoardWritingRepository, times(1)).save(any(NoticeBoardWriting.class));
+        verify(noticeBoardViewCountingRepository, never()).save(any(NoticeBoardViewCounting.class)); // 조회수 저장이 호출되지 않음을 확인
     }
 
     @Test

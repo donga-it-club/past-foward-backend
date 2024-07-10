@@ -1,7 +1,16 @@
 package aws.retrospective.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import aws.retrospective.dto.AdminRoleDtO;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.UserRepository;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,16 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import aws.retrospective.dto.AdminRoleDtO;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -34,13 +34,13 @@ public class UserServiceTest {
     @BeforeEach
     public void setUp() {
         user = User.builder()
-                .email("test@example.com")
-                .username("testuser")
-                .phone("123-456-7890")
-                .tenantId("tenant1")
-                .isAdministrator(false)
-                .isEmailConsent(true)
-                .build();
+            .email("test@example.com")
+            .username("testuser")
+            .phone("123-456-7890")
+            .tenantId("tenant1")
+            .isAdministrator(false)
+            .isEmailConsent(true)
+            .build();
     }
 
     @Test
@@ -60,7 +60,7 @@ public class UserServiceTest {
         verify(userRepository).save(captor.capture());
         User savedUser = captor.getValue();
 
-        assertThat(savedUser.isIsemailConsent()).isEqualTo(newEmailConsent);
+        assertThat(savedUser.isEmailConsent()).isEqualTo(newEmailConsent);
     }
 
 

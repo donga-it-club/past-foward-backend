@@ -7,6 +7,7 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.entity.ActionItem;
@@ -29,9 +30,12 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -65,6 +69,7 @@ public class SectionService {
         // 다른 팀의 회고 보드를 조회 할 수 없다
         validateTeamAccess(request.getTeamId(), findRetrospective);
 
+        // 회고 카드 전체 조회
         return sectionRepository.getSectionsAll(request.getRetrospectiveId());
     }
 
@@ -162,10 +167,10 @@ public class SectionService {
         // Action Items 유형인지 확인한다.
         validateActionItems(section);
 
+        // Action Item을 가져온다.
+        ActionItem actionItem = getActionItem(section);
         // Action Item에 지정할 사용자를 조회한다.
         User assignUser = getAssignUser(request);
-
-        ActionItem actionItem = getActionItem(section);
 
         /**
          * Action Item이 없을 때는 새로 생성하고, 있을 때는 사용자를 지정한다.
@@ -177,10 +182,6 @@ public class SectionService {
             // 기존에 등록된 Action Item에 새로운 사용자를 지정한다.
             actionItem.assignUser(assignUser);
         }
-    }
-
-    private ActionItem getActionItem(Section section) {
-        return actionItemRepository.findBySectionId(section.getId()).orElse(null);
     }
 
     // 회고카드 삭제
@@ -365,7 +366,6 @@ public class SectionService {
      */
     private void assignActionItem(User user, Team team, Section section,
         Retrospective retrospective) {
-        // Action Item 생성
         actionItemRepository.save(createActionItem(user, team, section, retrospective));
     }
 
@@ -417,6 +417,10 @@ public class SectionService {
             // 알림을 생성한다.
             createNotification(section, section.getRetrospective(), user, section.getUser());
         }
+    }
+
+    private ActionItem getActionItem(Section section) {
+        return actionItemRepository.findBySectionId(section.getId()).orElse(null);
     }
 
 }

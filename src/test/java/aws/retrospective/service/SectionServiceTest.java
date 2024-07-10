@@ -225,7 +225,6 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(request, "teamId", teamId);
         List<GetSectionsResponseDto> results = sectionService.getSections(request);
 
-
         //then
         assertThat(results.size()).isEqualTo(1);
         GetSectionsResponseDto result = results.get(0);
