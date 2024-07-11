@@ -7,7 +7,6 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.entity.ActionItem;
@@ -30,14 +29,12 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -127,7 +124,11 @@ public class SectionService {
     // 30초마다 Redis 좋아요 기록을 DB의 Likes 테이블에 저장한다.
     @Scheduled(fixedDelay = 1000L * 30)
     @Transactional
+    @SchedulerLock(name = "SchedulerLock", lockAtLeastFor = "PT15S",lockAtMostFor = "PT30S")
     public void saveLikes() {
+
+        log.info("스케줄링 호츌");
+
         // 정규식에 해당하는 모든 key를 조회한다.
         Set<String> keys = redisTemplate.keys("section:*:like");
 

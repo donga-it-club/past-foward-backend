@@ -72,6 +72,10 @@ dependencies {
 
     // Spring Data Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // shed lock
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:5.10.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.10.0'
 }
 
 tasks.named('test') {
