@@ -9,14 +9,18 @@ import aws.retrospective.entity.NotificationType;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
 import aws.retrospective.entity.Section;
+import aws.retrospective.entity.Team;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.NotificationRedis;
+import aws.retrospective.entity.UserTeam;
 import aws.retrospective.repository.NotificationRedisRepository;
 import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.SectionRepository;
+import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.UserRepository;
+import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.util.TestUtil;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,6 +55,10 @@ class NotificationServiceTest {
     SectionService sectionService;
     @Autowired
     NotificationRepository notificationRepository;
+    @Autowired
+    private TeamRepository teamRepository;
+    @Autowired
+    private UserTeamRepository userTeamRepository;
 
     @AfterEach
     public void tearDown() {
@@ -147,11 +155,17 @@ class NotificationServiceTest {
             .build();
         User savedUser = userRepository.save(user);
 
+        Team team = TestUtil.createTeam();
+        Team savedTeam = teamRepository.save(team);
+
+        UserTeam userTeam = UserTeam.builder().user(savedUser).team(savedTeam).build();
+        UserTeam savedUserTeam = userTeamRepository.save(userTeam);
+
         RetrospectiveTemplate template = RetrospectiveTemplate.builder().name("KPT").build();
         templateRepository.save(template);
 
         Retrospective retrospective = Retrospective.builder().title("title").user(user)
-            .template(template).build();
+            .template(template).team(savedTeam).build();
         retrospectiveRepository.save(retrospective);
 
         Section section = Section.builder().user(user).retrospective(retrospective)
@@ -191,5 +205,7 @@ class NotificationServiceTest {
         assertThat(notification.getSenderName()).isEqualTo(savedUser.getUsername());
         assertThat(notification.getThumbnail()).isEqualTo(savedUser.getThumbnail());
         assertThat(notification.getNotificationType()).isEqualTo(NotificationType.LIKE);
+        assertThat(notification.getTeamId()).isEqualTo(savedTeam.getId());
+        assertThat(notification.getRetrospectiveId()).isEqualTo(retrospective.getId());
     }
 }
