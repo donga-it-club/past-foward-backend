@@ -26,11 +26,15 @@ public class GetNotificationResponseDto {
     private NotificationType notificationType;
     @Schema(description = "알림 발생 시간", example = "2021-07-01T00:00:00")
     private LocalDateTime dateTime;
+    @Schema(description = "회고 보드 ID", example = "1")
+    private Long retrospectiveId;
+    @Schema(description = "팀 ID", example = "1")
+    private Long teamId;
 
     private GetNotificationResponseDto(Long notificationId, Long sectionId,
         String retrospectiveTitle, Long receiverId,
         String senderName, String thumbnail, NotificationType notificationType,
-        LocalDateTime dateTime) {
+        LocalDateTime dateTime, Long retrospectiveId, Long teamId) {
         this.notificationId = notificationId;
         this.sectionId = sectionId;
         this.retrospectiveTitle = retrospectiveTitle;
@@ -39,6 +43,8 @@ public class GetNotificationResponseDto {
         this.thumbnail = thumbnail;
         this.notificationType = notificationType;
         this.dateTime = parseDateTime(dateTime.toString());
+        this.retrospectiveId = retrospectiveId;
+        this.teamId = teamId;
     }
 
     public static GetNotificationResponseDto of(Notification notification) {
@@ -46,7 +52,10 @@ public class GetNotificationResponseDto {
             notification.getSection().getId(),
             notification.getRetrospective().getTitle(), notification.getReceiver().getId(),
             notification.getReceiver().getUsername(), notification.getSender().getThumbnail(),
-            notification.getNotificationType(), notification.getCreatedDate());
+            notification.getNotificationType(), notification.getCreatedDate(),
+            notification.getRetrospective().getId(),
+            notification.getRetrospective().getTeam() == null ? null
+                : notification.getRetrospective().getTeam().getId());
     }
 
     private LocalDateTime parseDateTime(String dateTime) {
