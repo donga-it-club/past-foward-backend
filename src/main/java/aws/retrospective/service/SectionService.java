@@ -35,7 +35,9 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,19 +126,16 @@ public class SectionService {
     // 30초마다 Redis 좋아요 기록을 DB의 Likes 테이블에 저장한다.
     @Scheduled(fixedDelay = 1000L * 30)
     @Transactional
-    @SchedulerLock(name = "SchedulerLock", lockAtLeastFor = "PT15S",lockAtMostFor = "PT30S")
+    @SchedulerLock(name = "SchedulerLock", lockAtLeastFor = "PT15S", lockAtMostFor = "PT30S")
     public void saveLikes() {
-
-        log.info("스케줄링 호츌");
-
         // 정규식에 해당하는 모든 key를 조회한다.
-        Set<String> keys = redisTemplate.keys("section:*:like");
+        ScanOptions scanOptions = ScanOptions.scanOptions().match("section:*:like").count(10)
+            .build();
+        Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection()
+            .scan(scanOptions);
 
-        if (keys == null || keys.isEmpty()) {
-            return;
-        }
-
-        for (String key : keys) {
+        while (cursor.hasNext()) {
+            String key = new String(cursor.next());
             // key에서 sectionId를 추출한다.
             Long sectionId = Long.parseLong(key.split(":")[1]);
             // key에 저장된 모든 value를 추출한다.
