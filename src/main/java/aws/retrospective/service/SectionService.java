@@ -58,6 +58,8 @@ public class SectionService {
     private final NotificationRepository notificationRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
+    private static final String REDIS_LIKE_KEY_PATTERN = "section:*:like";
+
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
@@ -128,11 +130,7 @@ public class SectionService {
     @Transactional
     @SchedulerLock(name = "SchedulerLock", lockAtLeastFor = "PT15S", lockAtMostFor = "PT30S")
     public void saveLikes() {
-        // 정규식에 해당하는 모든 key를 조회한다.
-        ScanOptions scanOptions = ScanOptions.scanOptions().match("section:*:like").count(10)
-            .build();
-        Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection()
-            .scan(scanOptions);
+        Cursor<byte[]> cursor = getRedisCursor();
 
         while (cursor.hasNext()) {
             String key = new String(cursor.next());
@@ -155,6 +153,12 @@ public class SectionService {
                 userIds.stream().map(Long::parseLong).toList());
             likes.forEach(this::deleteNotification); // 알림을 지운다.
         }
+    }
+
+    private Cursor<byte[]> getRedisCursor() {
+        ScanOptions scanOptions = ScanOptions.scanOptions().match(REDIS_LIKE_KEY_PATTERN).count(10)
+            .build();
+        return redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
     }
 
     // Action Items 사용자 지정
