@@ -89,7 +89,7 @@ public class RetrospectiveController {
     }
 
     @Operation(summary = "회고 리더 권한 양도")
-    @PostMapping("/transferLeadership")
+    @PostMapping("/{retrospectiveId}/transferLeadership")
     public CommonApiResponse<CreateRetrospectiveResponseDto> transferLeaderdhip(@CurrentUser User user,
                                                                                 @PathVariable Long retrospectiveId,
                                                                                 @RequestParam Long newLeaderId) {
