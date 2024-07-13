@@ -58,7 +58,7 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
                 comment.user.thumbnail, comment.createdDate, comment.updatedDate))
             .from(comment)
             .join(comment.user, user)
-            .where(comment.id.in(sectionIds))
+            .where(comment.section.id.in(sectionIds))
             .fetch();
     }
 
