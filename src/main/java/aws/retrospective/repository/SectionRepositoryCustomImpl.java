@@ -48,14 +48,14 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
 
     private static Map<Long, List<GetCommentDto>> createCommentMap(List<GetCommentDto> comments) {
         return comments.stream()
-            .collect(Collectors.groupingBy(GetCommentDto::getCommentId));
+            .collect(Collectors.groupingBy(GetCommentDto::getSectionId));
     }
 
     private List<GetCommentDto> getComments(List<Long> sectionIds) {
         return queryFactory
             .select(Projections.constructor(GetCommentDto.class,
-                comment.id, comment.user.id, comment.content, comment.user.username,
-                comment.user.thumbnail))
+                comment.section.id, comment.id, comment.user.id, comment.content, comment.user.username,
+                comment.user.thumbnail, comment.createdDate, comment.updatedDate))
             .from(comment)
             .join(comment.user, user)
             .where(comment.id.in(sectionIds))
