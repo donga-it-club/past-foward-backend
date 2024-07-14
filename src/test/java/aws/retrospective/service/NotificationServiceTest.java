@@ -59,6 +59,8 @@ class NotificationServiceTest {
     private TeamRepository teamRepository;
     @Autowired
     private UserTeamRepository userTeamRepository;
+    @Autowired
+    private RetrospectiveService retrospectiveService;
 
     @AfterEach
     public void tearDown() {
@@ -207,5 +209,40 @@ class NotificationServiceTest {
         assertThat(notification.getNotificationType()).isEqualTo(NotificationType.LIKE);
         assertThat(notification.getTeamId()).isEqualTo(savedTeam.getId());
         assertThat(notification.getRetrospectiveId()).isEqualTo(retrospective.getId());
+    }
+
+    @Test
+    @DisplayName("삭제된 회고 보드는 알림 조회에 포함하지 않는다.")
+    void deleteRetrospectiveNotification() {
+        //given
+        User user = User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
+            .build();
+        User savedUser = userRepository.save(user);
+
+        RetrospectiveTemplate template = RetrospectiveTemplate.builder().name("KPT").build();
+        templateRepository.save(template);
+
+        Retrospective retrospective = Retrospective.builder().title("title").user(user)
+            .template(template).build();
+        retrospectiveRepository.save(retrospective);
+
+        Section section = Section.builder().user(user).retrospective(retrospective)
+            .build();
+        Section savedSection = sectionRepository.save(section);
+
+        NotificationRedis redis = NotificationRedis.of("notification",
+            LocalDateTime.now());// 마지막으로 알림이 전송된 시간을 레디스에 저장
+        notificationRedisRepository.save(redis);
+
+        //when
+        sectionService.increaseSectionLikes(savedSection.getId(), user); // 회고 보드에 좋아요 클릭
+
+        retrospectiveService.deleteRetrospective(retrospective.getId(), user);
+
+        // 레디스에 저장된 시간 이후의 알림 조회
+        List<GetNotificationResponseDto> notifications = notificationService.getNotifications();
+
+        //then
+        assertThat(notifications.size()).isEqualTo(0);
     }
 }
