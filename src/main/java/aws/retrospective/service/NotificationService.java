@@ -11,14 +11,8 @@ import aws.retrospective.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,8 +73,9 @@ public class NotificationService {
     }
 
     private List<GetNotificationResponseDto> convertDto(NotificationRedis notificationRedis) {
-        return notificationRepository.findByIsReadOrCreatedDateAfter(
-                NotificationStatus.UNREAD, notificationRedis.getLastNotificationTime()).stream()
+        return notificationRepository.findUnReadAndNewNotifications(
+                notificationRedis.getLastNotificationTime())
+            .stream()
             .map(GetNotificationResponseDto::of)
             .toList();
     }
