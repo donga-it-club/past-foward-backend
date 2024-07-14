@@ -4,8 +4,10 @@ import aws.retrospective.dto.CreateRetrospectiveGroupDto;
 import aws.retrospective.dto.CreateRetrospectiveGroupResponseDto;
 import aws.retrospective.dto.GetRetrospectiveGroupResponseDto;
 import aws.retrospective.dto.GetRetrospectiveGroupsDto;
+import aws.retrospective.dto.GetRetrospectivesDto;
 import aws.retrospective.dto.PaginationResponseDto;
 import aws.retrospective.dto.RetrospectiveGroupResponseDto;
+import aws.retrospective.dto.RetrospectiveResponseDto;
 import aws.retrospective.dto.UpdateRetrospectiveGroupBoardsDto;
 import aws.retrospective.dto.UpdateRetrospectiveGroupDto;
 import aws.retrospective.entity.Retrospective;
@@ -16,6 +18,7 @@ import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.specification.RetrospectiveGroupSpecification;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -84,21 +87,39 @@ public class RetrospectiveGroupService {
         return Sort.by(Direction.DESC, "createdDate");
     }
 
+
+    // 특정 회고 그룹 조회 (회고 목록 포함)
     @Transactional(readOnly = true)
     public GetRetrospectiveGroupResponseDto getRetrospectiveGroup(User user, Long retrospectiveGroupId) {
-        RetrospectiveGroup findRetrospectiveGroup = retrospectiveGroupRepository.findRetrospectiveGroupById(
-            retrospectiveGroupId).orElseThrow(
-            () -> new NoSuchElementException("Not found retrospective group: " + retrospectiveGroupId));
+        RetrospectiveGroup findRetrospectiveGroup = retrospectiveGroupRepository.findById(retrospectiveGroupId)
+            .orElseThrow(() -> new NoSuchElementException("Not found retrospective group: " + retrospectiveGroupId));
 
-        return toResponse(findRetrospectiveGroup);
+        List<Retrospective> retrospectives = findRetrospectiveGroup.getRetrospectives();
+
+        List<RetrospectiveResponseDto> retrospectivesDtoList = retrospectives.stream()
+            .map(retrospective -> RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser(user, retrospective)))
+            .collect(Collectors.toList());
+
+        return new GetRetrospectiveGroupResponseDto(
+            findRetrospectiveGroup.getId(),
+            findRetrospectiveGroup.getTitle(),
+            findRetrospectiveGroup.getUser().getId(),
+            findRetrospectiveGroup.getUser().getUsername(),
+            findRetrospectiveGroup.getDescription(),
+            findRetrospectiveGroup.getThumbnail(),
+            findRetrospectiveGroup.getStatus().name(),
+            retrospectivesDtoList
+        );
     }
 
-    private GetRetrospectiveGroupResponseDto toResponse(RetrospectiveGroup findRetrospectiveGroup) {
-        return new GetRetrospectiveGroupResponseDto(findRetrospectiveGroup.getId(),
-            findRetrospectiveGroup.getTitle(), findRetrospectiveGroup.getUser().getId(),
-            findRetrospectiveGroup.getUser().getUsername(), findRetrospectiveGroup.getDescription(),
-            findRetrospectiveGroup.getThumbnail(), findRetrospectiveGroup.getStatus().name());
+    private boolean hasBookmarksByUser(User user, Retrospective retrospective) {
+        // 사용자가 해당 회고를 북마크 했는지 여부를 확인하는 로직을 구현할 수 있습니다.
+        // 예를 들어, 사용자가 북마크한 회고 목록을 조회하여 포함되어 있는지 여부를 반환하도록 구현할 수 있습니다.
+        // 이 예제에서는 임의로 false를 반환합니다.
+        return false;
     }
+
+
 
     // 회고 그룹 보드 수정
     @Transactional
