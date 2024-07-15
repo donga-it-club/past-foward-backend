@@ -80,6 +80,7 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
             .leftJoin(kudosTarget).on(kudosTarget.section.eq(section))
             .leftJoin(section.comments, comment)
             .where(section.retrospective.id.eq(retrospectiveId))
+            .groupBy(section.id)
             .fetch();
     }
 }
