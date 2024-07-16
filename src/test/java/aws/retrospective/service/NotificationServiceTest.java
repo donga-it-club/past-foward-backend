@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -71,18 +72,22 @@ class NotificationServiceTest {
     @DisplayName("회고 보드에 댓글이 작성되면 알림을 생성 및 조회할 수 있다.")
     void createNotificationFromComment() {
         //given
-        User user = User.builder().username("test").phone("010-1234-1234").email("test@naver.com")
+        User senderUser = User.builder().username("sender").phone("010-1234-1234").email("test@naver.com")
             .build();
-        User savedUser = userRepository.save(user);
+        User savedSenderUser = userRepository.save(senderUser);
+        ReflectionTestUtils.setField(senderUser, "thumbnail", "121212-ababab");
+
+        User receiverUser = TestUtil.createUser();
+        User savedReceiverUser = userRepository.save(receiverUser);
 
         RetrospectiveTemplate template = RetrospectiveTemplate.builder().name("KPT").build();
         templateRepository.save(template);
 
-        Retrospective retrospective = Retrospective.builder().title("title").user(user)
+        Retrospective retrospective = Retrospective.builder().title("title").user(savedReceiverUser)
             .template(template).build();
         retrospectiveRepository.save(retrospective);
 
-        Section section = Section.builder().user(user).retrospective(retrospective)
+        Section section = Section.builder().user(savedReceiverUser).retrospective(retrospective)
             .build();
         Section savedSection = sectionRepository.save(section);
 
@@ -93,7 +98,7 @@ class NotificationServiceTest {
         notificationRedisRepository.save(redis);
 
         //when
-        commentService.createComment(savedUser, request); // 댓글 작성
+        commentService.createComment(senderUser, request); // 댓글 작성
         // 레디스에 저장된 시간 이후의 알림 조회
         List<GetNotificationResponseDto> notifications = notificationService.getNotifications();
 
@@ -103,9 +108,11 @@ class NotificationServiceTest {
         assertThat(notification.getSectionId()).isEqualTo(savedSection.getId());
         assertThat(notification.getRetrospectiveTitle()).isEqualTo(
             retrospective.getTitle());
-        assertThat(notification.getReceiverId()).isEqualTo(savedUser.getId());
-        assertThat(notification.getSenderName()).isEqualTo(savedUser.getUsername());
-        assertThat(notification.getThumbnail()).isEqualTo(savedUser.getThumbnail());
+        assertThat(notification.getReceiverId()).isEqualTo(savedReceiverUser.getId());
+        assertThat(notification.getReceiverId()).isNotEqualTo(savedSenderUser.getId());
+        assertThat(notification.getSenderName()).isEqualTo(savedSenderUser.getUsername());
+        assertThat(notification.getSenderName()).isNotEqualTo(savedReceiverUser.getUsername());
+        assertThat(notification.getThumbnail()).isEqualTo(savedSenderUser.getThumbnail());
         assertThat(notification.getNotificationType()).isEqualTo(NotificationType.COMMENT);
     }
 
