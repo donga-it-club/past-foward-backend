@@ -51,7 +51,7 @@ public class GetNotificationResponseDto {
         return new GetNotificationResponseDto(notification.getId(),
             notification.getSection().getId(),
             notification.getRetrospective().getTitle(), notification.getReceiver().getId(),
-            notification.getReceiver().getUsername(), notification.getSender().getThumbnail(),
+            notification.getSender().getUsername(), notification.getSender().getThumbnail(),
             notification.getNotificationType(), notification.getCreatedDate(),
             notification.getRetrospective().getId(),
             notification.getRetrospective().getTeam() == null ? null
