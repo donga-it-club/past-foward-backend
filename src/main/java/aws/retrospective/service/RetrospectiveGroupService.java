@@ -97,7 +97,7 @@ public class RetrospectiveGroupService {
         List<Retrospective> retrospectives = findRetrospectiveGroup.getRetrospectives();
 
         List<RetrospectiveResponseDto> retrospectivesDtoList = retrospectives.stream()
-            .map(retrospective -> RetrospectiveResponseDto.of(retrospective, hasBookmarksByUser(user, retrospective)))
+            .map(RetrospectiveResponseDto::withoutBookmark)
             .collect(Collectors.toList());
 
         return new GetRetrospectiveGroupResponseDto(
@@ -110,13 +110,6 @@ public class RetrospectiveGroupService {
             findRetrospectiveGroup.getStatus().name(),
             retrospectivesDtoList
         );
-    }
-
-    private boolean hasBookmarksByUser(User user, Retrospective retrospective) {
-        // 사용자가 해당 회고를 북마크 했는지 여부를 확인하는 로직을 구현할 수 있습니다.
-        // 예를 들어, 사용자가 북마크한 회고 목록을 조회하여 포함되어 있는지 여부를 반환하도록 구현할 수 있습니다.
-        // 이 예제에서는 임의로 false를 반환합니다.
-        return false;
     }
 
 
