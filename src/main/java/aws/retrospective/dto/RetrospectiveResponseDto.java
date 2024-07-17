@@ -69,4 +69,22 @@ public class RetrospectiveResponseDto {
             retrospective.getUpdatedDate()
         );
     }
+
+    public static RetrospectiveResponseDto withoutBookmark(Retrospective retrospective) {
+        return new RetrospectiveResponseDto(
+            retrospective.getId(),
+            retrospective.getTitle(),
+            retrospective.getUser().getId(),
+            retrospective.getUser().getUsername(),
+            retrospective.getTeam() != null ? retrospective.getTeam().getId() : null,
+            retrospective.getTemplate().getId(),
+            retrospective.getStatus().name(),
+            null, // 북마크 여부를 설정하지 않음
+            retrospective.getThumbnail(),
+            retrospective.getDescription(),
+            retrospective.getStartDate(),
+            retrospective.getCreatedDate(),
+            retrospective.getUpdatedDate()
+        );
+    }
 }

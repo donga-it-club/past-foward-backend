@@ -1,6 +1,6 @@
 package aws.retrospective.dto;
 
-import aws.retrospective.entity.ProjectStatus;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,5 +22,7 @@ public class GetRetrospectiveGroupResponseDto {
     private UUID thumbnail; //회고 그룹 썸네일
 
     private String status; //회고 그룹 상태
+
+    private List<RetrospectiveResponseDto> retrospectives; // 회고 목록
 
 }
