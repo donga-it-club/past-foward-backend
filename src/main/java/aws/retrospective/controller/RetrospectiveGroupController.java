@@ -91,11 +91,11 @@ public class RetrospectiveGroupController {
         return CommonApiResponse.successResponse(HttpStatus.OK, response);
     }
 
-    @Operation(summary = "Read retrospectives in a retrospective group", responses = {
+    @Operation(summary = "Read a retrospective group including retrospectives", responses = {
         @ApiResponse(responseCode = "200", description = "Retrospective Group read successfully"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/{retrospectiveGroupId}/retrospectives")
+    @GetMapping("/{retrospectiveGroupId}")
     public CommonApiResponse<GetRetrospectiveGroupResponseDto> getRetrospectiveGroup(
         @CurrentUser User user,
         @PathVariable Long retrospectiveGroupId) {
