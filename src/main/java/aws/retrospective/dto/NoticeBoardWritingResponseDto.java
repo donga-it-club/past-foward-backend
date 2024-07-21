@@ -30,13 +30,12 @@ public class NoticeBoardWritingResponseDto {
         this.views = entity.getViews();
     }
     // 조회수를 추가로 받는 생성자
-    public NoticeBoardWritingResponseDto(NoticeBoardWriting entity, int views, UUID thumbnail) {
+    public NoticeBoardWritingResponseDto(NoticeBoardWriting entity, int views) {
         this.title = entity.getTitle();
         this.content = entity.getContent();
         this.status = entity.getStatus().name(); // Enum to String
         this.createdDate = entity.getCreatedDate();
         this.modifiedDate = entity.getModifiedDate();
         this.views = views;
-        this.thumbnail = thumbnail;
     }
 }
