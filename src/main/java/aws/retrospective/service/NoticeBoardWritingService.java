@@ -27,10 +27,12 @@ public class NoticeBoardWritingService {
     private final NoticeBoardViewCountingRepository noticeBoardViewCountingRepository;
 
     public NoticeBoardWritingResponseDto savePost(NoticeBoardWritingRequestDto requestDto) {
+        SaveStatus status = (requestDto.getStatus() != null) ? requestDto.getStatus() : SaveStatus.PUBLISHED;
+
         NoticeBoardWriting noticeBoardWriting = NoticeBoardWriting.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .status(SaveStatus.PUBLISHED)
+                .status(status)
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
 
@@ -42,10 +44,12 @@ public class NoticeBoardWritingService {
     }
 
     public NoticeBoardWritingResponseDto saveTempPost(NoticeBoardWritingRequestDto requestDto) {
+        SaveStatus status = (requestDto.getStatus() != null) ? requestDto.getStatus() : SaveStatus.TEMP;
+
         NoticeBoardWriting noticeBoardWriting = NoticeBoardWriting.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .status(SaveStatus.TEMP)
+                .status(status)
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
         return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting, 0);

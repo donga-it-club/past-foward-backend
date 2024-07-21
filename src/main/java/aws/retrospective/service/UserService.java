@@ -36,8 +36,8 @@ public class UserService {
     public GetUserInfoDto getUserInfo(User user) {
         User currentUser = getUser(user.getId());
         return new GetUserInfoDto(currentUser.getId(), currentUser.getUsername(),
-                currentUser.getEmail(), currentUser.getThumbnail(), currentUser.getPhone(),
-                currentUser.getCreatedDate(), currentUser.getUpdatedDate());
+            currentUser.getEmail(), currentUser.getThumbnail(), currentUser.getPhone(),
+            currentUser.getCreatedDate(), currentUser.getUpdatedDate(), currentUser.isAdministrator());
     }
 
     @Transactional
