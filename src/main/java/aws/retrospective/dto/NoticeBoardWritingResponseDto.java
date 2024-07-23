@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class NoticeBoardWritingResponseDto {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private int views;
+    private UUID thumbnail;
 
     // NoticeBoardWriting 엔티티를 받아서 초기화하는 생성자 추가
     public NoticeBoardWritingResponseDto(NoticeBoardWriting entity) {
@@ -26,6 +28,7 @@ public class NoticeBoardWritingResponseDto {
         this.createdDate = entity.getCreatedDate();
         this.modifiedDate = entity.getModifiedDate();
         this.views = entity.getViews();
+        this.thumbnail = entity.getThumbnail();
     }
     // 조회수를 추가로 받는 생성자
     public NoticeBoardWritingResponseDto(NoticeBoardWriting entity, int views) {
@@ -35,5 +38,6 @@ public class NoticeBoardWritingResponseDto {
         this.createdDate = entity.getCreatedDate();
         this.modifiedDate = entity.getModifiedDate();
         this.views = views;
+        this.thumbnail = entity.getThumbnail();
     }
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -26,12 +27,14 @@ public class NoticeBoardWriting extends BaseEntity {
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
     private int views;
+    private UUID thumbnail;
 
     @Builder
-    public NoticeBoardWriting(String title,String content, SaveStatus status) {
+    public NoticeBoardWriting(String title,String content, SaveStatus status, UUID thumbnail) {
         this.title = title;
         this.content = content;
         this.status = status;
+        this.thumbnail = thumbnail;
     }
 
     @PrePersist
@@ -44,9 +47,9 @@ public class NoticeBoardWriting extends BaseEntity {
         modifiedDate = LocalDateTime.now();
     }
 
-
-    public void updateBoard(String title, String content) {
+    public void updateBoard(String title, String content, UUID thumbnail) {
         this.title = title;
         this.content = content;
+        this.thumbnail = thumbnail;
     }
 }
