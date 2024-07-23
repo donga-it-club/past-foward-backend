@@ -57,7 +57,7 @@ public class NoticeBoardWritingServiceTest {
 
     @Test
     public void testSavePost() {
-        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content",SaveStatus.PUBLISHED,thumbnail);
+        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content", SaveStatus.PUBLISHED, thumbnail);
 
         when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenAnswer(invocation -> {
             NoticeBoardWriting entity = invocation.getArgument(0);
@@ -82,7 +82,7 @@ public class NoticeBoardWritingServiceTest {
 
     @Test
     public void testSaveTempPost() {
-        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content",SaveStatus.TEMP,thumbnail);
+        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content", SaveStatus.TEMP, thumbnail);
 
         when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenAnswer(invocation -> {
             NoticeBoardWriting entity = invocation.getArgument(0);
@@ -168,7 +168,7 @@ public class NoticeBoardWritingServiceTest {
     @Test
     public void testUpdatePost() {
         Long postId = 1L;
-        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Updated Title", "Updated Content",SaveStatus.PUBLISHED,thumbnail);
+        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Updated Title", "Updated Content", SaveStatus.PUBLISHED, thumbnail);
 
         when(noticeBoardWritingRepository.findById(postId)).thenReturn(Optional.of(noticeBoardWriting));
         when(noticeBoardViewCountingRepository.findById(postId)).thenReturn(Optional.of(NoticeBoardViewCounting.of(postId, 1)));
