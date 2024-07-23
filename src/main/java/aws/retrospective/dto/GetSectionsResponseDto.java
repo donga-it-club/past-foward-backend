@@ -62,4 +62,8 @@ public class GetSectionsResponseDto {
         this.comments = comments == null ? new ArrayList<>() : comments;
     }
 
+    public void addLikeCnt(long likeCnt) {
+        this.likeCnt = likeCnt;
+    }
+
 }

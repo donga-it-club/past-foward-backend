@@ -15,12 +15,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 
 @RequiredArgsConstructor
 @Slf4j
 public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public List<GetSectionsResponseDto> getSectionsAll(Long retrospectiveId) {
@@ -40,11 +42,25 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
 
         // result에는 댓글 정보가 포함되어 있지 않기 때문에 루프를 돌면서 컬렉션 추가
         result.forEach(
-            section -> section.addComments(collect.get(section.getSectionId()))
+            section ->  {
+                section.addComments(collect.get(section.getSectionId()));
+                section.addLikeCnt(getLikeCnt(section.getSectionId()));
+            }
         );
 
         return result;
     }
+
+    private long getLikeCnt(Long sectionId) {
+        // 좋아요 개수 가져오기
+        Long size = redisTemplate.opsForSet().size(getSectionLikeKey(sectionId));
+        return size == null ? 0 : size;
+    }
+
+    private String getSectionLikeKey(Long sectionId) {
+        return "section:" + sectionId + ":like";
+    }
+
 
     private static Map<Long, List<GetCommentDto>> createCommentMap(List<GetCommentDto> comments) {
         return comments.stream()
@@ -72,7 +88,7 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
         return queryFactory
             .select(Projections.constructor(GetSectionsResponseDto.class,
                 section.id, section.user.id, section.user.username, section.content,
-                section.likeCnt, section.templateSection.sectionName, section.createdDate,
+                section.templateSection.sectionName, section.createdDate,
                 section.user.thumbnail, actionItem, kudosTarget
             ))
             .from(section)

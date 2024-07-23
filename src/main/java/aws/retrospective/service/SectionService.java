@@ -7,10 +7,8 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
-import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
@@ -31,13 +29,16 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +56,9 @@ public class SectionService {
     private final UserRepository userRepository;
     private final KudosTargetRepository kudosRepository;
     private final NotificationRepository notificationRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String REDIS_LIKE_KEY_PATTERN = "section:*:like";
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -110,30 +114,51 @@ public class SectionService {
 
     // 회고 카드 좋아요 API
     @Transactional
-    public IncreaseSectionLikesResponseDto increaseSectionLikes(Long sectionId, User user) {
-        // 회고 카드 조회
-        Section findSection = getSection(sectionId);
-        // 사용자가 해당 회고 카드에 좋아요를 눌렀는지 확인한다.
-        Optional<Likes> findLikes = likesRepository.findByUserAndSection(user, findSection);
+    public void clickLikeSection(Long sectionId, User user) {// 회고 카드 조회
+        // user가 section에 좋아요를 누른 상태인지 확인한다.
+        boolean isClick = isClickedLikeSection(sectionId, user);
 
-        // 좋아요를 누른적이 없을 때는 좋아요 횟수를 증가시킨다.
-        if (findLikes.isEmpty()) {
-            Likes createLikes = createLikes(findSection, user);
-            likesRepository.save(createLikes);
-            findSection.increaseSectionLikes(); // 좋아요 기록 저장
-
-            // 댓글 알림 생성
-            Notification notification = createNotification(findSection, findSection.getRetrospective(),
-                user, findSection.getUser(), createLikes);
-            notificationRepository.save(notification);
-        } else {
-            Likes likes = findLikes.get();
-            deleteNotification(likes); // 기존의 알림을 삭제
-            likesRepository.delete(likes); // 좋아요 기록 삭제
-            findSection.cancelSectionLikes(); // 좋아요 취소
+        if (!isClick) { // Redis에 새로운 user를 저장한다.
+            addUserLike(sectionId, user);
+        } else { // Redis에 저장된 userId를 삭제한다.
+            cancelUserLike(sectionId, user);
         }
+    }
 
-        return convertIncreaseSectionLikesResponseDto(findSection);
+    // 30초마다 Redis 좋아요 기록을 DB의 Likes 테이블에 저장한다.
+    @Scheduled(fixedDelay = 1000L * 30)
+    @Transactional
+    @SchedulerLock(name = "SchedulerLock", lockAtLeastFor = "PT15S", lockAtMostFor = "PT30S")
+    public void saveLikes() {
+        Cursor<byte[]> cursor = getRedisCursor();
+
+        while (cursor.hasNext()) {
+            String key = new String(cursor.next());
+            // key에서 sectionId를 추출한다.
+            Long sectionId = Long.parseLong(key.split(":")[1]);
+            // key에 저장된 모든 value를 추출한다.
+            Set<String> userIds = redisTemplate.opsForSet().members(key);
+            for (String userId : userIds) {
+                User user = getUser(Long.parseLong(userId)); // 좋아요를 누른 사용자
+                Section section = getSection(sectionId); // 좋아요를 누른 회고 카드
+
+                // 새로운 좋아요 기록을 Likes 테이블에 저장 및 알림을 생성한다.
+                addLikeAndNotification(sectionId, user, section);
+            }
+
+            /**
+             * Redis의 Key에 저장되지 않은 value들을 Likes 테이블에서 삭제한다.
+             */
+            List<Likes> likes = likesRepository.deleteBySectionIdAndUserIdNotIn(sectionId,
+                userIds.stream().map(Long::parseLong).toList());
+            likes.forEach(this::deleteNotification); // 알림을 지운다.
+        }
+    }
+
+    private Cursor<byte[]> getRedisCursor() {
+        ScanOptions scanOptions = ScanOptions.scanOptions().match(REDIS_LIKE_KEY_PATTERN).count(10)
+            .build();
+        return redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
     }
 
     // Action Items 사용자 지정
@@ -184,7 +209,7 @@ public class SectionService {
         // Kudos 유형에만 칭창할 사람을 지정8할 수 있다.
         validateKudosTemplate(sectionId, section);
 
-        User targetUser = getUser(request); // 칭찬 대상 조회
+        User targetUser = getUser(request.getUserId()); // 칭찬 대상 조회
         KudosTarget kudosSection = getKudosSection(section); // DB에 저장된 Kudos 정보 조회
 
         /**
@@ -218,10 +243,10 @@ public class SectionService {
 
     /**
      * Section 생성
-     * @param sectionContent 회고 카드 내용
+     * @param sectionContent  회고 카드 내용
      * @param templateSection 회고 카드의 템플릿 (ex. Keep, Problem, Try)
-     * @param retrospective 회고 카드가 속한 회고 보드
-     * @param user 회고 카드를 작성한 사용자
+     * @param retrospective   회고 카드가 속한 회고 보드
+     * @param user            회고 카드를 작성한 사용자
      * @return
      */
     private Section createSection(String sectionContent, TemplateSection templateSection,
@@ -247,29 +272,32 @@ public class SectionService {
             () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
     }
 
-    private User getUser(AssignKudosRequestDto request) {
-        return userRepository.findById(request.getUserId())
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
             .orElseThrow(
-                () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
+                () -> new NoSuchElementException("Not Found User Id : " + userId));
     }
 
     /**
      * 칭찬 대상을 지정한다.
+     *
      * @param section 칭찬 대상을 지정할 Section
-     * @param user 칭찬 대상
+     * @param user    칭찬 대상
      * @return
      */
     private KudosTarget assignKudos(Section section, User user) {
         return kudosRepository.save(KudosTarget.createKudosTarget(section, user));
     }
 
-    private void validateTemplateMatch(Retrospective retrospective, TemplateSection templateSection) {
-        if(retrospective.isNotSameTemplate(templateSection.getTemplate())) {
+    private void validateTemplateMatch(Retrospective retrospective,
+        TemplateSection templateSection) {
+        if (retrospective.isNotSameTemplate(templateSection.getTemplate())) {
             throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
         }
     }
 
-    private static CreateSectionResponseDto convertCreateSectionResponseDto(CreateSectionDto request,
+    private static CreateSectionResponseDto convertCreateSectionResponseDto(
+        CreateSectionDto request,
         Section createSection) {
         return CreateSectionResponseDto.builder()
             .id(createSection.getId())
@@ -285,7 +313,8 @@ public class SectionService {
 
     /**
      * 회고 카드 수정 응답 Dto 변환
-     * @param sectionId 수정된 회고 카드 ID
+     *
+     * @param sectionId      수정된 회고 카드 ID
      * @param sectionContent 수정된 회고 카드 내용
      */
     private static EditSectionResponseDto convertUpdateSectionResponseDto(Long sectionId,
@@ -296,6 +325,7 @@ public class SectionService {
 
     /**
      * Section 삭제
+     *
      * @param section 삭제할 회고 카드
      */
     public void deleteSection(Section section) {
@@ -332,9 +362,10 @@ public class SectionService {
 
     /**
      * Action Item 생성 및 사용자 지정
-     * @param user Action Item에 지정할 사용자
-     * @param team 팀 정보 (개인 : null)
-     * @param section Action Item을 지정할 회고 카드
+     *
+     * @param user          Action Item에 지정할 사용자
+     * @param team          팀 정보 (개인 : null)
+     * @param section       Action Item을 지정할 회고 카드
      * @param retrospective Action Item을 지정할 회고 보드
      */
     private void assignActionItem(User user, Team team, Section section,
@@ -353,19 +384,13 @@ public class SectionService {
         return kudosRepository.findBySectionId(section.getId());
     }
 
-    private IncreaseSectionLikesResponseDto convertIncreaseSectionLikesResponseDto(Section section) {
-        return new IncreaseSectionLikesResponseDto(section.getId(), section.getLikeCnt());
-    }
-
-    private Notification createNotification(Section section, Retrospective retrospective,
-        User sender, User receiver, Likes likes) {
-        return Notification.builder().section(section).retrospective(retrospective)
-            .sender(sender).receiver(receiver).comment(null).likes(likes)
-            .notificationType(NotificationType.LIKE).build();
-    }
-
-    private Likes createLikes(Section section, User user) {
-        return Likes.builder().user(user).section(section).build();
+    private void createNotification(Section section, Retrospective retrospective,
+        User sender, User receiver) {
+        Notification notification = Notification.builder().section(section)
+            .retrospective(retrospective)
+            .sender(sender).receiver(receiver).comment(null).notificationType(NotificationType.LIKE)
+            .build();
+        notificationRepository.save(notification); // 새로운 알림 저장
     }
 
     private void deleteNotification(Likes likes) {
@@ -373,7 +398,33 @@ public class SectionService {
             .ifPresent(notificationRepository::delete);
     }
 
+    private String getSectionLikeKey(Long sectionId) {
+        return "section:" + sectionId + ":like";
+    }
+
+    private void addUserLike(Long sectionId, User user) {
+        redisTemplate.opsForSet().add(getSectionLikeKey(sectionId), user.getId().toString());
+    }
+
+    private void cancelUserLike(Long sectionId, User user) {
+        redisTemplate.opsForSet().remove(getSectionLikeKey(sectionId), user.getId().toString());
+    }
+
+    private Boolean isClickedLikeSection(Long sectionId, User user) {
+        return redisTemplate.opsForSet().isMember(getSectionLikeKey(sectionId), user.getId().toString());
+    }
+
+    private void addLikeAndNotification(Long sectionId, User user, Section section) {
+        if(!likesRepository.existsBySectionIdAndUserId(sectionId, user.getId())) {
+            Likes likes = Likes.builder().section(section).user(user).build();
+            likesRepository.save(likes);
+            // 알림을 생성한다.
+            createNotification(section, section.getRetrospective(), user, section.getUser());
+        }
+    }
+
     private ActionItem getActionItem(Section section) {
         return actionItemRepository.findBySectionId(section.getId()).orElse(null);
     }
+
 }
