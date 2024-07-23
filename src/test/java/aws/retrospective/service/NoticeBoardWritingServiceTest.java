@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +43,7 @@ public class NoticeBoardWritingServiceTest {
     private AmazonS3Service amazonS3Service;
 
     private NoticeBoardWriting noticeBoardWriting;
+    private UUID thumbnail;
 
     @BeforeEach
     public void setUp() {
@@ -49,12 +51,13 @@ public class NoticeBoardWritingServiceTest {
                 .title("Test Title")
                 .content("Test Content")
                 .status(SaveStatus.PUBLISHED)
+                .thumbnail(thumbnail)
                 .build();
     }
 
     @Test
     public void testSavePost() {
-        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content",SaveStatus.PUBLISHED);
+        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content", SaveStatus.PUBLISHED, thumbnail);
 
         when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenAnswer(invocation -> {
             NoticeBoardWriting entity = invocation.getArgument(0);
@@ -72,13 +75,14 @@ public class NoticeBoardWritingServiceTest {
         assertEquals("Test Content", responseDto.getContent());
         assertEquals("PUBLISHED", responseDto.getStatus());
         assertEquals(0, responseDto.getViews());
+        assertEquals(thumbnail, responseDto.getThumbnail());
         verify(noticeBoardWritingRepository, times(1)).save(any(NoticeBoardWriting.class));
         verify(noticeBoardViewCountingRepository, times(1)).save(any(NoticeBoardViewCounting.class));
     }
 
     @Test
     public void testSaveTempPost() {
-        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content",SaveStatus.TEMP);
+        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Test Title", "Test Content", SaveStatus.TEMP, thumbnail);
 
         when(noticeBoardWritingRepository.save(any(NoticeBoardWriting.class))).thenAnswer(invocation -> {
             NoticeBoardWriting entity = invocation.getArgument(0);
@@ -95,6 +99,7 @@ public class NoticeBoardWritingServiceTest {
         assertEquals("Test Content", responseDto.getContent());
         assertEquals("TEMP", responseDto.getStatus());
         assertEquals(0, responseDto.getViews());
+        assertEquals(thumbnail, responseDto.getThumbnail());
         verify(noticeBoardWritingRepository, times(1)).save(any(NoticeBoardWriting.class));
         verify(noticeBoardViewCountingRepository, never()).save(any(NoticeBoardViewCounting.class)); // 조회수 저장이 호출되지 않음을 확인
     }
@@ -154,6 +159,7 @@ public class NoticeBoardWritingServiceTest {
         assertEquals("Test Content", responseDto.getContent());
         assertEquals("PUBLISHED", responseDto.getStatus());
         assertEquals(1, responseDto.getViews()); // 조회수 증가 확인
+        assertEquals(thumbnail, responseDto.getThumbnail());
         verify(noticeBoardWritingRepository, times(1)).findById(any(Long.class));
         verify(noticeBoardViewCountingRepository, times(1)).findById(any(Long.class));
         verify(noticeBoardViewCountingRepository, times(1)).save(any(NoticeBoardViewCounting.class)); // 조회수 증가 저장 확인
@@ -162,7 +168,7 @@ public class NoticeBoardWritingServiceTest {
     @Test
     public void testUpdatePost() {
         Long postId = 1L;
-        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Updated Title", "Updated Content",SaveStatus.PUBLISHED);
+        NoticeBoardWritingRequestDto requestDto = new NoticeBoardWritingRequestDto("Updated Title", "Updated Content", SaveStatus.PUBLISHED, thumbnail);
 
         when(noticeBoardWritingRepository.findById(postId)).thenReturn(Optional.of(noticeBoardWriting));
         when(noticeBoardViewCountingRepository.findById(postId)).thenReturn(Optional.of(NoticeBoardViewCounting.of(postId, 1)));
@@ -173,6 +179,7 @@ public class NoticeBoardWritingServiceTest {
         assertEquals("Updated Title", responseDto.getTitle());
         assertEquals("Updated Content", responseDto.getContent());
         assertEquals(1, responseDto.getViews());
+        assertEquals(thumbnail, responseDto.getThumbnail());
         verify(noticeBoardWritingRepository, times(1)).findById(postId);
         verify(noticeBoardViewCountingRepository, times(1)).findById(postId);
     }

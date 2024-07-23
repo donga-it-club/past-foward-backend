@@ -33,6 +33,7 @@ public class NoticeBoardWritingService {
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
                 .status(status)
+                .thumbnail(requestDto.getThumbnail())
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
 
@@ -50,6 +51,7 @@ public class NoticeBoardWritingService {
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
                 .status(status)
+                .thumbnail(requestDto.getThumbnail())
                 .build();
         NoticeBoardWriting savedNoticeBoardWriting = noticeBoardWritingRepository.save(noticeBoardWriting);
         return new NoticeBoardWritingResponseDto(savedNoticeBoardWriting, 0);
@@ -107,7 +109,7 @@ public class NoticeBoardWritingService {
         NoticeBoardWriting post = noticeBoardWritingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid post ID"));
 
-        post.updateBoard(requestDto.getTitle(), requestDto.getContent());
+        post.updateBoard(requestDto.getTitle(), requestDto.getContent(),requestDto.getThumbnail());
 
         int currentViewCount = noticeBoardViewCountingRepository.findById(id)
                 .map(NoticeBoardViewCounting::getViewCount)
