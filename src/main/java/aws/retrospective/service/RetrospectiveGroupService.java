@@ -16,6 +16,7 @@ import aws.retrospective.entity.User;
 import aws.retrospective.repository.RetrospectiveGroupRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.specification.RetrospectiveGroupSpecification;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -122,7 +123,10 @@ public class RetrospectiveGroupService {
             () -> new NoSuchElementException("Not found retrospective group: " + retrospectiveGroupId));
 
         // 기존 회고 제거
-        retrospectiveGroup.getRetrospectives().clear();
+        List<Retrospective> retrospectivesToRemove = new ArrayList<>(retrospectiveGroup.getRetrospectives());
+        for (Retrospective retrospective : retrospectivesToRemove) {
+            retrospectiveGroup.removeRetrospective(retrospective);
+        }
 
         // 새 회고 추가
         if (dto.getRetrospectiveIds() != null && !dto.getRetrospectiveIds().isEmpty()) {
