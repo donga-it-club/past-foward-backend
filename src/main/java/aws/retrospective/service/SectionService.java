@@ -7,7 +7,6 @@ import aws.retrospective.dto.CreateSectionDto;
 import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
-import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
@@ -31,11 +30,9 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -185,19 +182,18 @@ public class SectionService {
         validateKudosTemplate(sectionId, section);
 
         User targetUser = getUser(request.getUserId()); // 칭찬 대상 조회
-        KudosTarget kudosSection = getKudosSection(section); // DB에 저장된 Kudos 정보 조회
+        KudosTarget findKudosTarget = getKudosSection(section); // DB에 저장된 Kudos 정보 조회
 
         /**
          * Kudos 정보가 없을 때는 새로 생성하고, 있을 때는 사용자를 지정(변경)한다.
          */
-        if(kudosSection == null) {
-            KudosTarget createKudosTarget = KudosTarget.createKudosTarget(section, targetUser);
-            kudosRepository.save(createKudosTarget);
-            return convertAssignKudosResponse(createKudosTarget);
+        if(findKudosTarget == null) {
+            KudosTarget createNewKudosTarget = assignKudos(section, targetUser);
+            return convertAssignKudosResponse(createNewKudosTarget);
         }
 
-        kudosSection.assignUser(targetUser);
-        return convertAssignKudosResponse(kudosSection);
+        findKudosTarget.assignUser(targetUser);
+        return convertAssignKudosResponse(findKudosTarget);
     }
 
     private static void validateKudosTemplate(Long sectionId, Section section) {
