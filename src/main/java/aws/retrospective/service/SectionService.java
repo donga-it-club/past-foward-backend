@@ -184,14 +184,20 @@ public class SectionService {
         // Kudos 유형에만 칭창할 사람을 지정8할 수 있다.
         validateKudosTemplate(sectionId, section);
 
-        User targetUser = getUser(request); // 칭찬 대상 조회
+        User targetUser = getUser(request.getUserId()); // 칭찬 대상 조회
         KudosTarget kudosSection = getKudosSection(section); // DB에 저장된 Kudos 정보 조회
 
         /**
          * Kudos 정보가 없을 때는 새로 생성하고, 있을 때는 사용자를 지정(변경)한다.
          */
-        return convertAssignKudosResponse(
-            kudosSection == null ? assignKudos(section, targetUser) : kudosSection);
+        if(kudosSection == null) {
+            KudosTarget createKudosTarget = KudosTarget.createKudosTarget(section, targetUser);
+            kudosRepository.save(createKudosTarget);
+            return convertAssignKudosResponse(createKudosTarget);
+        }
+
+        kudosSection.assignUser(targetUser);
+        return convertAssignKudosResponse(kudosSection);
     }
 
     private static void validateKudosTemplate(Long sectionId, Section section) {
@@ -247,10 +253,10 @@ public class SectionService {
             () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
     }
 
-    private User getUser(AssignKudosRequestDto request) {
-        return userRepository.findById(request.getUserId())
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
             .orElseThrow(
-                () -> new NoSuchElementException("Not Found User Id : " + request.getUserId()));
+                () -> new NoSuchElementException("Not Found User Id : " + userId));
     }
 
     /**
