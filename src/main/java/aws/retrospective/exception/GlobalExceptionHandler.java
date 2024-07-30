@@ -5,6 +5,7 @@ import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.exception.retrospective.TemplateMisMatchException;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -66,6 +67,14 @@ public class GlobalExceptionHandler {
         log.error("ForbiddenAccessException occurred", ex);
         ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(
+        DataIntegrityViolationException ex) {
+        log.error("DataIntegrityViolationException - 중복 데이터 삽입 시도", ex);
+        ErrorResponse response = new ErrorResponse(ErrorCode.CONFILCT, "이미 존재하는 데이터입니다.");
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(RuntimeException.class)

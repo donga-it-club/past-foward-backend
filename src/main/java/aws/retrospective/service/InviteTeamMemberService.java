@@ -27,6 +27,7 @@ public class InviteTeamMemberService {
     private final TeamInvitationRepository teamInvitationRepository;
     private final QRCodeService qrCodeService;
     private final UserTeamRepository userTeamRepository;
+    private final UserTeamSaveHelper userTeamSaveHelper;
     private static final int EXPIRATION_HOURS = 2;
 
     @Value("${domain.url}")
@@ -41,14 +42,15 @@ public class InviteTeamMemberService {
                 () -> new IllegalArgumentException("Invalid invitation code: " + invitationCode));
 
         Team team = teamInvite.getTeam();
-        Optional<UserTeam> userTeam = userTeamRepository.findByTeamIdAndUserId(team.getId(),
-            user.getId());
 
-        if (userTeam.isPresent()) {
+        // fast-path: 이미 가입된 경우 조기 반환 (동시성 가드는 DB 유니크 제약조건이 담당)
+        Optional<UserTeam> existingUserTeam = userTeamRepository.findByTeamIdAndUserId(team.getId(),
+            user.getId());
+        if (existingUserTeam.isPresent()) {
             return AcceptInviteResponseDto.builder()
                 .teamId(team.getId())
                 .userId(user.getId())
-                .role(userTeam.get().getRole())
+                .role(existingUserTeam.get().getRole())
                 .build();
         }
 
@@ -58,7 +60,21 @@ public class InviteTeamMemberService {
             .role(UserTeamRole.MEMBER)
             .build();
 
-        userTeamRepository.save(newUserTeam);
+        // REQUIRES_NEW 트랜잭션으로 save 시도 → 중복 키 위반 시 내부 트랜잭션만 롤백
+        boolean saved = userTeamSaveHelper.saveIfNotDuplicate(newUserTeam);
+
+        if (!saved) {
+            // 동시 요청 경쟁에서 밀린 경우: 먼저 저장된 레코드 조회 후 반환
+            UserTeam created = userTeamRepository.findByTeamIdAndUserId(team.getId(), user.getId())
+                .orElseThrow(() -> new IllegalStateException(
+                    "UserTeam not found after duplicate key violation for teamId="
+                        + team.getId() + ", userId=" + user.getId()));
+            return AcceptInviteResponseDto.builder()
+                .teamId(team.getId())
+                .userId(user.getId())
+                .role(created.getRole())
+                .build();
+        }
 
         return AcceptInviteResponseDto.builder()
             .teamId(team.getId())
