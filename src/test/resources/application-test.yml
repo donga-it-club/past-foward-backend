@@ -5,6 +5,8 @@ spring:
     url: "jdbc:mysql://localhost:3306/past-forward"
     username: dev
     password: 1234
+    hikari:
+      maximum-pool-size: 200
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
