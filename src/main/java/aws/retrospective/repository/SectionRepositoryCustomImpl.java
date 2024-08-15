@@ -81,6 +81,7 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
             .leftJoin(section.comments, comment)
             .where(section.retrospective.id.eq(retrospectiveId))
             .groupBy(section.id)
+            .orderBy(section.likeCnt.desc(), section.createdDate.desc())
             .fetch();
     }
 }
