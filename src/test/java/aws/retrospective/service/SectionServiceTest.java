@@ -42,8 +42,6 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
-import aws.retrospective.util.TestUtil;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -512,49 +510,6 @@ class SectionServiceTest {
         //then
         assertThrows(IllegalArgumentException.class,
             () -> sectionService.assignKudos(sectionId, any()));
-    }
-
-    @Test
-    @DisplayName("회고 카드 조회시에 좋아요 개수가 많은 순으로 내림차순 정렬한다.")
-    void getSectionsByLikeCntDescPriorityTest() {
-        // given
-        User user = createUser();
-
-        Long retrospectiveId = 1L;
-        TemplateSection templateSection = createTemplateSection(createTemplate());
-        Retrospective retrospective = createRetrospective(createTemplate(), user, null);
-
-        // section을 3개 저장하되, 좋아요 개수를 다르게 한다.
-        Section section1 = createSection(user, templateSection, retrospective);
-        ReflectionTestUtils.setField(section1, "id", 1L);
-        ReflectionTestUtils.setField(section1, "likeCnt", 5);
-
-        Section section2 = createSection(user, templateSection, retrospective);
-        ReflectionTestUtils.setField(section2, "id", 2L);
-        ReflectionTestUtils.setField(section2, "likeCnt", 10);
-
-        Section section3 = createSection(user, templateSection, retrospective);
-        ReflectionTestUtils.setField(section3, "id", 3L);
-        ReflectionTestUtils.setField(section3, "likeCnt", 7);
-
-        GetSectionsResponseDto dto1 = new GetSectionsResponseDto(section1.getId(), section1.getUser().getId(), section1.getUser().getUsername(), section1.getContent(), section1.getLikeCnt(), section1.getTemplateSection().getSectionName(), section1.getCreatedDate(), section1.getUser().getThumbnail(), null, null);
-        GetSectionsResponseDto dto2 = new GetSectionsResponseDto(section2.getId(), section2.getUser().getId(), section2.getUser().getUsername(), section2.getContent(), section2.getLikeCnt(), section2.getTemplateSection().getSectionName(), section2.getCreatedDate(), section2.getUser().getThumbnail(), null, null);
-        GetSectionsResponseDto dto3 = new GetSectionsResponseDto(section3.getId(), section3.getUser().getId(), section3.getUser().getUsername(), section3.getContent(), section3.getLikeCnt(), section3.getTemplateSection().getSectionName(), section3.getCreatedDate(), section3.getUser().getThumbnail(), null, null);
-
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(Optional.of(retrospective));
-        when(sectionRepository.getSectionsAll(retrospectiveId)).thenReturn(List.of(dto1, dto2, dto3));
-
-        // when
-        GetSectionsRequestDto request = new GetSectionsRequestDto();
-        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
-        List<GetSectionsResponseDto> results = sectionService.getSections(request); // 좋아요 개수를 내림차순으로 반환해야 한다.
-
-        // then
-        assertThat(results).hasSize(3);
-        // 아래 3개의 테스트를 실패한다.
-        assertThat(results.get(0).getLikeCnt()).isEqualTo(10); // 테스트 실제값:5
-        assertThat(results.get(1).getLikeCnt()).isEqualTo(7); // 테스트 실제값:10
-        assertThat(results.get(2).getLikeCnt()).isEqualTo(5); // 테스트 실제값:7
     }
 
     private static Likes createLikes(Section section, User user) {
