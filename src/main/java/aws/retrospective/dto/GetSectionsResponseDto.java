@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.ToString;
 
 @Getter
-@ToString
 public class GetSectionsResponseDto {
 
     @Schema(description = "회고 카드 id", example = "1")
