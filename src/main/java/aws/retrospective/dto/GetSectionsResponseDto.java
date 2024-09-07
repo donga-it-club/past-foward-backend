@@ -2,6 +2,8 @@ package aws.retrospective.dto;
 
 import aws.retrospective.entity.ActionItem;
 import aws.retrospective.entity.KudosTarget;
+import aws.retrospective.entity.Section;
+import aws.retrospective.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -63,4 +65,18 @@ public class GetSectionsResponseDto {
         this.comments = comments == null ? new ArrayList<>() : comments;
     }
 
+    public static GetSectionsResponseDto from(Section section, User user) {
+        return new GetSectionsResponseDto(
+            section.getId(),
+            user.getId(),
+            user.getUsername(),
+            section.getContent(),
+            section.getLikeCnt(),
+            section.getTemplateSection().getSectionName(),
+            section.getCreatedDate(),
+            user.getThumbnail(),
+            null,
+            null
+        );
+    }
 }
