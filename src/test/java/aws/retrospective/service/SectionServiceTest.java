@@ -52,6 +52,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,6 +79,8 @@ class SectionServiceTest {
     KudosTargetRepository kudosRepository;
     @Mock
     NotificationRepository notificationRepository;
+    @Mock
+    RedisTemplate<String, Object> redisTemplate;
     @InjectMocks
     SectionService sectionService;
 
@@ -96,6 +100,10 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
+
+        ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(any())).thenReturn(null);
 
         Long templateSectionId = 1L;
         TemplateSection templateSection = createTemplateSection(kptTemplate);
