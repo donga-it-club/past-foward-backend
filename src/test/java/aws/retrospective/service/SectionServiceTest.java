@@ -54,7 +54,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,8 +80,6 @@ class SectionServiceTest {
     @Mock
     NotificationRepository notificationRepository;
     @Mock
-    RedisTemplate<String, Object> redisTemplate;
-    @Mock
     CacheRepository cacheRepository;
     @InjectMocks
     SectionService sectionService;
@@ -103,11 +100,6 @@ class SectionServiceTest {
         ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
-
-        // TODO RedisTemplate 추상화 처리
-        ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get(any())).thenReturn(null);
 
         Long templateSectionId = 1L;
         TemplateSection templateSection = createTemplateSection(kptTemplate);

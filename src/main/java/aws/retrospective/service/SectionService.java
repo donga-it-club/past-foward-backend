@@ -57,10 +57,9 @@ public class SectionService {
     private final UserRepository userRepository;
     private final KudosTargetRepository kudosRepository;
     private final NotificationRepository notificationRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
 
     @Qualifier("sectionCacheRepository")
-    private final CacheRepository cacheRepository;
+    private final CacheRepository<List<GetSectionsResponseDto>> cacheRepository;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -405,13 +404,12 @@ public class SectionService {
         String cacheKey = String.format("%s::%d", cacheRepository.getCacheKey(), retrospectiveId);
 
         // 캐싱된 데이터를 가져온다.
-        List<GetSectionsResponseDto> cachingData = (List<GetSectionsResponseDto>) redisTemplate.opsForValue()
-            .get(cacheKey);
+        List<GetSectionsResponseDto> cachingData = cacheRepository.getCacheDate(cacheKey);
 
         // 캐싱된 값이 존재할 경우 생성된 회고 카드를 추가한다.
         if (cachingData != null && !cachingData.isEmpty()) {
             cachingData.add(GetSectionsResponseDto.from(newSection, user));
-            redisTemplate.opsForValue().set(cacheKey, cachingData);
+            cacheRepository.saveCacheData(cacheKey, cachingData);
         }
     }
 }
