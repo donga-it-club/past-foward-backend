@@ -17,8 +17,6 @@ public class ObjectMapperFactory {
     return objectMapper;
   }
 
-  private ObjectMapperFactory() {
-    throw new IllegalStateException("ObjectMapperFactory class");
-  }
+  private ObjectMapperFactory() {}
 
 }
