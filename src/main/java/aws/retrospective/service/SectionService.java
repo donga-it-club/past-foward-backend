@@ -58,7 +58,7 @@ public class SectionService {
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
-    @Cacheable(value = "sections", key = "#request.retrospectiveId")
+    @Cacheable(value = "sectionInRetrospective-cache", key = "#request.retrospectiveId")
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
 
@@ -387,7 +387,7 @@ public class SectionService {
     }
 
     private void updateCacheWithNewSection(Long retrospectiveId, Section newSection, User user) {
-        String cacheKey = "sections::" + retrospectiveId;
+        String cacheKey = "sectionsInRetrospective-cache::" + retrospectiveId;
 
         // 캐싱된 데이터를 가져온다.
         List<GetSectionsResponseDto> cachingData = (List<GetSectionsResponseDto>) redisTemplate.opsForValue()
