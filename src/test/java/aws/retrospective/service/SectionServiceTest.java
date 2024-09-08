@@ -34,6 +34,7 @@ import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
+import aws.retrospective.repository.CacheRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.NotificationRepository;
@@ -81,6 +82,8 @@ class SectionServiceTest {
     NotificationRepository notificationRepository;
     @Mock
     RedisTemplate<String, Object> redisTemplate;
+    @Mock
+    CacheRepository cacheRepository;
     @InjectMocks
     SectionService sectionService;
 
@@ -101,6 +104,7 @@ class SectionServiceTest {
         when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
             Optional.of(retrospective));
 
+        // TODO RedisTemplate 추상화 처리
         ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(any())).thenReturn(null);
