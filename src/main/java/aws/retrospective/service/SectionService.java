@@ -58,10 +58,6 @@ public class SectionService {
     private final UserRepository userRepository;
     private final KudosTargetRepository kudosRepository;
     private final NotificationRepository notificationRepository;
-
-    @Qualifier("sectionCacheRepository")
-    private final CacheRepository<List<GetSectionsResponseDto>> cacheRepository;
-
     private final ApplicationEventPublisher eventPublisher;
 
     // 회고 카드 전체 조회

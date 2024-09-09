@@ -80,8 +80,6 @@ class SectionServiceTest {
     @Mock
     NotificationRepository notificationRepository;
     @Mock
-    CacheRepository cacheRepository;
-    @Mock
     ApplicationEventPublisher eventPublisher;
     @InjectMocks
     SectionService sectionService;
