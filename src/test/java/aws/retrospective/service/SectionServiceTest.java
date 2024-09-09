@@ -53,7 +53,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +81,8 @@ class SectionServiceTest {
     NotificationRepository notificationRepository;
     @Mock
     CacheRepository cacheRepository;
+    @Mock
+    ApplicationEventPublisher eventPublisher;
     @InjectMocks
     SectionService sectionService;
 

@@ -20,6 +20,7 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
+import aws.retrospective.event.SectionCacheUpdateEvent;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.CacheRepository;
@@ -39,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,8 @@ public class SectionService {
 
     @Qualifier("sectionCacheRepository")
     private final CacheRepository<List<GetSectionsResponseDto>> cacheRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -93,7 +97,8 @@ public class SectionService {
         Section saveSection = sectionRepository.save(createSection);
 
         // 캐싱된 데이터에 새로운 회고 카드를 추가한다.
-        updateCacheWithNewSection(request.getRetrospectiveId(), saveSection, user);
+        eventPublisher.publishEvent(
+            new SectionCacheUpdateEvent(request.getRetrospectiveId(), saveSection, user));
 
         // Entity를 Dto로 변환하여 반환한다.
         return convertCreateSectionResponseDto(request, createSection);
@@ -399,16 +404,4 @@ public class SectionService {
         return actionItemRepository.findBySectionId(section.getId()).orElse(null);
     }
 
-    private void updateCacheWithNewSection(Long retrospectiveId, Section newSection, User user) {
-        String cacheKey = String.format("%s::%d", cacheRepository.getCacheKey(), retrospectiveId);
-
-        // 캐싱된 데이터를 가져온다.
-        List<GetSectionsResponseDto> cachingData = cacheRepository.getCacheDate(cacheKey);
-
-        // 캐싱된 값이 존재할 경우 생성된 회고 카드를 추가한다.
-        if (cachingData != null && !cachingData.isEmpty()) {
-            cachingData.add(GetSectionsResponseDto.from(newSection, user));
-            cacheRepository.saveCacheData(cacheKey, cachingData);
-        }
-    }
 }
