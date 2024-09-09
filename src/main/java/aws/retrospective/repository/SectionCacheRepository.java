@@ -29,4 +29,9 @@ public class SectionCacheRepository implements CacheRepository {
     public void saveCacheData(String cacheKey, Object data) {
         redisTemplate.opsForValue().set(cacheKey, data);
     }
+
+    @Override
+    public void deleteCacheData(String cacheKey) {
+        redisTemplate.delete(cacheKey);
+    }
 }

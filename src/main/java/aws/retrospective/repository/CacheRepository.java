@@ -9,4 +9,5 @@ public interface CacheRepository<T> {
 
     void saveCacheData(String cacheKey, T data);
 
+    void deleteCacheData(String cacheKey);
 }
