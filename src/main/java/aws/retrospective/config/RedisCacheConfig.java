@@ -1,7 +1,10 @@
 package aws.retrospective.config;
 
+import aws.retrospective.repository.SectionCacheRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -21,19 +24,22 @@ public class RedisCacheConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-        // Jackson Serializer에 ObjectMapper 전달
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(
-            objectMapper);
-
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofHours(1)) // 캐시 유효 기간 설정
+            .entryTtl(Duration.ofHours(1)) // 전역에서 기본으로 사용되는 TTL
             .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(
                 new StringRedisSerializer()))
-            .serializeValuesWith(
-                RedisSerializationContext.SerializationPair.fromSerializer(serializer));
+            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                new GenericJackson2JsonRedisSerializer(
+                    objectMapper)));
+
+        // Key 별로 TTL을 동적으로 설정한다.
+        Map<String, RedisCacheConfiguration> configurations = new HashMap<>();
+        configurations.put(SectionCacheRepository.CACHE_KEY,
+            redisCacheConfiguration.entryTtl(Duration.ofHours(1)));
 
         return RedisCacheManager.builder(redisConnectionFactory)
             .cacheDefaults(redisCacheConfiguration)
+            .withInitialCacheConfigurations(configurations)
             .build();
     }
 }
