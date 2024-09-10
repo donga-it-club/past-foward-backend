@@ -34,7 +34,6 @@ import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
-import aws.retrospective.repository.CacheRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.NotificationRepository;
@@ -169,8 +168,12 @@ class SectionServiceTest {
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
 
+        Retrospective retrospective = createRetrospective(createTemplate(), createUser(),
+            createTeam());
+
         Long sectionId = 1L;
         Section section = createSection(user);
+        ReflectionTestUtils.setField(section, "retrospective", retrospective);
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
@@ -196,8 +199,12 @@ class SectionServiceTest {
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
 
+        Retrospective retrospective = createRetrospective(createTemplate(), createUser(),
+            createTeam());
+
         Long sectionId = 1L;
         Section section = createSection(user);
+        ReflectionTestUtils.setField(section, "retrospective", retrospective);
         ReflectionTestUtils.setField(section, "id", sectionId);
         ReflectionTestUtils.setField(section, "likeCnt", 2);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
@@ -225,8 +232,12 @@ class SectionServiceTest {
         User loginedUser = createUser();
         ReflectionTestUtils.setField(loginedUser, "id", userId);
 
+        Retrospective retrospective = createRetrospective(createTemplate(), createUser(),
+            createTeam());
+
         Long sectionId = 1L;
         Section section = createSection(loginedUser);
+        ReflectionTestUtils.setField(section, "retrospective", retrospective);
         ReflectionTestUtils.setField(section, "id", sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(section));
 
@@ -471,8 +482,12 @@ class SectionServiceTest {
     @DisplayName("Kudos Section에 이미 지정된 사람을 다른 사람으로 바꿀 수 있다.")
     void assignKudosSection_exist() {
         //given
+        Retrospective retrospective = createRetrospective(createTemplate(), createUser(),
+            createTeam());
+
         Long sectionId = 1L;
         Section mockSection = mock(Section.class);
+        when(mockSection.getRetrospective()).thenReturn(retrospective);
         when(mockSection.getId()).thenReturn(sectionId);
         when(sectionRepository.findById(sectionId)).thenReturn(Optional.of(mockSection));
         when(mockSection.isNotKudosTemplate()).thenReturn(false);

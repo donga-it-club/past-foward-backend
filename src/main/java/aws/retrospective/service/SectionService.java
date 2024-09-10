@@ -20,10 +20,9 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
-import aws.retrospective.event.SectionCacheUpdateEvent;
+import aws.retrospective.event.SectionCacheDeleteEvent;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
-import aws.retrospective.repository.CacheRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.NotificationRepository;
@@ -38,7 +37,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -94,7 +92,7 @@ public class SectionService {
 
         // 캐싱된 데이터에 새로운 회고 카드를 추가한다.
         eventPublisher.publishEvent(
-            new SectionCacheUpdateEvent(request.getRetrospectiveId(), saveSection, user));
+            new SectionCacheDeleteEvent(request.getRetrospectiveId()));
 
         // Entity를 Dto로 변환하여 반환한다.
         return convertCreateSectionResponseDto(request, createSection);
@@ -114,6 +112,7 @@ public class SectionService {
 
         // 회고 카드 내용 수정
         findSection.updateSectionContent(request.getSectionContent());
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findSection.getRetrospective().getId()));
         return convertUpdateSectionResponseDto(findSection.getId(), findSection.getContent());
     }
 
@@ -143,6 +142,7 @@ public class SectionService {
             findSection.cancelSectionLikes(); // 좋아요 취소
         }
 
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findSection.getRetrospective().getId()));
         return convertIncreaseSectionLikesResponseDto(findSection);
     }
 
@@ -171,6 +171,8 @@ public class SectionService {
             // 기존에 등록된 Action Item에 새로운 사용자를 지정한다.
             actionItem.assignUser(assignUser);
         }
+
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(section.getRetrospective().getId()));
     }
 
     // 회고카드 삭제
@@ -183,7 +185,7 @@ public class SectionService {
          * 일치하지 않으면 예외를 발생시킨다.
          */
         validateSameUser(findSection, user);
-
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findSection.getRetrospective().getId()));
         deleteSection(findSection);
     }
 
@@ -206,6 +208,7 @@ public class SectionService {
         }
 
         findKudosTarget.assignUser(targetUser);
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(section.getRetrospective().getId()));
         return convertAssignKudosResponse(findKudosTarget);
     }
 

@@ -10,6 +10,7 @@ import aws.retrospective.entity.Notification;
 import aws.retrospective.entity.NotificationType;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
+import aws.retrospective.event.SectionCacheDeleteEvent;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.NotificationRepository;
@@ -17,6 +18,7 @@ import aws.retrospective.repository.SectionRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +29,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final SectionRepository sectionRepository;
     private final NotificationRepository notificationRepository;
-
+    private final ApplicationEventPublisher eventPublisher;
 
     // 댓글 생성
     @Transactional
@@ -43,6 +45,8 @@ public class CommentService {
 
         Notification notification = createNotification(user, section, createComment);
         notificationRepository.save(notification);
+
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(section.getRetrospective().getId()));
 
         return new CreateCommentResponseDto(
             createComment.getId(),
@@ -75,6 +79,8 @@ public class CommentService {
         // 댓글 수정
         findComment.updateComment(request.getCommentContent());
 
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findComment.getSection().getRetrospective().getId()));
+
         return new UpdateCommentResponseDto(commentId, request.getCommentContent());
     }
 
@@ -94,6 +100,7 @@ public class CommentService {
             .ifPresent(notificationRepository::delete);
 
         commentRepository.delete(findComment);
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findComment.getSection().getRetrospective().getId()));
     }
 
     // 모든 댓글 조회

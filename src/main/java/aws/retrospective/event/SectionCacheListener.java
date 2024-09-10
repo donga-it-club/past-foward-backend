@@ -36,4 +36,12 @@ public class SectionCacheListener {
             log.error("캐싱 데이터 갱신 중 오류가 발생했습니다.", ex);
         }
     }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void deleteCacheHandle(SectionCacheDeleteEvent event) {
+        String cacheKey = String.format("%s::%d", cacheRepository.getCacheKey(),
+            event.getRetrospectiveId());
+        cacheRepository.deleteCacheData(cacheKey);
+    }
+
 }
