@@ -12,11 +12,13 @@ import aws.retrospective.dto.DeleteCommentRequestDto;
 import aws.retrospective.dto.UpdateCommentRequestDto;
 import aws.retrospective.dto.UpdateCommentResponseDto;
 import aws.retrospective.entity.Comment;
+import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.Section;
 import aws.retrospective.entity.User;
 import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.SectionRepository;
+import aws.retrospective.util.TestUtil;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +39,8 @@ class CommentServiceTest {
     private CommentRepository commentRepository;
     @Mock
     private NotificationRepository notificationRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
     @InjectMocks
     private CommentService commentService;
 
@@ -47,8 +52,12 @@ class CommentServiceTest {
         User user = createUser();
         ReflectionTestUtils.setField(user, "id", userId);
 
+        Retrospective retrospective = TestUtil.createRetrospective(TestUtil.createTemplate(), user,
+            TestUtil.createTeam());
+
         Long sectionId = 1L;
         Section section = createSection();
+        ReflectionTestUtils.setField(section, "retrospective", retrospective);
         ReflectionTestUtils.setField(section, "id", sectionId);
 
         Comment mockComment = createComment();
@@ -72,8 +81,13 @@ class CommentServiceTest {
     void deleteCommentSuccessTest() {
         //given
         User user = createUser();
+
+        Retrospective retrospective = TestUtil.createRetrospective(TestUtil.createTemplate(), user,
+            TestUtil.createTeam());
+
         ReflectionTestUtils.setField(user, "id", 1L);
         Section section = createSection();
+        ReflectionTestUtils.setField(section, "retrospective", retrospective);
 
         Long commentId = 1L;
         Comment comment = createComment(user, section);
@@ -121,10 +135,16 @@ class CommentServiceTest {
         User longinedUser = createUser();
         ReflectionTestUtils.setField(longinedUser, "id", userId);
 
+        Retrospective retrospective = TestUtil.createRetrospective(TestUtil.createTemplate(), longinedUser,
+            TestUtil.createTeam());
+        Section section = createSection();
+        ReflectionTestUtils.setField(section, "retrospective", retrospective);
+
         Long commentId = 1L;
         Comment comment = createComment();
         ReflectionTestUtils.setField(comment, "id", commentId);
         ReflectionTestUtils.setField(comment, "user", longinedUser);
+        ReflectionTestUtils.setField(comment, "section", section);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         //when

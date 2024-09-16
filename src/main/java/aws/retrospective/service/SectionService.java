@@ -20,12 +20,14 @@ import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
+import aws.retrospective.event.SectionCacheDeleteEvent;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.NotificationRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
+import aws.retrospective.repository.SectionCacheRepository;
 import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
@@ -35,6 +37,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,9 +56,11 @@ public class SectionService {
     private final UserRepository userRepository;
     private final KudosTargetRepository kudosRepository;
     private final NotificationRepository notificationRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
+    @Cacheable(value = SectionCacheRepository.CACHE_KEY, key = "#request.retrospectiveId", cacheResolver = "customCacheResolver")
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
 
@@ -82,7 +88,11 @@ public class SectionService {
         // 회고 카드 생성
         Section createSection = createSection(request.getSectionContent(), findTemplateSection,
             findRetrospective, user);
-        sectionRepository.save(createSection);
+        Section saveSection = sectionRepository.save(createSection);
+
+        // 캐싱된 데이터에 새로운 회고 카드를 추가한다.
+        eventPublisher.publishEvent(
+            new SectionCacheDeleteEvent(request.getRetrospectiveId()));
 
         // Entity를 Dto로 변환하여 반환한다.
         return convertCreateSectionResponseDto(request, createSection);
@@ -102,6 +112,7 @@ public class SectionService {
 
         // 회고 카드 내용 수정
         findSection.updateSectionContent(request.getSectionContent());
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findSection.getRetrospective().getId()));
         return convertUpdateSectionResponseDto(findSection.getId(), findSection.getContent());
     }
 
@@ -120,7 +131,8 @@ public class SectionService {
             findSection.increaseSectionLikes(); // 좋아요 기록 저장
 
             // 댓글 알림 생성
-            Notification notification = createNotification(findSection, findSection.getRetrospective(),
+            Notification notification = createNotification(findSection,
+                findSection.getRetrospective(),
                 user, findSection.getUser(), createLikes);
             notificationRepository.save(notification);
         } else {
@@ -130,6 +142,7 @@ public class SectionService {
             findSection.cancelSectionLikes(); // 좋아요 취소
         }
 
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findSection.getRetrospective().getId()));
         return convertIncreaseSectionLikesResponseDto(findSection);
     }
 
@@ -158,6 +171,8 @@ public class SectionService {
             // 기존에 등록된 Action Item에 새로운 사용자를 지정한다.
             actionItem.assignUser(assignUser);
         }
+
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(section.getRetrospective().getId()));
     }
 
     // 회고카드 삭제
@@ -170,7 +185,7 @@ public class SectionService {
          * 일치하지 않으면 예외를 발생시킨다.
          */
         validateSameUser(findSection, user);
-
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(findSection.getRetrospective().getId()));
         deleteSection(findSection);
     }
 
@@ -187,12 +202,13 @@ public class SectionService {
         /**
          * Kudos 정보가 없을 때는 새로 생성하고, 있을 때는 사용자를 지정(변경)한다.
          */
-        if(findKudosTarget == null) {
+        if (findKudosTarget == null) {
             KudosTarget createNewKudosTarget = assignKudos(section, targetUser);
             return convertAssignKudosResponse(createNewKudosTarget);
         }
 
         findKudosTarget.assignUser(targetUser);
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(section.getRetrospective().getId()));
         return convertAssignKudosResponse(findKudosTarget);
     }
 
@@ -220,10 +236,11 @@ public class SectionService {
 
     /**
      * Section 생성
-     * @param sectionContent 회고 카드 내용
+     *
+     * @param sectionContent  회고 카드 내용
      * @param templateSection 회고 카드의 템플릿 (ex. Keep, Problem, Try)
-     * @param retrospective 회고 카드가 속한 회고 보드
-     * @param user 회고 카드를 작성한 사용자
+     * @param retrospective   회고 카드가 속한 회고 보드
+     * @param user            회고 카드를 작성한 사용자
      * @return
      */
     private Section createSection(String sectionContent, TemplateSection templateSection,
@@ -257,21 +274,24 @@ public class SectionService {
 
     /**
      * 칭찬 대상을 지정한다.
+     *
      * @param section 칭찬 대상을 지정할 Section
-     * @param user 칭찬 대상
+     * @param user    칭찬 대상
      * @return
      */
     private KudosTarget assignKudos(Section section, User user) {
         return kudosRepository.save(KudosTarget.createKudosTarget(section, user));
     }
 
-    private void validateTemplateMatch(Retrospective retrospective, TemplateSection templateSection) {
-        if(retrospective.isNotSameTemplate(templateSection.getTemplate())) {
+    private void validateTemplateMatch(Retrospective retrospective,
+        TemplateSection templateSection) {
+        if (retrospective.isNotSameTemplate(templateSection.getTemplate())) {
             throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
         }
     }
 
-    private static CreateSectionResponseDto convertCreateSectionResponseDto(CreateSectionDto request,
+    private static CreateSectionResponseDto convertCreateSectionResponseDto(
+        CreateSectionDto request,
         Section createSection) {
         return CreateSectionResponseDto.builder()
             .id(createSection.getId())
@@ -287,7 +307,8 @@ public class SectionService {
 
     /**
      * 회고 카드 수정 응답 Dto 변환
-     * @param sectionId 수정된 회고 카드 ID
+     *
+     * @param sectionId      수정된 회고 카드 ID
      * @param sectionContent 수정된 회고 카드 내용
      */
     private static EditSectionResponseDto convertUpdateSectionResponseDto(Long sectionId,
@@ -298,6 +319,7 @@ public class SectionService {
 
     /**
      * Section 삭제
+     *
      * @param section 삭제할 회고 카드
      */
     public void deleteSection(Section section) {
@@ -334,9 +356,10 @@ public class SectionService {
 
     /**
      * Action Item 생성 및 사용자 지정
-     * @param user Action Item에 지정할 사용자
-     * @param team 팀 정보 (개인 : null)
-     * @param section Action Item을 지정할 회고 카드
+     *
+     * @param user          Action Item에 지정할 사용자
+     * @param team          팀 정보 (개인 : null)
+     * @param section       Action Item을 지정할 회고 카드
      * @param retrospective Action Item을 지정할 회고 보드
      */
     private void assignActionItem(User user, Team team, Section section,
@@ -355,7 +378,8 @@ public class SectionService {
         return kudosRepository.findBySectionId(section.getId());
     }
 
-    private IncreaseSectionLikesResponseDto convertIncreaseSectionLikesResponseDto(Section section) {
+    private IncreaseSectionLikesResponseDto convertIncreaseSectionLikesResponseDto(
+        Section section) {
         return new IncreaseSectionLikesResponseDto(section.getId(), section.getLikeCnt());
     }
 
@@ -378,4 +402,5 @@ public class SectionService {
     private ActionItem getActionItem(Section section) {
         return actionItemRepository.findBySectionId(section.getId()).orElse(null);
     }
+
 }
