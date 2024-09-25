@@ -94,12 +94,11 @@ Past Forward 애플리케이션은 팀원 간의 효과적인 소통을 촉진�
     - EC2 + CodeDeploy
 
 ### 이희망
-- **엔티티 설계**
 - **회고 카드(Section)**
   - CRUD
   - 좋아요 및 취소
-- **Contact**
-  - AWS SES를 사용하여 문의 내역을 관리자 메일로 전송
+- Contact
+- 알림 기능
 
 ### 백민정
 
