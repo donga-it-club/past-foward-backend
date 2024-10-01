@@ -5,8 +5,8 @@ import aws.retrospective.common.CurrentUser;
 import aws.retrospective.dto.AssignKudosRequestDto;
 import aws.retrospective.dto.AssignKudosResponseDto;
 import aws.retrospective.dto.AssignUserRequestDto;
-import aws.retrospective.dto.CreateSectionDto;
-import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.CreateSectionRequest;
+import aws.retrospective.dto.CreateSectionResponse;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetCommentsResponseDto;
@@ -52,9 +52,9 @@ public class SectionController {
     @Operation(summary = "회고 카드 등록", description = "회고 카드 등록하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "201")})
     @PostMapping
-    public CommonApiResponse<CreateSectionResponseDto> createSection(@CurrentUser User user,
-        @Valid @RequestBody CreateSectionDto request) {
-        CreateSectionResponseDto response = sectionService.createSection(user, request);
+    public CommonApiResponse<CreateSectionResponse> createSection(@CurrentUser User user,
+        @Valid @RequestBody CreateSectionRequest request) {
+        CreateSectionResponse response = sectionService.createSection(user, request);
         return CommonApiResponse.successResponse(HttpStatus.CREATED, response);
     }
 

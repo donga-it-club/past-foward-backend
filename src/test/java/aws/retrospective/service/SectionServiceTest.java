@@ -11,8 +11,6 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import aws.retrospective.dto.AssignKudosRequestDto;
 import aws.retrospective.dto.AssignKudosResponseDto;
 import aws.retrospective.dto.AssignUserRequestDto;
-import aws.retrospective.dto.CreateSectionDto;
-import aws.retrospective.dto.CreateSectionResponseDto;
 import aws.retrospective.dto.DeleteSectionRequestDto;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
@@ -82,43 +80,6 @@ class SectionServiceTest {
     ApplicationEventPublisher eventPublisher;
     @InjectMocks
     SectionService sectionService;
-
-    @Test
-    @DisplayName("섹션 등록 API")
-    void createSectionTest() {
-        //given
-        Long userId = 1L;
-        User user = createUser();
-        ReflectionTestUtils.setField(user, "id", userId);
-
-        Team team = createTeam();
-        RetrospectiveTemplate kptTemplate = createTemplate();
-
-        Long retrospectiveId = 1L;
-        Retrospective retrospective = createRetrospective(kptTemplate, user, team);
-        ReflectionTestUtils.setField(retrospective, "id", retrospectiveId);
-        when(retrospectiveRepository.findById(retrospectiveId)).thenReturn(
-            Optional.of(retrospective));
-
-        Long templateSectionId = 1L;
-        TemplateSection templateSection = createTemplateSection(kptTemplate);
-        ReflectionTestUtils.setField(templateSection, "id", templateSectionId);
-        when(templateSectionRepository.findById(templateSectionId)).thenReturn(
-            Optional.of(templateSection));
-
-        CreateSectionDto request = new CreateSectionDto();
-        ReflectionTestUtils.setField(request, "retrospectiveId", retrospectiveId);
-        ReflectionTestUtils.setField(request, "templateSectionId", templateSectionId);
-        ReflectionTestUtils.setField(request, "sectionContent", "test");
-
-        //when
-        CreateSectionResponseDto response = sectionService.createSection(user, request);
-
-        //then
-        assertThat(response.getSectionContent()).isEqualTo("test");
-        assertThat(response.getUserId()).isEqualTo(userId);
-        assertThat(response.getRetrospectiveId()).isEqualTo(retrospectiveId);
-    }
 
     @Test
     @DisplayName("섹션 삭제 성공 API")

@@ -3,8 +3,8 @@ package aws.retrospective.service;
 import aws.retrospective.dto.AssignKudosRequestDto;
 import aws.retrospective.dto.AssignKudosResponseDto;
 import aws.retrospective.dto.AssignUserRequestDto;
-import aws.retrospective.dto.CreateSectionDto;
-import aws.retrospective.dto.CreateSectionResponseDto;
+import aws.retrospective.dto.CreateSectionRequest;
+import aws.retrospective.dto.CreateSectionResponse;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
@@ -22,6 +22,7 @@ import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.event.SectionCacheDeleteEvent;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
+import aws.retrospective.factory.SectionFactory;
 import aws.retrospective.repository.ActionItemRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
@@ -32,6 +33,7 @@ import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -57,6 +59,19 @@ public class SectionService {
     private final KudosTargetRepository kudosRepository;
     private final NotificationRepository notificationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final SectionFactory sectionFactory;
+
+    @Transactional
+    public CreateSectionResponse createSection(User user, CreateSectionRequest request) {
+        Retrospective retrospective = findRetrospectiveById(request.getRetrospectiveId());
+        TemplateSection templateSection = findTemplateSectionById(request.getTemplateSectionId());
+
+        Section section = sectionFactory.createSection(request.getSectionContent(), retrospective,
+            templateSection, user);
+        Section savedSection = sectionRepository.save(section);
+
+        return CreateSectionResponse.of(savedSection);
+    }
 
     // 회고 카드 전체 조회
     @Transactional(readOnly = true)
@@ -71,31 +86,6 @@ public class SectionService {
 
         // 회고 카드 전체 조회
         return sectionRepository.getSectionsAll(request.getRetrospectiveId());
-    }
-
-    // 회고 카드 생성 API
-    @Transactional
-    public CreateSectionResponseDto createSection(User user, CreateSectionDto request) {
-        Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
-        TemplateSection findTemplateSection = getTemplateSection(request.getTemplateSectionId());
-
-        /**
-         * 회고 템플릿이 일치하는지 확인한다.
-         * 회고 템플릿이 일치하지 않으면 예외를 발생시킨다.
-         */
-        validateTemplateMatch(findRetrospective, findTemplateSection);
-
-        // 회고 카드 생성
-        Section createSection = createSection(request.getSectionContent(), findTemplateSection,
-            findRetrospective, user);
-        Section saveSection = sectionRepository.save(createSection);
-
-        // 캐싱된 데이터에 새로운 회고 카드를 추가한다.
-        eventPublisher.publishEvent(
-            new SectionCacheDeleteEvent(request.getRetrospectiveId()));
-
-        // Entity를 Dto로 변환하여 반환한다.
-        return convertCreateSectionResponseDto(request, createSection);
     }
 
     // 회고 카드 수정 API
@@ -290,17 +280,6 @@ public class SectionService {
         }
     }
 
-    private static CreateSectionResponseDto convertCreateSectionResponseDto(
-        CreateSectionDto request,
-        Section createSection) {
-        return CreateSectionResponseDto.builder()
-            .id(createSection.getId())
-            .userId(createSection.getUser().getId())
-            .retrospectiveId(request.getRetrospectiveId())
-            .sectionContent(request.getSectionContent())
-            .build();
-    }
-
     private boolean validateSameUser(Section section, User user) {
         return section.isNotSameUser(user);
     }
@@ -401,6 +380,16 @@ public class SectionService {
 
     private ActionItem getActionItem(Section section) {
         return actionItemRepository.findBySectionId(section.getId()).orElse(null);
+    }
+
+    private Retrospective findRetrospectiveById(Long retrospectiveId) {
+        return retrospectiveRepository.findById(retrospectiveId)
+            .orElseThrow(() -> new EntityNotFoundException("회고카드가 조회되지 않습니다."));
+    }
+
+    private TemplateSection findTemplateSectionById(Long templateSectionId) {
+        return templateSectionRepository.findById(templateSectionId)
+            .orElseThrow(() -> new EntityNotFoundException("회고카드를 작성하기 위한 템플릿이 조회되지 않습니다."));
     }
 
 }
