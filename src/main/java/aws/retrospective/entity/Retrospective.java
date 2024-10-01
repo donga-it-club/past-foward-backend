@@ -1,7 +1,9 @@
 package aws.retrospective.entity;
 
-import
-    jakarta.persistence.Column;
+import static aws.retrospective.exception.retrospective.RetrospectiveErrorCode.*;
+
+import aws.retrospective.exception.retrospective.TemplateMisMatchException;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -129,4 +131,11 @@ public class Retrospective extends BaseEntity {
         return this.team == null;
 
     }
+
+    public void isTemplateSectionIncludedInRetrospectiveTemplate(TemplateSection templateSection) {
+        if(templateSection.getTemplate() != this.template) {
+            throw new TemplateMisMatchException(TEMPLATE_MISMATCH);
+        }
+    }
+
 }

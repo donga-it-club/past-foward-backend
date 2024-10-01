@@ -1,6 +1,7 @@
 package aws.retrospective.exception;
 
 import aws.retrospective.exception.custom.ForbiddenAccessException;
+import aws.retrospective.exception.retrospective.TemplateMisMatchException;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -77,6 +78,13 @@ public class GlobalExceptionHandler {
         log.error("Exception occurred", ex);
         ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(TemplateMisMatchException.class)
+    public ResponseEntity<ErrorResponse> handleTemplateMisMatchException(TemplateMisMatchException ex) {
+        log.error("TemplateMisMatchException occurred", ex);
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 }

@@ -11,6 +11,7 @@ import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.UserTeam;
+import aws.retrospective.exception.retrospective.TemplateMisMatchException;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
 import aws.retrospective.repository.TeamRepository;
@@ -146,6 +147,43 @@ public class SectionServiceTest {
         assertThatThrownBy(() -> sectionService.createSection(user, request))
             .isInstanceOf(EntityNotFoundException.class)
             .hasMessage("회고카드를 작성하기 위한 템플릿이 조회되지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("회고보드 템플릿과 회고카드 템플릿이 다르면 회고카드를 생성할 수 없다.")
+    void failed_createSection_when_misMatch_template() {
+        //given
+        User user = createUser();
+        User savedUser = userRepository.save(user);
+        Team team = createTeam();
+        Team savedTeam = teamRepository.save(team);
+        UserTeam userTeam = createUserTeam(savedUser, savedTeam);
+        userTeamRepository.save(userTeam);
+
+        RetrospectiveTemplate retrospectiveTemplate = createRetrospectiveTemplate("KPT");
+        RetrospectiveTemplate savedRetrospectiveTemplate = retrospectiveTemplateRepository.save(
+            retrospectiveTemplate);
+        Retrospective retrospective = createRetrospective("title", savedTeam, savedUser,
+            savedRetrospectiveTemplate);
+        Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
+
+        TemplateSection templateSection = createTemplateSection("Keep", retrospectiveTemplate);
+        templateSectionRepository.save(templateSection);
+
+        RetrospectiveTemplate retrospectiveTemplate2 = createRetrospectiveTemplate("KWAT");
+        retrospectiveTemplateRepository.save(retrospectiveTemplate2);
+        TemplateSection templateSection2 = createTemplateSection("KUDOS", retrospectiveTemplate2);
+        TemplateSection savedTemplateSection2 = templateSectionRepository.save(templateSection2);
+
+        CreateSectionRequest request = CreateSectionRequest.builder()
+            .retrospectiveId(savedRetrospective.getId())
+            .templateSectionId(savedTemplateSection2.getId())
+            .sectionContent("section")
+            .build();
+
+        //when // then
+        assertThatThrownBy(() -> sectionService.createSection(user, request))
+            .isInstanceOf(TemplateMisMatchException.class);
     }
 
     private static TemplateSection createTemplateSection(String sectionName,

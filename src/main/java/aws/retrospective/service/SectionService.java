@@ -66,6 +66,8 @@ public class SectionService {
         Retrospective retrospective = findRetrospectiveById(request.getRetrospectiveId());
         TemplateSection templateSection = findTemplateSectionById(request.getTemplateSectionId());
 
+        validationTemplateSection(retrospective, templateSection);
+
         Section section = sectionFactory.createSection(request.getSectionContent(), retrospective,
             templateSection, user);
         Section savedSection = sectionRepository.save(section);
@@ -390,6 +392,10 @@ public class SectionService {
     private TemplateSection findTemplateSectionById(Long templateSectionId) {
         return templateSectionRepository.findById(templateSectionId)
             .orElseThrow(() -> new EntityNotFoundException("회고카드를 작성하기 위한 템플릿이 조회되지 않습니다."));
+    }
+
+    private static void validationTemplateSection(Retrospective retrospective, TemplateSection templateSection) {
+        retrospective.isTemplateSectionIncludedInRetrospectiveTemplate(templateSection);
     }
 
 }
