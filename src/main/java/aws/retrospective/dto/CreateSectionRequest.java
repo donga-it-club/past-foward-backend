@@ -5,8 +5,10 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class CreateSectionRequest {
 
     @NotNull(message = "회고카드가 작성된 회고보드 ID는 필수 값입니다.")
