@@ -49,7 +49,7 @@ public class SectionServiceTest {
 
     @Test
     @DisplayName("팀 회고보드에 회고카드를 작성할 수 있다.")
-    void createSection() {
+    void createSectionForTeamBoard() {
         //given
         User user = createUser();
         User savedUser = userRepository.save(user);
@@ -62,6 +62,38 @@ public class SectionServiceTest {
         RetrospectiveTemplate savedRetrospectiveTemplate = retrospectiveTemplateRepository.save(
             retrospectiveTemplate);
         Retrospective retrospective = createRetrospective("title", savedTeam, savedUser,
+            savedRetrospectiveTemplate);
+        Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
+
+        TemplateSection templateSection = createTemplateSection("Keep", retrospectiveTemplate);
+        TemplateSection savedTemplateSection = templateSectionRepository.save(templateSection);
+
+        CreateSectionRequest request = CreateSectionRequest.builder()
+            .retrospectiveId(savedRetrospective.getId())
+            .templateSectionId(savedTemplateSection.getId())
+            .sectionContent("section")
+            .build();
+
+        //when
+        CreateSectionResponse response = sectionService.createSection(user, request);
+
+        //then
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getRetrospectiveId()).isEqualTo(savedRetrospective.getId());
+        assertThat(response.getSectionContent()).isEqualTo("section");
+    }
+
+    @Test
+    @DisplayName("개인 회고보드에 회고카드를 작성할 수 있다.")
+    void createSectionForPersonalBoard() {
+        //given
+        User user = createUser();
+        User savedUser = userRepository.save(user);
+
+        RetrospectiveTemplate retrospectiveTemplate = createRetrospectiveTemplate("KPT");
+        RetrospectiveTemplate savedRetrospectiveTemplate = retrospectiveTemplateRepository.save(
+            retrospectiveTemplate);
+        Retrospective retrospective = createRetrospective("title", null, savedUser,
             savedRetrospectiveTemplate);
         Retrospective savedRetrospective = retrospectiveRepository.save(retrospective);
 
