@@ -1,6 +1,7 @@
 package aws.retrospective.exception;
 
 import aws.retrospective.exception.custom.ForbiddenAccessException;
+import aws.retrospective.exception.retrospective.TemplateMisMatchException;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,8 +21,7 @@ public class GlobalExceptionHandler {
         MethodArgumentNotValidException ex) {
         log.error("유효성 검사 실패", ex);
         String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
-        ErrorResponse response = new ErrorResponse(ErrorCode.MISSING_REQUEST_PARAMETER,
-            errorMessage);
+        ErrorResponse response = new ErrorResponse(errorMessage);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -29,16 +29,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
         HttpMessageNotReadableException ex) {
         log.error("HttpMessageNotReadableException occurred", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.BAD_REQUEST, ex.getMessage());
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
         log.error("ResponseStatusException occurred", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.BAD_REQUEST, ex.getReason());
+        ErrorResponse response = new ErrorResponse(ex.getReason());
         if (ex.getStatusCode() == HttpStatus.CONFLICT) {
-            response = new ErrorResponse(ErrorCode.CONFILCT, ex.getReason());
+            response = new ErrorResponse(ex.getReason());
         }
         return new ResponseEntity<>(response, ex.getStatusCode());
     }
@@ -47,14 +47,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
         IllegalArgumentException ex) {
         log.error("잘못된 인자 전달", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.BAD_REQUEST, ex.getMessage());
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
         log.error("엔티티 조회 실패", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.EMPTY_DATA_ACCESS, ex.getMessage());
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
@@ -62,22 +62,29 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleForbiddenAccessException(
         ForbiddenAccessException ex) {
         log.error("ForbiddenAccessException occurred", ex);
-        ErrorResponse response = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> receiveRuntimeException(RuntimeException ex) {
         log.error("RuntimeException occurred", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.BAD_REQUEST);
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
         log.error("Exception occurred", ex);
-        ErrorResponse response = new ErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR);
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(TemplateMisMatchException.class)
+    public ResponseEntity<ErrorResponse> handleTemplateMisMatchException(TemplateMisMatchException ex) {
+        log.error("TemplateMisMatchException occurred", ex);
+        ErrorResponse response = new ErrorResponse(ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 }

@@ -52,13 +52,22 @@ public class Section extends BaseEntity {
     private List<Notification> notifications = new ArrayList<>();
 
     @Builder
-    public Section(String content, Retrospective retrospective, User user,
+    private Section(String content, Retrospective retrospective, User user,
         TemplateSection templateSection) {
         this.content = content;
         this.likeCnt = 0;
         this.retrospective = retrospective;
         this.user = user;
         this.templateSection = templateSection;
+    }
+
+    public static Section create(String content, Retrospective retrospective, User user, TemplateSection templateSection) {
+        return Section.builder()
+            .content(content)
+            .retrospective(retrospective)
+            .user(user)
+            .templateSection(templateSection)
+            .build();
     }
 
     // 섹션 내용 update
