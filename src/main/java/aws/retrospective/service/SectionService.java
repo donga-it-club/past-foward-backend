@@ -72,6 +72,8 @@ public class SectionService {
             templateSection, user);
         Section savedSection = sectionRepository.save(section);
 
+        eventPublisher.publishEvent(new SectionCacheDeleteEvent(request.getRetrospectiveId()));
+
         return CreateSectionResponse.of(savedSection);
     }
 
