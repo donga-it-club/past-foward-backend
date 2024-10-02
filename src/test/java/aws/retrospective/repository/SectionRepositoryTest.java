@@ -74,10 +74,10 @@ class SectionRepositoryTest {
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
-                    section1.getCreatedDate(), user.getThumbnail()),
+                    user.getThumbnail()),
                 tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
-                    section2.getCreatedDate(), user.getThumbnail())
+                    user.getThumbnail())
             );
     }
 
@@ -121,10 +121,10 @@ class SectionRepositoryTest {
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
-                    section1.getCreatedDate(), user.getThumbnail()),
+                    user.getThumbnail()),
                 tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
-                    section2.getCreatedDate(), user.getThumbnail())
+                    user.getThumbnail())
             );
         assertThat(sections.get(0).getKudosTarget()).isNull();
         assertThat(sections.get(1).getKudosTarget()).isNotNull();
@@ -170,10 +170,10 @@ class SectionRepositoryTest {
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
-                    section1.getCreatedDate(), user.getThumbnail()),
+                    user.getThumbnail()),
                 tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
-                    section2.getCreatedDate(), user.getThumbnail())
+                    user.getThumbnail())
             );
         assertThat(sections.get(0).getActionItems()).isNull();
         assertThat(sections.get(1).getActionItems()).isNotNull();
@@ -225,10 +225,10 @@ class SectionRepositoryTest {
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
-                    section1.getCreatedDate(), user.getThumbnail()),
+                    user.getThumbnail()),
                 tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
-                    section2.getCreatedDate(), user.getThumbnail())
+                    user.getThumbnail())
             );
         assertThat(sections.get(0).getActionItems()).isNull();
         assertThat(sections.get(0).getKudosTarget()).isNull();
