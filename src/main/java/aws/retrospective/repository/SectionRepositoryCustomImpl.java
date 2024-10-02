@@ -3,11 +3,19 @@ package aws.retrospective.repository;
 import static aws.retrospective.entity.QActionItem.actionItem;
 import static aws.retrospective.entity.QComment.comment;
 import static aws.retrospective.entity.QKudosTarget.kudosTarget;
+import static aws.retrospective.entity.QLikes.likes;
 import static aws.retrospective.entity.QSection.section;
+import static aws.retrospective.entity.QTemplateSection.templateSection;
 import static aws.retrospective.entity.QUser.user;
 
 import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
+import aws.retrospective.entity.QActionItem;
+import aws.retrospective.entity.QKudosTarget;
+import aws.retrospective.entity.QLikes;
+import aws.retrospective.entity.QSection;
+import aws.retrospective.entity.QTemplateSection;
+import aws.retrospective.entity.Section;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -82,6 +90,22 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
             .where(section.retrospective.id.eq(retrospectiveId))
             .groupBy(section.id)
             .orderBy(section.likeCnt.desc(), section.createdDate.desc())
+            .fetch();
+    }
+
+    @Override
+    public List<GetSectionsResponseDto> getSections2(Long retrospectiveId) {
+        return queryFactory
+            .select(Projections.constructor(
+                GetSectionsResponseDto.class,
+                section.id, user.id, user.username, section.content,
+                section.likeCnt, templateSection.sectionName, section.createdDate,
+                user.thumbnail, actionItem, kudosTarget
+            ))
+            .from(section)
+            .join(section.user, user)
+            .leftJoin(actionItem).on(actionItem.section.id.eq(section.id)).fetchJoin()
+            .leftJoin(kudosTarget).on(kudosTarget.section.id.eq(section.id)).fetchJoin()
             .fetch();
     }
 }

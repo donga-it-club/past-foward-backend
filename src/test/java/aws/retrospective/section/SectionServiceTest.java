@@ -2,24 +2,33 @@ package aws.retrospective.section;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import aws.retrospective.dto.CreateSectionRequest;
 import aws.retrospective.dto.CreateSectionResponse;
+import aws.retrospective.dto.GetSectionsRequestDto;
+import aws.retrospective.dto.GetSectionsResponseDto;
+import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.Retrospective;
 import aws.retrospective.entity.RetrospectiveTemplate;
+import aws.retrospective.entity.Section;
 import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.entity.UserTeam;
 import aws.retrospective.exception.retrospective.TemplateMisMatchException;
+import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.RetrospectiveRepository;
 import aws.retrospective.repository.RetrospectiveTemplateRepository;
+import aws.retrospective.repository.SectionRepository;
 import aws.retrospective.repository.TeamRepository;
 import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import aws.retrospective.repository.UserTeamRepository;
 import aws.retrospective.service.SectionService;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +55,10 @@ public class SectionServiceTest {
     private TemplateSectionRepository templateSectionRepository;
     @Autowired
     private SectionService sectionService;
+    @Autowired
+    private SectionRepository sectionRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Test
     @DisplayName("팀 회고보드에 회고카드를 작성할 수 있다.")
@@ -216,6 +229,141 @@ public class SectionServiceTest {
         //when // then
         assertThatThrownBy(() -> sectionService.createSection(user, request))
             .isInstanceOf(TemplateMisMatchException.class);
+    }
+
+    @Test
+    @DisplayName("개인 회고보드에 작성된 모든 회고카드를 조회할 수 있다.")
+    void getSections() {
+        //given
+        User user = createUser();
+        userRepository.save(user);
+        RetrospectiveTemplate retrospectiveTemplate = createRetrospectiveTemplate("KPT");
+        retrospectiveTemplateRepository.save(retrospectiveTemplate);
+        Retrospective retrospective = createRetrospective("title", null, user,
+            retrospectiveTemplate);
+        retrospectiveRepository.save(retrospective);
+
+        TemplateSection keepTemplateSection = createTemplateSection("Keep", retrospectiveTemplate);
+        templateSectionRepository.save(keepTemplateSection);
+        Section section1 = Section.create("content1", retrospective, user, keepTemplateSection);
+        Section section2 = Section.create("content2", retrospective, user, keepTemplateSection);
+        sectionRepository.save(section1);
+        sectionRepository.save(section2);
+
+        TemplateSection problemTemplateSection = createTemplateSection("Problem",
+            retrospectiveTemplate);
+        templateSectionRepository.save(problemTemplateSection);
+        Section section3 = Section.create("content3", retrospective, user, problemTemplateSection);
+        sectionRepository.save(section3);
+
+        GetSectionsRequestDto request = GetSectionsRequestDto.builder()
+            .retrospectiveId(retrospective.getId())
+            .teamId(null)
+            .build();
+
+        //when
+        List<GetSectionsResponseDto> sections = sectionService.getSection(request);
+
+        //then
+        assertThat(sections).hasSize(3);
+        assertThat(sections)
+            .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
+                "createdDate", "thumbnail", "comments")
+            .containsExactlyInAnyOrder(
+                tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
+                    section1.getLikeCnt(),
+                    keepTemplateSection.getSectionName(), section1.getCreatedDate(),
+                    user.getThumbnail(), Collections.emptyList()),
+                tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
+                    section2.getLikeCnt(), keepTemplateSection.getSectionName(),
+                    section2.getCreatedDate(),
+                    user.getThumbnail(), Collections.emptyList()),
+                tuple(section3.getId(), user.getId(), user.getUsername(), section3.getContent(),
+                    section3.getLikeCnt(), problemTemplateSection.getSectionName(),
+                    section3.getCreatedDate(),
+                    user.getThumbnail(), Collections.emptyList())
+            );
+    }
+
+    @Test
+    @DisplayName("팀 회고보드에 작성된 모든 회고카드를 조회할 수 있다.")
+    void getSections2() {
+        //given
+        User user = createUser();
+        userRepository.save(user);
+        User user2 = createUser();
+        userRepository.save(user2);
+        RetrospectiveTemplate retrospectiveTemplate = createRetrospectiveTemplate("KPT");
+        retrospectiveTemplateRepository.save(retrospectiveTemplate);
+        Retrospective retrospective = createRetrospective("title", null, user,
+            retrospectiveTemplate);
+        retrospectiveRepository.save(retrospective);
+
+        TemplateSection keepTemplateSection = createTemplateSection("Keep", retrospectiveTemplate);
+        templateSectionRepository.save(keepTemplateSection);
+        Section section1 = Section.create("content1", retrospective, user, keepTemplateSection);
+        Section section2 = Section.create("content2", retrospective, user2, keepTemplateSection);
+        sectionRepository.save(section1);
+        sectionRepository.save(section2);
+
+        TemplateSection problemTemplateSection = createTemplateSection("Problem",
+            retrospectiveTemplate);
+        templateSectionRepository.save(problemTemplateSection);
+        Section section3 = Section.create("content3", retrospective, user, problemTemplateSection);
+        sectionRepository.save(section3);
+
+        Comment comment1 = createComment(user, section1, "content1");
+        commentRepository.save(comment1);
+        Comment comment2 = createComment(user2, section2, "content2");
+        commentRepository.save(comment2);
+
+        GetSectionsRequestDto request = GetSectionsRequestDto.builder()
+            .retrospectiveId(retrospective.getId())
+            .teamId(null)
+            .build();
+
+        //when
+        List<GetSectionsResponseDto> sections = sectionService.getSection(request);
+
+        //then
+        assertThat(sections).hasSize(3);
+        assertThat(sections)
+            .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
+                "createdDate", "thumbnail")
+            .containsExactlyInAnyOrder(
+                tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
+                    section1.getLikeCnt(),
+                    keepTemplateSection.getSectionName(), section1.getCreatedDate(),
+                    user.getThumbnail()),
+                tuple(section2.getId(), user2.getId(), user2.getUsername(), section2.getContent(),
+                    section2.getLikeCnt(), keepTemplateSection.getSectionName(),
+                    section2.getCreatedDate(),
+                    user2.getThumbnail()),
+                tuple(section3.getId(), user.getId(), user.getUsername(), section3.getContent(),
+                    section3.getLikeCnt(), problemTemplateSection.getSectionName(),
+                    section3.getCreatedDate(),
+                    user.getThumbnail())
+            );
+
+        assertThat(sections.get(0).getComments()).hasSize(1);
+        assertThat(sections.get(0).getComments().get(0).getCommentId()).isEqualTo(comment1.getId());
+        assertThat(sections.get(0).getComments().get(0).getUserId()).isEqualTo(user.getId());
+        assertThat(sections.get(0).getComments().get(0).getContent()).isEqualTo(comment1.getContent());
+
+        assertThat(sections.get(1).getComments()).hasSize(1);
+        assertThat(sections.get(1).getComments().get(0).getCommentId()).isEqualTo(comment2.getId());
+        assertThat(sections.get(1).getComments().get(0).getUserId()).isEqualTo(user2.getId());
+        assertThat(sections.get(1).getComments().get(0).getContent()).isEqualTo(comment2.getContent());
+
+        assertThat(sections.get(2).getComments()).isEmpty();
+    }
+
+    private static Comment createComment(User user, Section section, String content) {
+        return Comment.builder()
+            .user(user)
+            .section(section)
+            .content(content)
+            .build();
     }
 
     private static TemplateSection createTemplateSection(String sectionName,

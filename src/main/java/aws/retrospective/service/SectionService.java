@@ -7,10 +7,12 @@ import aws.retrospective.dto.CreateSectionRequest;
 import aws.retrospective.dto.CreateSectionResponse;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.ActionItem;
+import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Notification;
@@ -24,6 +26,7 @@ import aws.retrospective.event.SectionCacheDeleteEvent;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.factory.SectionFactory;
 import aws.retrospective.repository.ActionItemRepository;
+import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.NotificationRepository;
@@ -35,8 +38,10 @@ import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -60,6 +65,7 @@ public class SectionService {
     private final NotificationRepository notificationRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final SectionFactory sectionFactory;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public CreateSectionResponse createSection(User user, CreateSectionRequest request) {
@@ -77,19 +83,38 @@ public class SectionService {
         return CreateSectionResponse.of(savedSection);
     }
 
-    // 회고 카드 전체 조회
     @Transactional(readOnly = true)
     @Cacheable(value = SectionCacheRepository.CACHE_KEY, key = "#request.retrospectiveId", cacheResolver = "customCacheResolver")
-    public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
-        Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
+    public List<GetSectionsResponseDto> getSection(GetSectionsRequestDto request) {
+        // 모든 회고카드 조회
+        // 회고보드에 작성된 모든 댓글 조회
+        // 회고카드와 댓글 mapping
 
-        // 개인 회고 조회 시에 팀 정보가 필요 없다.
-        validatePersonalRetrospective(findRetrospective, request.getTeamId());
-        // 다른 팀의 회고 보드를 조회 할 수 없다
-        validateTeamAccess(request.getTeamId(), findRetrospective);
+        // -> 회고보드 조회
+        Retrospective retrospective = findRetrospectiveById(request.getRetrospectiveId());
 
-        // 회고 카드 전체 조회
-        return sectionRepository.getSectionsAll(request.getRetrospectiveId());
+        // -> 모든 회고카드 조회, 댓글 포함 X
+        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(
+            retrospective.getId());
+
+        // -> section id에 포함되는 댓글 조회
+        List<Long> sectionIds = sections.stream()
+            .map(GetSectionsResponseDto::getSectionId)
+            .collect(Collectors.toList());
+        List<Comment> comments = commentRepository.findAllBySectionIdIn(sectionIds);
+
+        // -> 댓글을 각 sectionId 별로 그룹화
+        Map<Long, List<GetCommentDto>> commentsGroupedBySectionId = comments.stream()
+            .map(GetCommentDto::from)
+            .collect(Collectors.groupingBy(GetCommentDto::getSectionId));
+
+        // -> 각 회고카드에 해당하는 댓글을 매핑
+        sections.forEach(section -> {
+            List<GetCommentDto> sectionComments = commentsGroupedBySectionId.get(section.getSectionId());
+            section.addComments(sectionComments);  // 댓글 추가
+        });
+
+        return sections;
     }
 
     // 회고 카드 수정 API
