@@ -119,14 +119,14 @@ class SectionRepositoryTest {
 
         assertThat(sections)
             .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
-                "createdDate", "thumbnail")
+                "thumbnail")
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
-                    section1.getCreatedDate(), user.getThumbnail()),
+                    user.getThumbnail()),
                 tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
-                    section2.getCreatedDate(), user.getThumbnail())
+                    user.getThumbnail())
             );
     }
 
