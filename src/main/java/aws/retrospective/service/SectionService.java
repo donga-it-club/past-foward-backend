@@ -84,7 +84,7 @@ public class SectionService {
 
     @Transactional(readOnly = true)
     @Cacheable(value = SectionCacheRepository.CACHE_KEY, key = "#request.retrospectiveId", cacheResolver = "customCacheResolver")
-    public List<GetSectionsResponseDto> getSection(GetSectionsRequestDto request) {
+    public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
         Retrospective retrospective = findRetrospectiveById(request.getRetrospectiveId());
 
         // 회고 카드와 댓글을 분리해서 조회

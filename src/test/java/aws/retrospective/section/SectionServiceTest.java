@@ -262,7 +262,7 @@ public class SectionServiceTest {
             .build();
 
         //when
-        List<GetSectionsResponseDto> sections = sectionService.getSection(request);
+        List<GetSectionsResponseDto> sections = sectionService.getSections(request);
 
         //then
         assertThat(sections).hasSize(3);
@@ -323,7 +323,7 @@ public class SectionServiceTest {
             .build();
 
         //when
-        List<GetSectionsResponseDto> sections = sectionService.getSection(request);
+        List<GetSectionsResponseDto> sections = sectionService.getSections(request);
 
         //then
         assertThat(sections).hasSize(3);
