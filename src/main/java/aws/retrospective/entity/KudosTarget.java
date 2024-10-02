@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,6 +36,7 @@ public class KudosTarget extends BaseEntity{
         this.user = user;
     }
 
+    @Builder
     private KudosTarget(Section section, User user) {
         this.section = section;
         this.user = user;

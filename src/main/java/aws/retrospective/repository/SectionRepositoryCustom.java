@@ -5,5 +5,6 @@ import java.util.List;
 
 public interface SectionRepositoryCustom {
 
-    List<GetSectionsResponseDto> getSectionsAll(Long retrospectiveId);
+    List<GetSectionsResponseDto> getSections(Long retrospectiveId);
+
 }

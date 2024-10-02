@@ -7,10 +7,12 @@ import aws.retrospective.dto.CreateSectionRequest;
 import aws.retrospective.dto.CreateSectionResponse;
 import aws.retrospective.dto.EditSectionRequestDto;
 import aws.retrospective.dto.EditSectionResponseDto;
+import aws.retrospective.dto.GetCommentDto;
 import aws.retrospective.dto.GetSectionsRequestDto;
 import aws.retrospective.dto.GetSectionsResponseDto;
 import aws.retrospective.dto.IncreaseSectionLikesResponseDto;
 import aws.retrospective.entity.ActionItem;
+import aws.retrospective.entity.Comment;
 import aws.retrospective.entity.KudosTarget;
 import aws.retrospective.entity.Likes;
 import aws.retrospective.entity.Notification;
@@ -21,9 +23,9 @@ import aws.retrospective.entity.Team;
 import aws.retrospective.entity.TemplateSection;
 import aws.retrospective.entity.User;
 import aws.retrospective.event.SectionCacheDeleteEvent;
-import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.factory.SectionFactory;
 import aws.retrospective.repository.ActionItemRepository;
+import aws.retrospective.repository.CommentRepository;
 import aws.retrospective.repository.KudosTargetRepository;
 import aws.retrospective.repository.LikesRepository;
 import aws.retrospective.repository.NotificationRepository;
@@ -35,8 +37,10 @@ import aws.retrospective.repository.TemplateSectionRepository;
 import aws.retrospective.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -60,6 +64,7 @@ public class SectionService {
     private final NotificationRepository notificationRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final SectionFactory sectionFactory;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public CreateSectionResponse createSection(User user, CreateSectionRequest request) {
@@ -77,19 +82,21 @@ public class SectionService {
         return CreateSectionResponse.of(savedSection);
     }
 
-    // 회고 카드 전체 조회
     @Transactional(readOnly = true)
     @Cacheable(value = SectionCacheRepository.CACHE_KEY, key = "#request.retrospectiveId", cacheResolver = "customCacheResolver")
     public List<GetSectionsResponseDto> getSections(GetSectionsRequestDto request) {
-        Retrospective findRetrospective = getRetrospective(request.getRetrospectiveId());
+        Retrospective retrospective = findRetrospectiveById(request.getRetrospectiveId());
 
-        // 개인 회고 조회 시에 팀 정보가 필요 없다.
-        validatePersonalRetrospective(findRetrospective, request.getTeamId());
-        // 다른 팀의 회고 보드를 조회 할 수 없다
-        validateTeamAccess(request.getTeamId(), findRetrospective);
+        // 회고 카드와 댓글을 분리해서 조회
+        List<GetSectionsResponseDto> sections = getSectionsWithoutComments(retrospective.getId());
+        List<Long> sectionIds = extractSectionIds(sections);
+        List<Comment> comments = getCommentsBy(sectionIds);
 
-        // 회고 카드 전체 조회
-        return sectionRepository.getSectionsAll(request.getRetrospectiveId());
+        // 회고 카드와 댓글을 매핑
+        Map<Long, List<GetCommentDto>> sectionCommentsMap = createGroupCommentsBySectionId(comments);
+        addCommentsToSection(sections, sectionCommentsMap);
+
+        return sections;
     }
 
     // 회고 카드 수정 API
@@ -213,11 +220,6 @@ public class SectionService {
         }
     }
 
-    private TemplateSection getTemplateSection(Long sectionId) {
-        return templateSectionRepository.findById(sectionId)
-            .orElseThrow(() -> new NoSuchElementException("Section이 조회되지 않습니다."));
-    }
-
     private Retrospective getRetrospective(Long retrospectiveId) {
         return retrospectiveRepository.findById(retrospectiveId)
             .orElseThrow(() -> new NoSuchElementException("회고보드가 조회되지 않습니다."));
@@ -226,22 +228,6 @@ public class SectionService {
     private Section getSection(Long sectionId) {
         return sectionRepository.findById(sectionId)
             .orElseThrow(() -> new NoSuchElementException("회고 카드가 조회되지 않습니다."));
-    }
-
-    /**
-     * Section 생성
-     *
-     * @param sectionContent  회고 카드 내용
-     * @param templateSection 회고 카드의 템플릿 (ex. Keep, Problem, Try)
-     * @param retrospective   회고 카드가 속한 회고 보드
-     * @param user            회고 카드를 작성한 사용자
-     * @return
-     */
-    private Section createSection(String sectionContent, TemplateSection templateSection,
-        Retrospective retrospective, User user) {
-        return Section.builder().templateSection(templateSection)
-            .retrospective(retrospective).user(user).content(sectionContent)
-            .build();
     }
 
     private Team getTeam(Long teamId) {
@@ -266,45 +252,20 @@ public class SectionService {
                 () -> new NoSuchElementException("Not Found User Id : " + userId));
     }
 
-    /**
-     * 칭찬 대상을 지정한다.
-     *
-     * @param section 칭찬 대상을 지정할 Section
-     * @param user    칭찬 대상
-     * @return
-     */
     private KudosTarget assignKudos(Section section, User user) {
         return kudosRepository.save(KudosTarget.createKudosTarget(section, user));
-    }
-
-    private void validateTemplateMatch(Retrospective retrospective,
-        TemplateSection templateSection) {
-        if (retrospective.isNotSameTemplate(templateSection.getTemplate())) {
-            throw new IllegalArgumentException("회고 템플릿 정보가 일치하지 않습니다.");
-        }
     }
 
     private boolean validateSameUser(Section section, User user) {
         return section.isNotSameUser(user);
     }
 
-    /**
-     * 회고 카드 수정 응답 Dto 변환
-     *
-     * @param sectionId      수정된 회고 카드 ID
-     * @param sectionContent 수정된 회고 카드 내용
-     */
     private static EditSectionResponseDto convertUpdateSectionResponseDto(Long sectionId,
         String sectionContent) {
         return EditSectionResponseDto.builder().sectionId(sectionId)
             .content(sectionContent).build();
     }
 
-    /**
-     * Section 삭제
-     *
-     * @param section 삭제할 회고 카드
-     */
     public void deleteSection(Section section) {
         // 연관관계에 있는 Kudos 테이블의 row를 먼저 삭제한다.
         if (section.isKudosTemplate()) {
@@ -314,37 +275,12 @@ public class SectionService {
         sectionRepository.delete(section);
     }
 
-    private void validateTeamAccess(Long teamId, Retrospective retrospective) {
-        if (teamId != null) {
-            if (retrospective.isNotSameTeam(getTeam(teamId))) {
-                throw new ForbiddenAccessException("다른 팀의 회고보드에 접근할 수 없습니다.");
-            }
-        }
-    }
-
-    private void validatePersonalRetrospective(Retrospective retrospective, Long teamId) {
-        if (retrospective.isPersonalRetrospective()) {
-            // 개인 회고시에 팀 ID 정보는 필요하지 않다.
-            if (teamId != null) {
-                throw new IllegalArgumentException("개인 회고 조회 시 팀 정보는 필요하지 않습니다.");
-            }
-        }
-    }
-
     private static void validateActionItems(Section section) {
         if (section.isNotActionItemsSection()) {
             throw new IllegalArgumentException("Action Items 유형만 사용자를 지정할 수 있습니다.");
         }
     }
 
-    /**
-     * Action Item 생성 및 사용자 지정
-     *
-     * @param user          Action Item에 지정할 사용자
-     * @param team          팀 정보 (개인 : null)
-     * @param section       Action Item을 지정할 회고 카드
-     * @param retrospective Action Item을 지정할 회고 보드
-     */
     private void assignActionItem(User user, Team team, Section section,
         Retrospective retrospective) {
         actionItemRepository.save(createActionItem(user, team, section, retrospective));
@@ -398,6 +334,34 @@ public class SectionService {
 
     private static void validationTemplateSection(Retrospective retrospective, TemplateSection templateSection) {
         retrospective.isTemplateSectionIncludedInRetrospectiveTemplate(templateSection);
+    }
+
+    private static void addCommentsToSection(List<GetSectionsResponseDto> sections,
+        Map<Long, List<GetCommentDto>> sectionCommentsMap) {
+        sections.forEach(section -> {
+            List<GetCommentDto> sectionComments = sectionCommentsMap.get(section.getSectionId());
+            section.addComments(sectionComments);
+        });
+    }
+
+    private static Map<Long, List<GetCommentDto>> createGroupCommentsBySectionId(List<Comment> comments) {
+        return comments.stream()
+            .map(GetCommentDto::from)
+            .collect(Collectors.groupingBy(GetCommentDto::getSectionId));
+    }
+
+    private List<Comment> getCommentsBy(List<Long> sectionIds) {
+        return commentRepository.findAllBySectionIdIn(sectionIds);
+    }
+
+    private static List<Long> extractSectionIds(List<GetSectionsResponseDto> sections) {
+        return sections.stream()
+            .map(GetSectionsResponseDto::getSectionId)
+            .collect(Collectors.toList());
+    }
+
+    private List<GetSectionsResponseDto> getSectionsWithoutComments(Long retrospectiveId) {
+        return sectionRepository.getSections(retrospectiveId);
     }
 
 }

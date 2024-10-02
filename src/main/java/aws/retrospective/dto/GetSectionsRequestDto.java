@@ -2,10 +2,13 @@ package aws.retrospective.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
+@NoArgsConstructor
 @Setter
 public class GetSectionsRequestDto {
 
@@ -15,4 +18,11 @@ public class GetSectionsRequestDto {
 
     @Schema(description = "팀 id", example = "1")
     private Long teamId;
+
+    @Builder
+    private GetSectionsRequestDto(Long retrospectiveId, Long teamId) {
+        this.retrospectiveId = retrospectiveId;
+        this.teamId = teamId;
+    }
+
 }
