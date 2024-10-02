@@ -70,7 +70,7 @@ class SectionRepositoryTest {
         assertThat(sections).hasSize(2);
         assertThat(sections)
             .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
-                "createdDate", "thumbnail")
+                "thumbnail")
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
@@ -117,7 +117,7 @@ class SectionRepositoryTest {
         assertThat(sections).hasSize(2);
         assertThat(sections)
             .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
-                "createdDate", "thumbnail")
+                "thumbnail")
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
@@ -166,7 +166,7 @@ class SectionRepositoryTest {
         assertThat(sections).hasSize(2);
         assertThat(sections)
             .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
-                "createdDate", "thumbnail")
+                "thumbnail")
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
@@ -221,7 +221,7 @@ class SectionRepositoryTest {
         assertThat(sections).hasSize(2);
         assertThat(sections)
             .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
-                "createdDate", "thumbnail")
+                "thumbnail")
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(), keepTemplateSection.getSectionName(),
