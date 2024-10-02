@@ -63,7 +63,7 @@ class SectionRepositoryTest {
         sectionRepository.save(section2);
 
         //when
-        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(
+        List<GetSectionsResponseDto> sections = sectionRepository.getSections(
             retrospective.getId());
 
         //then
@@ -110,7 +110,7 @@ class SectionRepositoryTest {
         kudosTargetRepository.save(kudosTarget);
 
         //when
-        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(
+        List<GetSectionsResponseDto> sections = sectionRepository.getSections(
             retrospective.getId());
 
         //then
@@ -159,7 +159,7 @@ class SectionRepositoryTest {
         actionItemRepository.save(actionItem);
 
         //when
-        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(
+        List<GetSectionsResponseDto> sections = sectionRepository.getSections(
             retrospective.getId());
 
         //then
@@ -214,7 +214,7 @@ class SectionRepositoryTest {
         kudosTargetRepository.save(kudosTarget);
 
         //when
-        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(
+        List<GetSectionsResponseDto> sections = sectionRepository.getSections(
             retrospective.getId());
 
         //then

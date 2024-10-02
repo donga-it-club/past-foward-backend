@@ -20,7 +20,7 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<GetSectionsResponseDto> getSections2(Long retrospectiveId) {
+    public List<GetSectionsResponseDto> getSections(Long retrospectiveId) {
         return queryFactory
             .select(Projections.constructor(
                 GetSectionsResponseDto.class,

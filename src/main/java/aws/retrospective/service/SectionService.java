@@ -88,25 +88,14 @@ public class SectionService {
     public List<GetSectionsResponseDto> getSection(GetSectionsRequestDto request) {
         Retrospective retrospective = findRetrospectiveById(request.getRetrospectiveId());
 
-        // -> 모든 회고카드 조회, 댓글 포함 X
-        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(retrospective.getId());
+        // 회고 카드와 댓글을 분리해서 조회
+        List<GetSectionsResponseDto> sections = getSectionsWithoutComments(retrospective);
+        List<Long> sectionIds = extractSectionIds(sections);
+        List<Comment> comments = getCommentsBy(sectionIds);
 
-        // -> section id에 포함되는 댓글 조회
-        List<Long> sectionIds = sections.stream()
-            .map(GetSectionsResponseDto::getSectionId)
-            .collect(Collectors.toList());
-        List<Comment> comments = commentRepository.findAllBySectionIdIn(sectionIds);
-
-        // -> 댓글을 각 sectionId 별로 그룹화
-        Map<Long, List<GetCommentDto>> commentsGroupedBySectionId = comments.stream()
-            .map(GetCommentDto::from)
-            .collect(Collectors.groupingBy(GetCommentDto::getSectionId));
-
-        // -> 각 회고카드에 해당하는 댓글을 매핑
-        sections.forEach(section -> {
-            List<GetCommentDto> sectionComments = commentsGroupedBySectionId.get(section.getSectionId());
-            section.addComments(sectionComments);  // 댓글 추가
-        });
+        // 회고 카드와 댓글을 매핑
+        Map<Long, List<GetCommentDto>> sectionCommentsMap = createGroupCommentsBySectionId(comments);
+        addCommentsToSection(sections, sectionCommentsMap);
 
         return sections;
     }
@@ -417,6 +406,34 @@ public class SectionService {
 
     private static void validationTemplateSection(Retrospective retrospective, TemplateSection templateSection) {
         retrospective.isTemplateSectionIncludedInRetrospectiveTemplate(templateSection);
+    }
+
+    private static void addCommentsToSection(List<GetSectionsResponseDto> sections,
+        Map<Long, List<GetCommentDto>> sectionCommentsMap) {
+        sections.forEach(section -> {
+            List<GetCommentDto> sectionComments = sectionCommentsMap.get(section.getSectionId());
+            section.addComments(sectionComments);
+        });
+    }
+
+    private static Map<Long, List<GetCommentDto>> createGroupCommentsBySectionId(List<Comment> comments) {
+        return comments.stream()
+            .map(GetCommentDto::from)
+            .collect(Collectors.groupingBy(GetCommentDto::getSectionId));
+    }
+
+    private List<Comment> getCommentsBy(List<Long> sectionIds) {
+        return commentRepository.findAllBySectionIdIn(sectionIds);
+    }
+
+    private static List<Long> extractSectionIds(List<GetSectionsResponseDto> sections) {
+        return sections.stream()
+            .map(GetSectionsResponseDto::getSectionId)
+            .collect(Collectors.toList());
+    }
+
+    private List<GetSectionsResponseDto> getSectionsWithoutComments(Retrospective retrospective) {
+        return sectionRepository.getSections(retrospective.getId());
     }
 
 }
