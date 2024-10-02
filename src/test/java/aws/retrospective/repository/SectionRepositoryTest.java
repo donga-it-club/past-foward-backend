@@ -126,8 +126,8 @@ class SectionRepositoryTest {
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
                     section2.getCreatedDate(), user.getThumbnail())
             );
-        assertThat(sections.get(0).getKudosTarget()).isNotNull();
-        assertThat(sections.get(1).getKudosTarget()).isNull();
+        assertThat(sections.get(0).getKudosTarget()).isNull();
+        assertThat(sections.get(1).getKudosTarget()).isNotNull();
     }
 
     @Test
@@ -175,8 +175,8 @@ class SectionRepositoryTest {
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
                     section2.getCreatedDate(), user.getThumbnail())
             );
-        assertThat(sections.get(0).getActionItems()).isNotNull();
-        assertThat(sections.get(1).getActionItems()).isNull();
+        assertThat(sections.get(0).getActionItems()).isNull();
+        assertThat(sections.get(1).getActionItems()).isNotNull();
     }
 
     @Test
@@ -230,10 +230,10 @@ class SectionRepositoryTest {
                     section2.getLikeCnt(), problemTemplateSection.getSectionName(),
                     section2.getCreatedDate(), user.getThumbnail())
             );
-        assertThat(sections.get(0).getActionItems()).isNotNull();
-        assertThat(sections.get(0).getKudosTarget()).isNotNull();
-        assertThat(sections.get(1).getActionItems()).isNull();
-        assertThat(sections.get(1).getKudosTarget()).isNull();
+        assertThat(sections.get(0).getActionItems()).isNull();
+        assertThat(sections.get(0).getKudosTarget()).isNull();
+        assertThat(sections.get(1).getActionItems()).isNotNull();
+        assertThat(sections.get(1).getKudosTarget()).isNotNull();
     }
 
     private static TemplateSection createTemplateSection(String sectionName,

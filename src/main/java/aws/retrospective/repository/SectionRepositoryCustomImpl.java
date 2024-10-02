@@ -32,6 +32,8 @@ public class SectionRepositoryCustomImpl implements SectionRepositoryCustom {
             .join(section.user, user)
             .leftJoin(actionItem).on(actionItem.section.id.eq(section.id)).fetchJoin()
             .leftJoin(kudosTarget).on(kudosTarget.section.id.eq(section.id)).fetchJoin()
+            .orderBy(section.createdDate.desc())
             .fetch();
     }
+
 }

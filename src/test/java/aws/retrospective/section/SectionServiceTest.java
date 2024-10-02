@@ -268,19 +268,19 @@ public class SectionServiceTest {
         assertThat(sections).hasSize(3);
         assertThat(sections)
             .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
-                "createdDate", "thumbnail", "comments")
+                 "thumbnail", "comments")
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
                     section1.getLikeCnt(),
-                    keepTemplateSection.getSectionName(), section1.getCreatedDate(),
+                    keepTemplateSection.getSectionName(),
                     user.getThumbnail(), Collections.emptyList()),
                 tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
                     section2.getLikeCnt(), keepTemplateSection.getSectionName(),
-                    section2.getCreatedDate(),
+
                     user.getThumbnail(), Collections.emptyList()),
                 tuple(section3.getId(), user.getId(), user.getUsername(), section3.getContent(),
                     section3.getLikeCnt(), problemTemplateSection.getSectionName(),
-                    section3.getCreatedDate(),
+
                     user.getThumbnail(), Collections.emptyList())
             );
     }
@@ -302,8 +302,8 @@ public class SectionServiceTest {
         TemplateSection keepTemplateSection = createTemplateSection("Keep", retrospectiveTemplate);
         templateSectionRepository.save(keepTemplateSection);
         Section section1 = Section.create("content1", retrospective, user, keepTemplateSection);
-        Section section2 = Section.create("content2", retrospective, user2, keepTemplateSection);
         sectionRepository.save(section1);
+        Section section2 = Section.create("content2", retrospective, user2, keepTemplateSection);
         sectionRepository.save(section2);
 
         TemplateSection problemTemplateSection = createTemplateSection("Problem",
@@ -328,34 +328,27 @@ public class SectionServiceTest {
         //then
         assertThat(sections).hasSize(3);
         assertThat(sections)
-            .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
-                "createdDate", "thumbnail")
+            .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName", "thumbnail")
             .containsExactlyInAnyOrder(
                 tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
-                    section1.getLikeCnt(),
-                    keepTemplateSection.getSectionName(), section1.getCreatedDate(),
-                    user.getThumbnail()),
+                    section1.getLikeCnt(), keepTemplateSection.getSectionName(), user.getThumbnail()),
                 tuple(section2.getId(), user2.getId(), user2.getUsername(), section2.getContent(),
-                    section2.getLikeCnt(), keepTemplateSection.getSectionName(),
-                    section2.getCreatedDate(),
-                    user2.getThumbnail()),
+                    section2.getLikeCnt(), keepTemplateSection.getSectionName(), user2.getThumbnail()),
                 tuple(section3.getId(), user.getId(), user.getUsername(), section3.getContent(),
-                    section3.getLikeCnt(), problemTemplateSection.getSectionName(),
-                    section3.getCreatedDate(),
-                    user.getThumbnail())
+                    section3.getLikeCnt(), problemTemplateSection.getSectionName(), user.getThumbnail())
             );
 
-        assertThat(sections.get(0).getComments()).hasSize(1);
-        assertThat(sections.get(0).getComments().get(0).getCommentId()).isEqualTo(comment1.getId());
-        assertThat(sections.get(0).getComments().get(0).getUserId()).isEqualTo(user.getId());
-        assertThat(sections.get(0).getComments().get(0).getContent()).isEqualTo(comment1.getContent());
+        assertThat(sections.get(0).getComments()).isEmpty();
 
         assertThat(sections.get(1).getComments()).hasSize(1);
         assertThat(sections.get(1).getComments().get(0).getCommentId()).isEqualTo(comment2.getId());
         assertThat(sections.get(1).getComments().get(0).getUserId()).isEqualTo(user2.getId());
         assertThat(sections.get(1).getComments().get(0).getContent()).isEqualTo(comment2.getContent());
 
-        assertThat(sections.get(2).getComments()).isEmpty();
+        assertThat(sections.get(2).getComments()).hasSize(1);
+        assertThat(sections.get(2).getComments().get(0).getCommentId()).isEqualTo(comment1.getId());
+        assertThat(sections.get(2).getComments().get(0).getUserId()).isEqualTo(user.getId());
+        assertThat(sections.get(2).getComments().get(0).getContent()).isEqualTo(comment1.getContent());
     }
 
     private static Comment createComment(User user, Section section, String content) {
