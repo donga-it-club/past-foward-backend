@@ -86,16 +86,10 @@ public class SectionService {
     @Transactional(readOnly = true)
     @Cacheable(value = SectionCacheRepository.CACHE_KEY, key = "#request.retrospectiveId", cacheResolver = "customCacheResolver")
     public List<GetSectionsResponseDto> getSection(GetSectionsRequestDto request) {
-        // 모든 회고카드 조회
-        // 회고보드에 작성된 모든 댓글 조회
-        // 회고카드와 댓글 mapping
-
-        // -> 회고보드 조회
         Retrospective retrospective = findRetrospectiveById(request.getRetrospectiveId());
 
         // -> 모든 회고카드 조회, 댓글 포함 X
-        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(
-            retrospective.getId());
+        List<GetSectionsResponseDto> sections = sectionRepository.getSections2(retrospective.getId());
 
         // -> section id에 포함되는 댓글 조회
         List<Long> sectionIds = sections.stream()
