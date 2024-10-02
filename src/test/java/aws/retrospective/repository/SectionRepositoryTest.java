@@ -42,7 +42,7 @@ class SectionRepositoryTest {
 
     @Test
     @DisplayName("회고보드에 작성된 모든 회고카드를 조회할 수 있다.")
-    void getSections2() {
+    void getSections1() {
         //given
         User user = createUser("username", "thumbnail");
         userRepository.save(user);
@@ -68,6 +68,55 @@ class SectionRepositoryTest {
 
         //then
         assertThat(sections).hasSize(2);
+        assertThat(sections)
+            .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
+                "createdDate", "thumbnail")
+            .containsExactlyInAnyOrder(
+                tuple(section1.getId(), user.getId(), user.getUsername(), section1.getContent(),
+                    section1.getLikeCnt(), keepTemplateSection.getSectionName(),
+                    section1.getCreatedDate(), user.getThumbnail()),
+                tuple(section2.getId(), user.getId(), user.getUsername(), section2.getContent(),
+                    section2.getLikeCnt(), problemTemplateSection.getSectionName(),
+                    section2.getCreatedDate(), user.getThumbnail())
+            );
+    }
+
+    @Test
+    @DisplayName("다른 회고보드에 작성된 회고카드는 조회되지 않는다.")
+    void getSections2() {
+        //given
+        User user = createUser("username", "thumbnail");
+        userRepository.save(user);
+        RetrospectiveTemplate retrospectiveTemplate = createRetrospectiveTemplate("KPT");
+        retrospectiveTemplateRepository.save(retrospectiveTemplate);
+        Retrospective retrospective = createRetrospective("title", null, user,
+            retrospectiveTemplate);
+        retrospectiveRepository.save(retrospective);
+        Retrospective retrospective2 = createRetrospective("title2", null, user,
+            retrospectiveTemplate);
+        retrospectiveRepository.save(retrospective2);
+
+        TemplateSection keepTemplateSection = createTemplateSection("Keep", retrospectiveTemplate);
+        templateSectionRepository.save(keepTemplateSection);
+        TemplateSection problemTemplateSection = createTemplateSection("Problem",
+            retrospectiveTemplate);
+        templateSectionRepository.save(problemTemplateSection);
+        Section section1 = createSection("content1", retrospective, user, keepTemplateSection);
+        Section section2 = createSection("content2", retrospective, user, problemTemplateSection);
+        sectionRepository.save(section1);
+        sectionRepository.save(section2);
+
+        Section section3 = createSection("content3", retrospective2, user, keepTemplateSection);
+        sectionRepository.save(section3);
+
+        //when
+        List<GetSectionsResponseDto> sections = sectionRepository.getSections(
+            retrospective.getId());
+
+        //then
+        assertThat(sections).hasSize(2);
+        assertThat(sections.contains(section3)).isFalse(); // section3는 다른 회고보드에 작성된 것이므로 조회되지 않는다.
+
         assertThat(sections)
             .extracting("sectionId", "userId", "username", "content", "likeCnt", "sectionName",
                 "createdDate", "thumbnail")
