@@ -10,7 +10,9 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_USER: dev
       MYSQL_PASSWORD: 1234
-      volumes: data:/var/lib/mysql
+    volumes:
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+      - data:/var/lib/mysql
     ports:
       - "3306:3306"
 
