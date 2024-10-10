@@ -76,7 +76,7 @@ dependencies {
     // LocalDateTime 타입 직렬화
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.4'
 
-    //
+    // Spring Security Test
     testImplementation 'org.springframework.security:spring-security-test'
 }
 

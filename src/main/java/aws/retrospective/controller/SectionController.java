@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -51,6 +52,7 @@ public class SectionController {
     // 회고 카드 등록
     @Operation(summary = "회고 카드 등록", description = "회고 카드 등록하는 API")
     @ApiResponses(value = {@ApiResponse(responseCode = "201")})
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public CommonApiResponse<CreateSectionResponse> createSection(@CurrentUser User user,
         @Valid @RequestBody CreateSectionRequest request) {
