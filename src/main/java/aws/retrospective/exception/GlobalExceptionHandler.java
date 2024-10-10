@@ -1,5 +1,6 @@
 package aws.retrospective.exception;
 
+import aws.retrospective.common.CommonApiResponse;
 import aws.retrospective.exception.custom.ForbiddenAccessException;
 import aws.retrospective.exception.retrospective.TemplateMisMatchException;
 import java.util.NoSuchElementException;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,13 +18,13 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> validMissingParameterException(
+    public CommonApiResponse<ErrorResponse> validMissingParameterException(
         MethodArgumentNotValidException ex) {
         log.error("유효성 검사 실패", ex);
         String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
-        ErrorResponse response = new ErrorResponse(errorMessage);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return CommonApiResponse.errorResponse(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
