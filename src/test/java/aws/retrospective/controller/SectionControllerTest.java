@@ -57,4 +57,73 @@ class SectionControllerTest {
             .andExpect(jsonPath("$.message").doesNotExist());
     }
 
+    @Test
+    @DisplayName("신규 회고카드 등록 시에 회고보드 정보가 필요하다.")
+    void createSectionWithEmptyRetrospectiveId() throws Exception {
+        //given
+        CreateSectionRequest request = CreateSectionRequest.builder()
+            .templateSectionId(1L)
+            .sectionContent("내용")
+            .build();
+
+        //when //then
+        mockMvc.perform(
+                post("/sections")
+                    .content(objectMapper.writeValueAsString(request))
+                    .contentType(APPLICATION_JSON)
+                    .with(csrf())
+            )
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("400"))
+            .andExpect(jsonPath("$.message").value("회고카드가 작성된 회고보드 ID는 필수 값입니다."))
+            .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("신규 회고카드 등록 시에 회고보드 정보가 필요하다.")
+    void createSectionWithEmptyTemplateSectionId() throws Exception {
+        //given
+        CreateSectionRequest request = CreateSectionRequest.builder()
+            .retrospectiveId(1L)
+            .sectionContent("내용")
+            .build();
+
+        //when //then
+        mockMvc.perform(
+                post("/sections")
+                    .content(objectMapper.writeValueAsString(request))
+                    .contentType(APPLICATION_JSON)
+                    .with(csrf())
+            )
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("400"))
+            .andExpect(jsonPath("$.message").value("회고카드가 작성된 템플릿 ID는 필수 값입니다."))
+            .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("신규 회고카드 등록 시에 회고보드 정보가 필요하다.")
+    void createSectionWithEmptySectionContent() throws Exception {
+        //given
+        CreateSectionRequest request = CreateSectionRequest.builder()
+            .retrospectiveId(1L)
+            .templateSectionId(1L)
+            .build();
+
+        //when //then
+        mockMvc.perform(
+                post("/sections")
+                    .content(objectMapper.writeValueAsString(request))
+                    .contentType(APPLICATION_JSON)
+                    .with(csrf())
+            )
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("400"))
+            .andExpect(jsonPath("$.message").value("회고카드에 작성된 내용은 필수 값입니다."))
+            .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
 }
